@@ -66,3 +66,12 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["B"], 0x4011)
+
+    def test_next_word_pointer(self):
+        self.cpu[:3] = [
+            # set A to the value where the next word points to.
+            # hint: it points to address 2, which is 0xbeef
+            0x7801, 0x0002, 0xbeef
+        ]
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0xbeef)
