@@ -24,3 +24,16 @@ class TestDCPU16(unittest.TestCase):
         # run for a cycle
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["I"], 0x000a)
+
+    def test_multiple_instructions(self):
+        # set X, 0x04
+        self.cpu[0] = "9031"
+        # set A, 001a
+        self.cpu[1] = "7c01"
+        self.cpu[2] = "001a"
+        # run...
+        self.cpu.cycle()
+        self.cpu.cycle()
+        # and then check things
+        self.assertEquals(self.cpu.registers["X"], 0x0004)
+        self.assertEquals(self.cpu.registers["A"], 0x001a)
