@@ -85,12 +85,11 @@ class DCPU16(object):
         """Given the name of a register, return a setter and getter for where
         it points.
         """
-        def r_psetter(x):
-            print "setting RAM at self.registers[r] to %04x" % x
+        def setter(x):
             self.RAM[self.registers[r]] = x
         def getter():
             return self.RAM[self.registers[r]]
-        return r_psetter, getter
+        return setter, getter
 
     def register_plus_next_word(self, r):
         "Given the name of a register, return [next word + register]."
