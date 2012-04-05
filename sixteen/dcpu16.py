@@ -196,3 +196,8 @@ class DCPU16(object):
         overflow = int(div < 0) and 0xffff
         a_set(result)
         self.registers["O"] = overflow
+
+    def AND(self, a, b):
+        a_set, a_get = self.values[a]
+        _, b_get = self.values[b] 
+        a_set(a_get() & b_get())
