@@ -102,3 +102,18 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["A"], 0x0001)
         # and the stack pointer should be 0x0000 again
         self.assertEquals(self.cpu.registers["SP"], 0x0000)
+
+    def test_pop_push_peek(self):
+        self.cpu[:3] = [
+            # push 0x0001 (short form 0x21)
+            0x85a1,
+            # set A to whatever's peeked (should be 0x0001)
+            0x6401,
+            # set B to whatever's peeked (also should be 0x0001)
+            0x6411,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0x0001)
+        self.assertEquals(self.cpu.registers["B"], 0x0001)
