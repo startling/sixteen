@@ -128,3 +128,20 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0x0003)
+        # and make sure the overflow is empty
+        self.assertEquals(self.cpu.registers["O"], 0x0000)
+
+    def test_add_overflow(self):
+        self.cpu[:4] = [
+            # set A to 0x0005
+            0x7c01, 0x0005,
+            # and then add 0xffff 
+            0x7c02, 0xffff
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        # make sure the overflow is 0x0001
+        self.assertEquals(self.cpu.registers["O"], 0x0001)
+        # and that A is 0x0004 (0xffff + 0x0005 = 0x10004)
+        self.assertEquals(self.cpu.registers["A"], 0x0004)
+
