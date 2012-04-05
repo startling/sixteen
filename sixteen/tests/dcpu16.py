@@ -17,3 +17,10 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         # and then assert that the register was assigned to.
         self.assertEquals(self.cpu.registers["A"], 0x0030)
+
+    def test_set_short_literal(self):
+        # set I to 10.
+        self.cpu[0] = "a861"
+        # run for a cycle
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["I"], 0x000a)
