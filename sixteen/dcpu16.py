@@ -40,6 +40,8 @@ class DCPU16(object):
             self.values[n] = self.register(r)
             # add register pointers
             self.values[n + 0x08] = self.register_pointer(r)
+            # add [register + next word]s
+            self.values[n + 0x10] = self.register_plus_next_word(r)
 
         # add setters and getters for the short literals
         for n in xrange(0x20, 0x40):
@@ -89,6 +91,16 @@ class DCPU16(object):
         def getter():
             return self.RAM[self.registers[r]]
         return r_psetter, getter
+
+    def register_plus_next_word(self, r):
+        "Given the name of a register, return [next word + register]."
+        def getter():
+            address = self.get_next() + self.registers[r]
+            return self.RAM[address]
+        def setter(x):
+            address = self.get_next() + self.registers[r]
+            self.RAM[address] = x
+        return setter, getter
 
     def next_word(self):
         "Return a setter and a getter for the next word after the PC."
