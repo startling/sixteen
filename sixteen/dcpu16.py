@@ -32,7 +32,7 @@ class DCPU16(object):
         # setters take a single argument and then set that value to the
         # argument; getters don't take any arguments and return that value.
         self.values = {
-            0x1f: self.next_word(),
+            0x1e: self.next_word_pointer(), 0x1f: self.next_word(),
         }
         
         # add setters and getters for all the registers
@@ -100,6 +100,14 @@ class DCPU16(object):
         def setter(x):
             address = self.get_next() + self.registers[r]
             self.RAM[address] = x
+        return setter, getter
+
+    def next_word_pointer(self):
+        "Return a setter and a getter for the value at next word."
+        def getter():
+            return self.RAM[self.get_next()]
+        def setter(x):
+            self.RAM[self.get_next()] = x
         return setter, getter
 
     def next_word(self):
