@@ -41,3 +41,6 @@ class Word(object):
     def as_literal(self):
         "Interpret this word as a literal; returns one integer."
         return self._word.uint
+
+    def __str__(self):
+        return self._word.hex
