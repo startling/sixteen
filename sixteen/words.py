@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from bitstring import Bits
+from bitstring import BitArray
 
 
 class Word(object):
@@ -24,7 +24,7 @@ class Word(object):
     @classmethod
     def from_hex(cls, word):
         "Initialize a Word given a string of hexadecimal."
-        return cls(Bits("0x" + word))
+        return cls(BitArray("0x" + word))
 
     def as_opcode(self):
         """Interpret this word as an opcode. from the docs:
