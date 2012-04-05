@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sixteen.words import Word
+from sixteen.words import as_opcode, from_hex
 
 
 class DCPU16(object):
@@ -24,7 +24,7 @@ class DCPU16(object):
         # initialize RAM with empty words. None will be treated as empty 0000
         # words everywhere, because having 0x10000 Words around is expensive
         # right now.
-        self.RAM = [None] * 0x10000
+        self.RAM = [0x0000] * 0x10000
         # copy my own `registers` dict.
         self.registers = self._registers.copy()
 
@@ -46,20 +46,23 @@ class DCPU16(object):
 
     def __getitem__(self, n):
         "Get the word at a given address."
-        return self.RAM[n] or Word.from_hex("0000")
+        return self.RAM[n] or 0x0000
 
-    def __setitem__(self, n, hex_value):
+    def __setitem__(self, n, value):
         "Set the word at a given address to a hex value."
-        self.RAM[n] = Word.from_hex(hex_value)
+        self.RAM[n] = value
+
+    def set_ram(self, address, value):
+        self.RAM[address] = value
 
     def dump(self):
         "Return a friendly dump of the RAM."
-        return [w or "0000" for w in self.RAM]
+        return self.RAM
 
     def cycle(self):
         pointer = self.registers["PC"]
         self.registers["PC"] += 1
-        o, a, b = self.RAM[pointer].as_opcode()
+        o, a, b = as_opcode(self.RAM[pointer])
         getattr(self, self.opcodes[o])(a, b)
 
     # values:
@@ -76,7 +79,7 @@ class DCPU16(object):
         def getter():
             value = self.RAM[self.registers["PC"]]
             self.registers["PC"] += 1
-            return value.as_literal()
+            return value
         def setter(k):
             # should this do anything?
             return None
