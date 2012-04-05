@@ -117,3 +117,14 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0x0001)
         self.assertEquals(self.cpu.registers["B"], 0x0001)
+
+    def test_add(self):
+        self.cpu[:3] = [
+            # set A to 0x0001 (short form 0x21)
+            0x8401, 
+            # and then add two (short form 0x22) to it
+            0x8802,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0x0003)
