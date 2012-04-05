@@ -142,6 +142,33 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         # make sure the overflow is 0x0001
         self.assertEquals(self.cpu.registers["O"], 0x0001)
-        # and that A is 0x0004 (0xffff + 0x0005 = 0x10004)
+        # and that A is 0x0004
         self.assertEquals(self.cpu.registers["A"], 0x0004)
+    
+    def test_sub(self):
+        self.cpu[:4] = [
+            # set A to 0x0005
+            0x7c01, 0xffff,
+            # and then subtract 0xffff 
+            0x7c03, 0x0005,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        # make sure the underflow is empty
+        self.assertEquals(self.cpu.registers["O"], 0x0000)
+        # and that A is 0xfffa
+        self.assertEquals(self.cpu.registers["A"], 0xfffa)
 
+    def test_sub_underflow(self):
+        self.cpu[:4] = [
+            # set A to 0x0005
+            0x7c01, 0x0005,
+            # and then subtract 0xffff 
+            0x7c03, 0xffff
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        # make sure the underflow is 0xffff
+        self.assertEquals(self.cpu.registers["O"], 0xffff)
+        # and that A is 0x0006.
+        self.assertEquals(self.cpu.registers["A"], 0x0006)
