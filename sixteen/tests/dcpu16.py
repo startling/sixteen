@@ -38,15 +38,19 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["X"], 0x0004)
         self.assertEquals(self.cpu.registers["A"], 0x001a)
 
-    def test_set_register_pointer(self):
+    def test_register_pointer(self):
         # set A, 0x0020 
         self.cpu[0] = 0x7c01
         self.cpu[1] = 0x0020
         # set the address A points to to be 0xbeef
         self.cpu[2] = 0x7c81
         self.cpu[3] = 0xbeef
+        # save [A] as B
+        self.cpu[4] = 0x2011
         # run
+        self.cpu.cycle()
         self.cpu.cycle()
         self.cpu.cycle()
         # make sure we made the address 0x0020 be 0xbeef
         self.assertEquals(self.cpu[0x0020], 0xbeef)
+        self.assertEquals(self.cpu.registers["B"], 0xbeef)
