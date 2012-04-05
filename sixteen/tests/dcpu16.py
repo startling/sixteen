@@ -89,3 +89,16 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["PC"], 0x0003)
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["PC"], self.cpu.registers["A"])
+
+    def test_pop_push(self):
+        self.cpu[:2] = [
+            # push 0x0001 (short form 0x21)
+            0x85a1,
+            # set A to whatever's popped (should be 0x0001)
+            0x6001,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0x0001)
+        # and the stack pointer should be 0x0000 again
+        self.assertEquals(self.cpu.registers["SP"], 0x0000)
