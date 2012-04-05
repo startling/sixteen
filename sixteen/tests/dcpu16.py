@@ -54,3 +54,15 @@ class TestDCPU16(unittest.TestCase):
         # make sure we made the address 0x0020 be 0xbeef
         self.assertEquals(self.cpu[0x0020], 0xbeef)
         self.assertEquals(self.cpu.registers["B"], 0xbeef)
+
+    def test_register_plus_next(self):
+        self.cpu[:4] = [
+            # set A, 0x0000
+            0x7c01, 0x0000,
+            # set B to [A + next register (0x0001 in this case)]
+            # the total should be 0x0002, which should be 0x4011
+            0x4011, 0x0002,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["B"], 0x4011)
