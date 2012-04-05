@@ -18,6 +18,7 @@ class DCPU16(object):
         # special registers
         "PC": 0x000, "SP": 0xffff, "O": 0x0000,
     }
+    
 
     def __init__(self):
         # initialize RAM with empty words. None will be treated as empty 0000
@@ -26,6 +27,17 @@ class DCPU16(object):
         self.RAM = [None] * 0x10000
         # copy my own `registers` dict.
         self.registers = self._registers.copy()
+
+        # this is a dictionary of value codes to pairs of setters and getters
+        # setters take a single argument and then set that value to the
+        # argument; getters don't take any arguments and return that value.
+        self.values = {
+            0x1f: self.next_word(),
+        }
+        
+        # add setters and getters for all the registers
+        for n, r in zip(xrange(0x08), ["A", "B", "C", "X", "Y", "Z", "I", "J"]):
+            self.values[n] = self.register(r)
 
     def __getitem__(self, n):
         "Get the word at a given address."
@@ -38,3 +50,35 @@ class DCPU16(object):
     def dump(self):
         "Return a friendly dump of the RAM."
         return [w or "0000" for w in self.RAM]
+
+    def cycle(self):
+        pointer = self.registers["PC"]
+        self.registers["PC"] += 1
+        o, a, b = self.RAM[pointer].as_opcode()
+        getattr(self, self.opcodes[o])(a, b)
+
+    # values:
+    def register(self, r):
+        "Given the name of a register, return a setter and a getter for it."
+        def setter(x):
+            self.registers[r] = x
+        def getter():
+            return self.registers[r]
+        return setter, getter
+
+    def next_word(self):
+        "Return a setter and a getter for the next word after the PC."
+        def getter():
+            value = self.RAM[self.registers["PC"]]
+            self.registers["PC"] += 1
+            return value.as_literal()
+        def setter(k):
+            # should this do anything?
+            return None
+        return setter, getter
+
+    # opcodes:
+    def SET(self, a, b):
+        setter, _ = self.values[a]
+        _, getter = self.values[b]
+        setter(getter())
