@@ -172,3 +172,15 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["O"], 0xffff)
         # and that A is 0x0006.
         self.assertEquals(self.cpu.registers["A"], 0x0006)
+
+    def test_AND(self):
+        self.cpu[:4] = [
+            # set A 
+            0x7c01, 0b1000000000000000,
+            # and then AND
+            0x7c09, 0b1111111111111111,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        # and that A is 0xfffa
+        self.assertEquals(self.cpu.registers["A"], 0b1000000000000000)
