@@ -75,3 +75,17 @@ class TestDCPU16(unittest.TestCase):
         ]
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0xbeef)
+
+    def test_get_set_pc(self):
+        self.cpu[:4] = [
+            # set the program counter to the next word
+            0x7dc1, 0x0003,
+            # blank word, that we'll jump over
+            0x0000,
+            # store the PC in A
+            0x7001
+        ]
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["PC"], 0x0003)
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["PC"], self.cpu.registers["A"])
