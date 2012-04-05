@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from sixteen.words import as_opcode
+from sixteen.words import as_opcode, from_opcode
 
 
 # a bunch of instructions, seperated into their components
@@ -19,6 +19,10 @@ instructions = {
 
 
 class TestWords(unittest.TestCase):
+    def test_from_opcode(self):
+        for code, (eo, ea, eb) in instructions.items():
+            self.assertEquals(from_opcode(eo, ea, eb), code)
+
     def test_instructions(self):
         for code, (eo, ea, eb) in instructions.items():
             o, a, b = as_opcode(code)
