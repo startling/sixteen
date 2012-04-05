@@ -32,3 +32,8 @@ def as_opcode(word):
     a = bitarray[6:-4]
     o = bitarray[-4:]
     return o.uint, a.uint, b.uint
+
+
+def from_opcode(o, a, b):
+    binary = "0b{:06b}{:06b}{:04b}".format(b, a, o)
+    return Bits(binary).uint
