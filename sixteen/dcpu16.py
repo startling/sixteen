@@ -62,11 +62,16 @@ class DCPU16(object):
         return self.RAM
 
     def cycle(self):
-        pointer = self.registers["PC"]
-        self.registers["PC"] += 1
-        o, a, b = as_opcode(self.RAM[pointer])
+        word = self.get_next()
+        o, a, b = as_opcode(word)
         getattr(self, self.opcodes[o])(a, b)
 
+    def get_next(self):
+        "Increment the program counter and return its value."
+        v = self.RAM[self.registers["PC"]]
+        self.registers["PC"] += 1
+        return v
+    
     # values:
     def register(self, r):
         "Given the name of a register, return a setter and a getter for it."
@@ -90,9 +95,7 @@ class DCPU16(object):
     def next_word(self):
         "Return a setter and a getter for the next word after the PC."
         def getter():
-            value = self.RAM[self.registers["PC"]]
-            self.registers["PC"] += 1
-            return value
+            return self.get_next()
         def setter(k):
             # should this do anything?
             return None
