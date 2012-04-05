@@ -180,4 +180,11 @@ class DCPU16(object):
     def ADD(self, a, b):
         a_set, a_get = self.values[a]
         _, b_get = self.values[b] 
-        a_set(a_get() + b_get())
+        result = a_get() + b_get()
+        # handle overflow
+        overflow = 0x0000
+        if result > len(self.RAM) - 1:
+            result = result - len(self.RAM)
+            overflow = 0x0001
+        a_set(result)
+        self.registers["O"] = overflow
