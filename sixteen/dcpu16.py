@@ -33,6 +33,9 @@ class DCPU16(object):
         # argument; getters don't take any arguments and return that value.
         self.values = {
             0x1e: self.next_word_pointer(), 0x1f: self.next_word(),
+            # values for SP, PC, and O
+            0x1b: self.register("SP"), 0x1c: self.register("PC"),
+            0x1d: self.register("O")
         }
         
         # add setters and getters for all the registers
