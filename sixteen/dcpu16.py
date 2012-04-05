@@ -35,7 +35,11 @@ class DCPU16(object):
             0x1e: self.next_word_pointer(), 0x1f: self.next_word(),
             # values for SP, PC, and O
             0x1b: self.register("SP"), 0x1c: self.register("PC"),
-            0x1d: self.register("O")
+            0x1d: self.register("O"),
+            # POP and PUSH
+            0x18: self.POP(), 0x1a: self.PUSH(),
+            # PEEK is just a register pointer to SP
+            0x19: self.register_pointer("SP"),
         }
         
         # add setters and getters for all the registers
@@ -57,6 +61,7 @@ class DCPU16(object):
 
     def __setitem__(self, n, value):
         "Set the word at a given address to a hex value."
+        # if we go over the limit, make it 0
         self.RAM[n] = value
 
     def dump(self):
@@ -133,6 +138,37 @@ class DCPU16(object):
             return n
         def setter(x):
             pass
+        return setter, getter
+
+    def POP(self):
+        def getter():
+            v = self.RAM[self.registers["SP"]]
+            self.registers["SP"] += 1
+            # handle overflow
+            if self.registers["SP"] == len(self.RAM) - 1:
+                self.registers["SP"] = 0x0000
+            return v
+        def setter(x):
+            self.RAM[self.registers["SP"]] = x
+            self.registers["SP"] += 1
+            # handle overflow
+            if self.registers["SP"] == len(self.RAM) - 1:
+                self.registers["SP"] = 0x0000
+        return setter, getter
+
+    def PUSH(self):
+        def getter():
+            self.registers["SP"] -= 1
+            # handle underflow
+            if self.registers["SP"] < 0:
+                self.registers["SP"] = len(self.RAM) - 1
+            return self.RAM[self.registers["SP"]]
+        def setter(x):
+            self.registers["SP"] -= 1
+            # handle underflow
+            if self.registers["SP"] < 0:
+                self.registers["SP"] = len(self.RAM) - 1
+            self.RAM[self.registers["SP"]] = x
         return setter, getter
 
     # opcodes:
