@@ -194,3 +194,14 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0b1111111111111111)
+
+    def test_XOR(self):
+        self.cpu[:4] = [
+            # set A 
+            0x7c01, 0b1000000000000000,
+            # and then XOR
+            0x7c0b, 0b1111111111111111,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0b0111111111111111)
