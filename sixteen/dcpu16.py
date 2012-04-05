@@ -39,6 +39,11 @@ class DCPU16(object):
         for n, r in zip(xrange(0x08), ["A", "B", "C", "X", "Y", "Z", "I", "J"]):
             self.values[n] = self.register(r)
 
+        # add setters and getters for the short literals
+        for n in xrange(0x20, 0x40):
+            self.values[n] = self.short_literal(n - 0x20)
+        
+
     def __getitem__(self, n):
         "Get the word at a given address."
         return self.RAM[n] or Word.from_hex("0000")
@@ -75,6 +80,20 @@ class DCPU16(object):
         def setter(k):
             # should this do anything?
             return None
+        return setter, getter
+
+    def short_literal(self, n):
+        """Given an integer, make a getter that returns it and a setter that
+        does nothing.
+
+        From the docs:
+        'If any instruction tries to assign a literal value, the assignment
+        fails silently. Other than that, the instruction behaves as normal.'
+        """
+        def getter():
+            return n
+        def setter(x):
+            pass
         return setter, getter
 
     # opcodes:
