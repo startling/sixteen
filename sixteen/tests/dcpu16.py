@@ -182,5 +182,15 @@ class TestDCPU16(unittest.TestCase):
         ]
         self.cpu.cycle()
         self.cpu.cycle()
-        # and that A is 0xfffa
         self.assertEquals(self.cpu.registers["A"], 0b1000000000000000)
+
+    def test_BOR(self):
+        self.cpu[:4] = [
+            # set A 
+            0x7c01, 0b1000000000000000,
+            # and then BOR
+            0x7c0a, 0b1111111111111111,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0b1111111111111111)
