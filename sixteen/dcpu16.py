@@ -186,3 +186,13 @@ class DCPU16(object):
         overflow = int(div > 0)
         a_set(result)
         self.registers["O"] = overflow
+
+    def SUB(self, a, b):
+        a_set, a_get = self.values[a]
+        _, b_get = self.values[b] 
+        result = a_get() - b_get()
+        # handle overflow
+        div, result = divmod(result, len(self.RAM))
+        overflow = int(div < 0) and 0xffff
+        a_set(result)
+        self.registers["O"] = overflow
