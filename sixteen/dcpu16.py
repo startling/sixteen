@@ -54,14 +54,12 @@ class DCPU16(object):
         "Set the word at a given address to a hex value."
         self.RAM[n] = value
 
-    def set_ram(self, address, value):
-        self.RAM[address] = value
-
     def dump(self):
         "Return a friendly dump of the RAM."
         return self.RAM
 
     def cycle(self):
+        "Run for one cycle."
         word = self.get_next()
         o, a, b = as_opcode(word)
         getattr(self, self.opcodes[o])(a, b)
