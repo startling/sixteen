@@ -104,10 +104,10 @@ def ShortLiteral(n):
             return self.value
 
         def set(self, value):
-        """"So say the docs:
-        'If any instruction tries to assign a literal value, the assignment fails
-        silently. Other than that, the instruction behaves as normal.'
-        """
+            """"So say the docs:
+            'If any instruction tries to assign a literal value, the assignment fails
+            silently. Other than that, the instruction behaves as normal.'
+            """
             pass
 
     return LiteralN
