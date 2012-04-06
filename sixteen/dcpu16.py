@@ -85,37 +85,6 @@ class DCPU16(object):
         self.registers["PC"] += 1
         return v
     
-    def POP(self):
-        def getter():
-            v = self.RAM[self.registers["SP"]]
-            self.registers["SP"] += 1
-            # handle overflow
-            if self.registers["SP"] == len(self.RAM) - 1:
-                self.registers["SP"] = 0x0000
-            return v
-        def setter(x):
-            self.RAM[self.registers["SP"]] = x
-            self.registers["SP"] += 1
-            # handle overflow
-            if self.registers["SP"] == len(self.RAM) - 1:
-                self.registers["SP"] = 0x0000
-        return setter, getter
-
-    def PUSH(self):
-        def getter():
-            self.registers["SP"] -= 1
-            # handle underflow
-            if self.registers["SP"] < 0:
-                self.registers["SP"] = len(self.RAM) - 1
-            return self.RAM[self.registers["SP"]]
-        def setter(x):
-            self.registers["SP"] -= 1
-            # handle underflow
-            if self.registers["SP"] < 0:
-                self.registers["SP"] = len(self.RAM) - 1
-            self.RAM[self.registers["SP"]] = x
-        return setter, getter
-
     # opcodes:
     def opcode(fn):
         """This is a decorator that unpacks the setters and getters for a given
