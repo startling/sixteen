@@ -76,6 +76,16 @@ class DCPU16(object):
         "Return a friendly dump of the RAM."
         return self.RAM
 
+    def parse_for_length(self, address):
+        """Count how many cycles the instruction at a given address takes
+        without evaluating it.
+        """
+        word = self.RAM[address]
+        o, a_code, b_code = as_opcode(word)
+        a = self.values[a_code]
+        b = self.values[b_code]
+        return 1 + a.consumes + b.consumes
+
     def cycle(self):
         "Run for one cycle and return a list of words consumed."
         word = self.get_next()
@@ -138,22 +148,22 @@ class DCPU16(object):
     def IFE(self, a, b):
         "0xc: IFE a, b - performs next instruction only if a==b."
         if a.get() != b.get():
-            self.registers["PC"] += 1
+            self.registers["PC"] += self.parse_for_length(self.registers["PC"])
 
     def IFN(self, a, b):
         "0xd: IFN a, b - performs next instruction only if a!=b."
         if a.get() == b.get():
-            self.registers["PC"] += 1
+            self.registers["PC"] += self.parse_for_length(self.registers["PC"])
 
     def IFG(self, a, b):
         "0xe: IFG a, b - performs next instruction only if a>b."
         if not a.get() > b.get():
-            self.registers["PC"] += 1
+            self.registers["PC"] += self.parse_for_length(self.registers["PC"])
 
     def IFB(self, a, b):
         "0xf: IFB a, b - performs next instruction only if (a&b)!=0."
         if a.get() & b.get() == 0:
-            self.registers["PC"] += 1
+            self.registers["PC"] += self.parse_for_length(self.registers["PC"])
 
     def MUL(self, a, b):
         "0x4: MUL a, b - sets a to a*b, sets O to ((a*b)>>16)&0xffff."
