@@ -4,17 +4,28 @@
 #TODO: make this a lot nicer
 
 import sys
+import argparse
 from sixteen.dcpu16 import DCPU16
 from sixteen.debugger import Debugger
 
 
+parser = argparse.ArgumentParser(
+	description='Step through and debug a DCPU-16 binary.'
+)
+
+parser.add_argument('--little', '-l', dest="big_endian", action='store_false', 
+	help="Denote that this file should be parsed as little-endian."
+	"(Default: big-endian).",
+)
+
+parser.add_argument('file',
+	help="The binary file to step through."
+)
+
+args = parser.parse_args()
 
 # open the file from the command-line
-f = open(sys.argv[-1])
-
-
-# optionally take a --little or --big option, but default to bigendian
-big_endian = "--little" not in sys.argv or "--big" in sys.argv
+f = open(args.file)
 
 
 # initialize a new CPU
@@ -28,7 +39,7 @@ for n, _ in enumerate(d.RAM):
 	# if there are exactly two bytes, go on
 	if len(word) == 2:
 		# unpack the top and the bottom of the word
-		if big_endian:
+		if args.big_endian:
 			top, bottom = word
 		else:
 			bottom, top = word
