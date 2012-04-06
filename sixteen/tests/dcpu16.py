@@ -76,6 +76,15 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0xbeef)
 
+    def test_set_next_word_pointer(self):
+        self.cpu[:3] = [
+            # set memory address 0x1000 to 0x0020
+            0x7de1, 0x1000, 0x0020
+        ]
+        self.cpu.cycle()
+        self.assertEquals(self.cpu[0x1000], 0x0020)
+
+
     def test_get_set_pc(self):
         self.cpu[:4] = [
             # set the program counter to the next word
@@ -239,7 +248,6 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["A"], 0x0000)
         # and make sure the overflow is empty
         self.assertEquals(self.cpu.registers["O"], 0x0000)
-
 
     def test_AND(self):
         self.cpu[:4] = [
