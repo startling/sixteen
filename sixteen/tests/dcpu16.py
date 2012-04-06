@@ -332,3 +332,29 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["A"], 0b0000000000010000)
         # and make sure the overflow is right.
         self.assertEquals(self.cpu.registers["O"], 0b0000000000001111)
+
+    def test_shr(self):
+        self.cpu[:4] = [
+            # set A to 0x0001
+            0x7c01, 0b0000000000010000,
+            # and then shift right by four
+            0x7c08, 0x0004,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0b0000000000000001)
+        # and make sure the overflow is 
+        self.assertEquals(self.cpu.registers["O"], 0x0000)
+
+    def test_shr_overflow(self):
+        self.cpu[:4] = [
+            # set A to 0x0001
+            0x7c01, 0b1000000000001111,
+            # and then shift right by four
+            0x7c08, 0x0004,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0b0000100000000000)
+        # and make sure the overflow is right.
+        self.assertEquals(self.cpu.registers["O"], 0b1111000000000000)
