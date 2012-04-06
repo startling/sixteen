@@ -8,6 +8,5 @@ setup(
     author = "startling",
     author_email = "tdixon51793@gmail.com",
     packages = ["sixteen"],
-    install_requires = ["bitstring"],
     scripts = glob("scripts/*"),
 )
