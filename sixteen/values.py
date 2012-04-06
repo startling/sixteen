@@ -24,6 +24,7 @@ class Box(object):
     to subclass and define it yourself.
     """
     consumed = None
+    consumes = 0
 
     def get(self):
         """'get' is called to retrieve the contained value. Nothing
@@ -84,14 +85,16 @@ class Register(object):
             s.dis = "[0x%04x + %s]" % (next_word, self.name)
             # handle overflow
             if s.key >= len(cpu.RAM) - 1:
-                s.key -= (cput.RAM - 1)
+                s.key -= len(cpu.RAM) - 1
 
         return type("[%s + next word]" % self.name, (Box,),
-                {"__init__": r_init})
+                {"__init__": r_init, "consumes": 1})
 
 
 class NextWord(Box):
     "0x1f: next word (literal)"
+    consumes = 1
+
     @consume
     def __init__(self, cpu, next_word):
         self.value = next_word
@@ -112,6 +115,8 @@ class NextWord(Box):
 
 class NextWordAsPointer(Box):
     "0x1e: [next word]"
+    consumes = 1
+
     @consume
     def __init__(self, cpu, next_word):
         "Get and set to and from the address stored in the next word."
