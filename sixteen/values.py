@@ -114,3 +114,15 @@ def ShortLiteral(n):
             pass
 
     return LiteralN
+
+
+class PUSH(Box):
+    "0x1a: PUSH / [--SP]"
+    def __init__(self, cpu):
+        "Decrement the counter and point to the address in SP."
+        self.container = cpu.RAM
+        cpu.registers["SP"] -= 1
+        # handle underflow
+        if cpu.registers["SP"] < 0:
+            cpu.registers["SP"] = len(cpu.RAM) - 1
+        self.key = cpu.registers["SP"]
