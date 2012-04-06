@@ -173,6 +173,20 @@ class TestDCPU16(unittest.TestCase):
         # and that A is 0x0006.
         self.assertEquals(self.cpu.registers["A"], 0x0006)
 
+    def test_mul(self):
+        self.cpu[:4] = [
+            # set A to 0x0008
+            0x7c01, 0x0008,
+            # and then multiply two
+            0x7c04, 0x0002,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0x0010)
+        # and make sure the overflow is empty
+        self.assertEquals(self.cpu.registers["O"], 0x0000)
+
+
     def test_AND(self):
         self.cpu[:4] = [
             # set A 
