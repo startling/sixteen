@@ -211,3 +211,27 @@ class DCPU16(object):
         a_set, a_get = self.values[a]
         _, b_get = self.values[b] 
         a_set(a_get() ^ b_get())
+
+    def IFE(self, a, b):
+        _, a_get = self.values[a]
+        _, b_get = self.values[b]
+        if a_get() != b_get():
+            self.registers["PC"] += 1
+
+    def IFN(self, a, b):
+        _, a_get = self.values[a]
+        _, b_get = self.values[b]
+        if a_get() == b_get():
+            self.registers["PC"] += 1
+
+    def IFG(self, a, b):
+        _, a_get = self.values[a]
+        _, b_get = self.values[b]
+        if not a_get() > b_get():
+            self.registers["PC"] += 1
+
+    def IFB(self, a, b):
+        _, a_get = self.values[a]
+        _, b_get = self.values[b]
+        if a_get() & b_get() == 0:
+            self.registers["PC"] += 1
