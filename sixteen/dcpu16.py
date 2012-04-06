@@ -240,4 +240,7 @@ class DCPU16(object):
         a_set, a_get = self.values[a]
         _, b_get = self.values[b]
         result = a_get() * b_get()
+        # handle overflow
+        overflow, result = divmod(result, len(self.RAM))
         a_set(result)
+        self.registers["O"] = overflow
