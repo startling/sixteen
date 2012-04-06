@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import readline
 from functools import wraps
 from sixteen.words import as_opcode
 
