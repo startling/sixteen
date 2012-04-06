@@ -80,8 +80,6 @@ class DCPU16(object):
         a = self.values[a_code](self)
         b = self.values[b_code](self)
         getattr(self, self.opcodes[o])(a, b)
-        a.after()
-        b.after()
 
     def get_next(self):
         "Increment the program counter and return its value."

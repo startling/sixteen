@@ -3,8 +3,8 @@
 
 class Box(object):
     """A base class that defines the Box interface with some sane defaults.
-    Everything that will be used as a box *needs* these four methods: "get",
-    "set", "after", and, of course, "__init__".
+    Everything that will be used as a box *needs* these three methods: "get",
+    "set", and, of course, "__init__".
 
     Each Box's __init__ takes two arguments -- "self", of course, and "cpu",
     which is probably an instance of sixteen.dcpu16.DCPU16. The default thing
@@ -24,12 +24,6 @@ class Box(object):
     def set(self, value):
         "This is what gets called when something tries to change this value."
         self.container[self.key] = value
-
-    def after(self):
-        """Well-behaved CPUs will call this after everything, for cleaning up,
-        postincrement and decrement, or anything else really.
-        """
-        pass
 
 
 class Register(object):
@@ -141,3 +135,5 @@ class POP(Box):
     
     def get(self):
         return self.value
+
+
