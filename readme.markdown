@@ -19,3 +19,11 @@ It'll step through the binary, printing each word it's using. You can either hit
 * `r` or `register`: print all of the registers; it can also take a single argument (e.g., `r A`) and print that single register.
 * `d` or `dump` takes a single argument, a four-digit long hex number, and prints the value of the memory at that location.
 * `q` or `quit` ends the debugger.
+
+## installation
+
+If you have pip, you can install it like this:
+
+````sh
+pip install git+git://github.com/startling/sixteen.git
+````
