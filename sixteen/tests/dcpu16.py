@@ -223,3 +223,12 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0x0000)
+
+    def test_IFG(self):
+        self.cpu[:4] = [
+            # if A > 0x0000 (it shouldn't), set A to 0xbeef
+            0x7c0e, 0x0000, 0x7c01, 0xbeef,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0x0000)
