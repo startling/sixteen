@@ -248,8 +248,11 @@ class DCPU16(object):
     def DIV(self, a, b):
         a_set, a_get = self.values[a]
         _, b_get = self.values[b]
-        result = a_get() // b_get()
+        a_result, b_result = a_get(), b_get()
+        result = a_result // b_result
         a_set(result)
+        overflow = ((a_result << 16) / b_result) & (len(self.RAM) - 1)
+        self.registers["O"] = overflow
 
     def MOD(self, a, b):
         a_set, a_get = self.values[a]
