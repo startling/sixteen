@@ -27,6 +27,7 @@ for n, _ in enumerate(d.RAM):
 		top, bottom = word
 		# bitshift the top up and then add to the bottom
 		word_int = (top << 8) + bottom
+		# AMBIGUITY: is the byte order big-endian or not?
 		# set this n in the ram to that number
 		d.RAM[n] = word_int
 	# if there aren't two bytes, stop
