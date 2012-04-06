@@ -125,6 +125,7 @@ class PUSH(Box):
 class POP(Box):
     "0x18: POP / [SP++]"
     def __init__(self, cpu):
+        "Save the value at the pointer for later and increment the counter."
         self.container = cpu.RAM
         self.key = cpu.registers["SP"]
         self.value = self.container[self.key]
@@ -135,5 +136,3 @@ class POP(Box):
     
     def get(self):
         return self.value
-
-
