@@ -76,8 +76,12 @@ class DCPU16(object):
     def cycle(self):
         "Run for one cycle."
         word = self.get_next()
-        o, a, b = as_opcode(word)
+        o, a_code, b_code = as_opcode(word)
+        a = self.values[a_code](self)
+        b = self.values[b_code](self)
         getattr(self, self.opcodes[o])(a, b)
+        a.after()
+        b.after()
 
     def get_next(self):
         "Increment the program counter and return its value."
@@ -86,29 +90,10 @@ class DCPU16(object):
         return v
     
     # opcodes:
-    def opcode(fn):
-        """This is a decorator that unpacks the setters and getters for a given
-        value and passes them to the decorated function. This simplifies things
-        a lot and makes for much much less duplicated code.
-
-        Each decorated function gets the setter for its first argument and the
-        getters for both arguments. I don't think any of them use the second
-        setter.
-        """
-        def op(self, a_code, b_code):
-            a = self.values[a_code](self)
-            b = self.values[b_code](self)
-            fn(self, a, b)
-            a.after()
-            b.after()
-        return op
-
-    @opcode
     def SET(self, a, b):
         "0x1: SET a, b - sets a to b"
         a.set(b.get())
 
-    @opcode
     def ADD(self, a, b):
         """0x2: ADD a, b - sets a to a+b, sets O to 0x0001 if there's an
         overflow, 0x0 otherwise.
@@ -117,7 +102,6 @@ class DCPU16(object):
         a.set(result)
         self.registers["O"] = int(div > 0)
 
-    @opcode
     def SUB(self, a, b):
         """0x3: SUB a, b - sets a to a-b, sets O to 0xffff if there's an
         underflow, 0x0 otherwise.
@@ -126,46 +110,38 @@ class DCPU16(object):
         a.set(result)
         self.registers["O"] = int(div < 0) and 0xffff
 
-    @opcode
     def AND(self, a, b):
         "0x9: AND a, b - sets a to a&b"
         a.set(a.get() & b.get())
 
-    @opcode
     def BOR(self, a, b):
         "0xa: BOR a, b - sets a to a|b."
         a.set(a.get() | b.get())
 
-    @opcode
     def XOR(self, a, b):
         "0xb: XOR a, b - sets a to a^b."
         a.set(a.get() ^ b.get())
 
-    @opcode
     def IFE(self, a, b):
         "0xc: IFE a, b - performs next instruction only if a==b."
         if a.get() != b.get():
             self.registers["PC"] += 1
 
-    @opcode
     def IFN(self, a, b):
         "0xd: IFN a, b - performs next instruction only if a!=b."
         if a.get() == b.get():
             self.registers["PC"] += 1
 
-    @opcode
     def IFG(self, a, b):
         "0xe: IFG a, b - performs next instruction only if a>b."
         if not a.get() > b.get():
             self.registers["PC"] += 1
 
-    @opcode
     def IFB(self, a, b):
         "0xf: IFB a, b - performs next instruction only if (a&b)!=0."
         if a.get() & b.get() == 0:
             self.registers["PC"] += 1
 
-    @opcode
     def MUL(self, a, b):
         "0x4: MUL a, b - sets a to a*b, sets O to ((a*b)>>16)&0xffff."
         # handle overflow
@@ -173,7 +149,6 @@ class DCPU16(object):
         a.set(result)
         self.registers["O"] = overflow
 
-    @opcode
     def DIV(self, a, b):
         """0x5: DIV a, b - sets a to a/b, sets O to ((a<<16)/b)&0xffff. if
         b==0, sets a and O to 0 instead.
@@ -187,12 +162,10 @@ class DCPU16(object):
             overflow = ((a_r << 16) / b_r) & (len(self.RAM) - 1)
         self.registers["O"] = overflow
 
-    @opcode
     def MOD(self, a, b):
         "0x6: MOD a, b - sets a to a%b. if b==0, sets a to 0 instead."
         a.set(a.get() % b.get())
 
-    @opcode
     def SHL(self, a, b):
         "0x7: SHL a, b - sets a to a<<b, sets O to ((a<<b)>>16)&0xffff."
         total = a.get() << b.get()
@@ -201,7 +174,6 @@ class DCPU16(object):
         # shift away the low end for the overflow
         self.registers["O"] = total >> 16
 
-    @opcode
     def SHR(self, a, b):
         "0x8: SHR a, b - sets a to a>>b, sets O to ((a<<16)>>b)&0xffff"
         a_r, b_r = a.get(), b.get()
