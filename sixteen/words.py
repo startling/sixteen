@@ -13,8 +13,6 @@ From the docs:
 > instruction has the format: bbbbbbaaaaaaoooo
 """
 
-from bitstring import Bits
-
 
 def from_hex(word):
     return int(word, base=16)
@@ -27,13 +25,22 @@ def as_opcode(word):
 
     This method returns three integers: o, a, and b.
     """
-    bitarray = Bits("0x%04x" % word)
-    b = bitarray[:6]
-    a = bitarray[6:-4]
-    o = bitarray[-4:]
-    return o.uint, a.uint, b.uint
+    # mask away everything but the opcode
+    o = word & 0b0000000000001111
+    # shift away the opcode
+    a_and_b = word >> 4
+    # mask away b to get a
+    a = a_and_b & 0b000000111111
+    # shift away a to get b
+    b = a_and_b >> 6
+    return o, a, b
 
 
 def from_opcode(o, a, b):
-    binary = "0b{:06b}{:06b}{:04b}".format(b, a, o)
-    return Bits(binary).uint
+    """Given o, a, and b as integers, return an integer such that its binary
+    representation looks like 'bbbbbbaaaaaaoooo'.
+    """
+    # o is the least significant, so it doesn't get shifted at all
+    # a gets shifted left by four, because o is four bits long.
+    # b gets shifted left by ten, because o is four bits and a is six.
+    return o ^ (a << 4) ^ (b << 10)
