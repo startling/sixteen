@@ -172,108 +172,104 @@ class DCPU16(object):
         return setter, getter
 
     # opcodes:
-    def SET(self, a, b):
-        "0x1: SET a, b - sets a to b"
-        setter, _ = self.values[a]
-        _, getter = self.values[b]
-        setter(getter())
+    def opcode(fn):
+        """This is a decorator that unpacks the setters and getters for a given
+        value and passes them to the decorated function. This simplifies things
+        a lot and makes for much much less duplicated code.
 
-    def ADD(self, a, b):
+        Each decorated function gets the setter for its first argument and the
+        getters for both arguments. I don't think any of them use the second
+        setter.
+        """
+        def op(self, a_n, b_n):
+            a_setter, a_getter = self.values[a_n]
+            b_setter, b_getter = self.values[b_n]
+            return fn(self, a_setter, a_getter, b_getter)
+        return op
+
+    @opcode
+    def SET(self, setter, a, b):
+        "0x1: SET a, b - sets a to b"
+        setter(b())
+
+    @opcode
+    def ADD(self, setter, a, b):
         """0x2: ADD a, b - sets a to a+b, sets O to 0x0001 if there's an
         overflow, 0x0 otherwise.
         """
-        a_set, a_get = self.values[a]
-        _, b_get = self.values[b] 
-        result = a_get() + b_get()
-        # handle overflow
-        div, result = divmod(result, len(self.RAM))
-        overflow = int(div > 0)
-        a_set(result)
-        self.registers["O"] = overflow
+        div, result = divmod(a() + b(), len(self.RAM))
+        setter(result)
+        # overflow is either 0x0000 or 0x0001
+        self.registers["O"] = int(div > 0)
 
-    def SUB(self, a, b):
+    @opcode
+    def SUB(self, setter, a, b):
         """0x3: SUB a, b - sets a to a-b, sets O to 0xffff if there's an
         underflow, 0x0 otherwise.
         """
-        a_set, a_get = self.values[a]
-        _, b_get = self.values[b] 
-        result = a_get() - b_get()
-        # handle overflow
-        div, result = divmod(result, len(self.RAM))
-        overflow = int(div < 0) and 0xffff
-        a_set(result)
-        self.registers["O"] = overflow
+        div, result = divmod(a() - b(), len(self.RAM))
+        setter(result)
+        # overflow is either 0x0000 or 0xffff
+        self.registers["O"] = int(div < 0) and 0xffff
 
-    def AND(self, a, b):
+    @opcode
+    def AND(self, setter, a, b):
         "0x9: AND a, b - sets a to a&b"
-        a_set, a_get = self.values[a]
-        _, b_get = self.values[b] 
-        a_set(a_get() & b_get())
+        setter(a() & b())
 
-    def BOR(self, a, b):
+    @opcode
+    def BOR(self, setter, a, b):
         "0xa: BOR a, b - sets a to a|b."
-        a_set, a_get = self.values[a]
-        _, b_get = self.values[b] 
-        a_set(a_get() | b_get())
+        setter(a() | b())
 
-    def XOR(self, a, b):
+    @opcode
+    def XOR(self, setter, a, b):
         "0xb: XOR a, b - sets a to a^b."
-        a_set, a_get = self.values[a]
-        _, b_get = self.values[b] 
-        a_set(a_get() ^ b_get())
+        setter(a() ^ b())
 
-    def IFE(self, a, b):
+    @opcode
+    def IFE(self, _, a, b):
         "0xc: IFE a, b - performs next instruction only if a==b."
-        _, a_get = self.values[a]
-        _, b_get = self.values[b]
-        if a_get() != b_get():
+        if a() != b():
             self.registers["PC"] += 1
 
-    def IFN(self, a, b):
+    @opcode
+    def IFN(self, _, a, b):
         "0xd: IFN a, b - performs next instruction only if a!=b."
-        _, a_get = self.values[a]
-        _, b_get = self.values[b]
-        if a_get() == b_get():
+        if a() == b():
             self.registers["PC"] += 1
 
-    def IFG(self, a, b):
+    @opcode
+    def IFG(self, _, a, b):
         "0xe: IFG a, b - performs next instruction only if a>b."
-        _, a_get = self.values[a]
-        _, b_get = self.values[b]
-        if not a_get() > b_get():
+        if not a() > b():
             self.registers["PC"] += 1
 
-    def IFB(self, a, b):
+    @opcode
+    def IFB(self, _, a, b):
         "0xf: IFB a, b - performs next instruction only if (a&b)!=0."
-        _, a_get = self.values[a]
-        _, b_get = self.values[b]
-        if a_get() & b_get() == 0:
+        if a() & b() == 0:
             self.registers["PC"] += 1
 
-    def MUL(self, a, b):
+    @opcode
+    def MUL(self, setter, a, b):
         "0x4: MUL a, b - sets a to a*b, sets O to ((a*b)>>16)&0xffff."
-        a_set, a_get = self.values[a]
-        _, b_get = self.values[b]
-        result = a_get() * b_get()
         # handle overflow
-        overflow, result = divmod(result, len(self.RAM))
-        a_set(result)
+        overflow, result = divmod(a() * b(), len(self.RAM))
+        setter(result)
         self.registers["O"] = overflow
 
-    def DIV(self, a, b):
+    @opcode
+    def DIV(self, setter, a, b):
         """0x5: DIV a, b - sets a to a/b, sets O to ((a<<16)/b)&0xffff. if
         b==0, sets a and O to 0 instead.
         """
-        a_set, a_get = self.values[a]
-        _, b_get = self.values[b]
-        a_result, b_result = a_get(), b_get()
-        result = a_result // b_result
-        a_set(result)
-        overflow = ((a_result << 16) / b_result) & (len(self.RAM) - 1)
+        a_r, b_r = a(), b()
+        setter(a_r // b_r)
+        overflow = ((a_r << 16) / b_r) & (len(self.RAM) - 1)
         self.registers["O"] = overflow
 
-    def MOD(self, a, b):
+    @opcode
+    def MOD(self, setter, a, b):
         "0x6: MOD a, b - sets a to a%b. if b==0, sets a to 0 instead."
-        a_set, a_get = self.values[a]
-        _, b_get = self.values[b]
-        a_set(a_get() % b_get())
+        setter(a() % b())
