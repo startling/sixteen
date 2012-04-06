@@ -14,9 +14,9 @@ run it like this:
 sixteen-debug examples/quick_example.bin
 ````
 
-You can specify two different options: "--little", which interprets the binary as little-endian, and "--hex", which reads an ASCII hex dump with possible whitespace.
+You can specify two different options: `--little`, which interprets the binary as little-endian, and `--hex`, which reads an ASCII hex dump with possible whitespace.
 
-It'll step through the instructions, printing one. You can either hit return to continue stepping through, or use one of these commands:
+It'll step through the instructions, printing each one. You can either hit return to continue stepping through, or use one of these commands:
 
 * `r` or `register`: print all of the registers; it can also take a single argument (e.g., `r A`) and print that single register.
 * `d` or `dump` takes a single argument, a four-digit long hex number, and prints the value of the memory at that location.
