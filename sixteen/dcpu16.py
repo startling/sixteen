@@ -6,10 +6,14 @@ from sixteen import values
 
 class DCPU16(object):
     opcodes = {
-        0x00: None,
+        0x00: "SPEC",
         0x01: "SET", 0x02: "ADD", 0x03: "SUB", 0x04: "MUL", 0x05: "DIV",
         0x06: "MOD", 0x07: "SHL", 0x08: "SHR", 0x09: "AND", 0x0a: "BOR",
         0x0b: "XOR", 0x0c: "IFE", 0x0d: "IFN", 0x0e: "IFG", 0x0f: "IFB",
+    }
+
+    special_opcodes = {
+        0x01: "JSR",
     }
 
     _registers = {
@@ -77,9 +81,16 @@ class DCPU16(object):
         "Run for one cycle."
         word = self.get_next()
         o, a_code, b_code = as_opcode(word)
-        a = self.values[a_code](self)
-        b = self.values[b_code](self)
-        getattr(self, self.opcodes[o])(a, b)
+        # if this is a special opcode...
+        if o == 0x00:
+            # arguments are switched for the special opcodes
+            a = self.values[b_code](self)
+            getattr(self, self.special_opcodes[a_code])(a)
+        else:
+            a = self.values[a_code](self)
+            b = self.values[b_code](self)
+            getattr(self, self.opcodes[o])(a, b)
+        return self._consumed
 
     def get_next(self):
         "Increment the program counter and return its value."
@@ -178,3 +189,14 @@ class DCPU16(object):
         a.set(a_r >> b_r)
         # shift left and mask away the low end for the overflow
         self.registers["O"] = (a_r << (16 - b_r)) & 0xffff
+
+    # Special operations
+    def JSR(self, a):
+        """JSR a - pushes the address of the next instruction to the stack, then
+        sets PC to a.
+        """
+        # push the next word to the stack
+        self.registers["SP"] -= 1
+        self.RAM[self.registers["SP"]] = self.get_next()
+        # and then set the program counter to A
+        self.registers["PC"] = a.get()
