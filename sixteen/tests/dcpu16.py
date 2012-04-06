@@ -381,3 +381,24 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["A"], 0b0000100000000000)
         # and make sure the overflow is right.
         self.assertEquals(self.cpu.registers["O"], 0b1111000000000000)
+
+    def test_jsr(self):
+        self.cpu[:6] = [
+            # JSR 0x0004
+            0x7c10, 0x0004,
+            # blank junk to jump over
+            0x0000, 0x0000,
+            # set A to 0xbeef
+            0x7c01, 0xbeef,
+            # SET PC, POP, e.g. go to after the JSR
+            0x61c1
+        ]
+        # make sure JSR jumps to 0x0004
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["PC"], 0x0004)
+        # make sure A gets set
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0xbeef)
+        # make sure the PC goes back to 0x0002
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["PC"], 0x0002)
