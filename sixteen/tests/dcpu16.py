@@ -306,3 +306,16 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         # make sure it's 2 (1
         self.assertEquals(self.cpu.registers["A"], 0x0002)
+
+    def test_shl(self):
+        self.cpu[:4] = [
+            # set A to 0x0001
+            0x7c01, 0b0000000000000001,
+            # and then shift left by four
+            0x7c07, 0x0004,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0b0000000000010000)
+        # and make sure the overflow is 
+        self.assertEquals(self.cpu.registers["O"], 0x0000)
