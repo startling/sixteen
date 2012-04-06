@@ -273,3 +273,12 @@ class DCPU16(object):
     def MOD(self, setter, a, b):
         "0x6: MOD a, b - sets a to a%b. if b==0, sets a to 0 instead."
         setter(a() % b())
+
+    @opcode
+    def SHL(self, setter, a, b):
+        "0x7: SHL a, b - sets a to a<<b, sets O to ((a<<b)>>16)&0xffff."
+        total = a() << b()
+        # mask away the high end for the actual value
+        setter(total & 0xffff)
+        # shift away the low end for the overflow
+        self.registers["O"] = total >> 16
