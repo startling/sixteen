@@ -213,6 +213,19 @@ class TestDCPU16(unittest.TestCase):
         # and make sure the overflow is empty
         self.assertEquals(self.cpu.registers["O"], 0x0000)
 
+    def test_div_overflow(self):
+        self.cpu[:4] = [
+            # set A to 0x0009
+            0x7c01, 0x0009,
+            # and then divide by 0x0007
+            0x7c05, 0x0007,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0x0001)
+        # and make sure the overflow is 0x4924
+        self.assertEquals(self.cpu.registers["O"], 0x4924)
+
     def test_AND(self):
         self.cpu[:4] = [
             # set A 
@@ -291,5 +304,5 @@ class TestDCPU16(unittest.TestCase):
         ]
         self.cpu.cycle()
         self.cpu.cycle()
-        # make sure it's 2 (12 % 5 == 2)
+        # make sure it's 2 (1
         self.assertEquals(self.cpu.registers["A"], 0x0002)
