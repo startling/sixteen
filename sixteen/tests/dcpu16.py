@@ -200,6 +200,19 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["O"], 0xfffe)
         # I think I did the math right?
 
+    def test_div(self):
+        self.cpu[:4] = [
+            # set A to 0x0008
+            0x7c01, 0x0008,
+            # and then divide by four
+            0x7c05, 0x0004,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0x0002)
+        # and make sure the overflow is empty
+        self.assertEquals(self.cpu.registers["O"], 0x0000)
+
     def test_AND(self):
         self.cpu[:4] = [
             # set A 

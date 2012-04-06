@@ -244,3 +244,9 @@ class DCPU16(object):
         overflow, result = divmod(result, len(self.RAM))
         a_set(result)
         self.registers["O"] = overflow
+
+    def DIV(self, a, b):
+        a_set, a_get = self.values[a]
+        _, b_get = self.values[b]
+        result = a_get() // b_get()
+        a_set(result)
