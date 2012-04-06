@@ -173,11 +173,15 @@ class DCPU16(object):
 
     # opcodes:
     def SET(self, a, b):
+        "0x1: SET a, b - sets a to b"
         setter, _ = self.values[a]
         _, getter = self.values[b]
         setter(getter())
 
     def ADD(self, a, b):
+        """0x2: ADD a, b - sets a to a+b, sets O to 0x0001 if there's an
+        overflow, 0x0 otherwise.
+        """
         a_set, a_get = self.values[a]
         _, b_get = self.values[b] 
         result = a_get() + b_get()
@@ -188,6 +192,9 @@ class DCPU16(object):
         self.registers["O"] = overflow
 
     def SUB(self, a, b):
+        """0x3: SUB a, b - sets a to a-b, sets O to 0xffff if there's an
+        underflow, 0x0 otherwise.
+        """
         a_set, a_get = self.values[a]
         _, b_get = self.values[b] 
         result = a_get() - b_get()
@@ -198,45 +205,53 @@ class DCPU16(object):
         self.registers["O"] = overflow
 
     def AND(self, a, b):
+        "0x9: AND a, b - sets a to a&b"
         a_set, a_get = self.values[a]
         _, b_get = self.values[b] 
         a_set(a_get() & b_get())
 
     def BOR(self, a, b):
+        "0xa: BOR a, b - sets a to a|b."
         a_set, a_get = self.values[a]
         _, b_get = self.values[b] 
         a_set(a_get() | b_get())
 
     def XOR(self, a, b):
+        "0xb: XOR a, b - sets a to a^b."
         a_set, a_get = self.values[a]
         _, b_get = self.values[b] 
         a_set(a_get() ^ b_get())
 
     def IFE(self, a, b):
+        "0xc: IFE a, b - performs next instruction only if a==b."
         _, a_get = self.values[a]
         _, b_get = self.values[b]
         if a_get() != b_get():
             self.registers["PC"] += 1
 
     def IFN(self, a, b):
+        "0xd: IFN a, b - performs next instruction only if a!=b."
         _, a_get = self.values[a]
         _, b_get = self.values[b]
         if a_get() == b_get():
             self.registers["PC"] += 1
 
     def IFG(self, a, b):
+        "0xe: IFG a, b - performs next instruction only if a>b."
         _, a_get = self.values[a]
         _, b_get = self.values[b]
         if not a_get() > b_get():
             self.registers["PC"] += 1
 
     def IFB(self, a, b):
+        "0xf: IFB a, b - performs next instruction only if (a&b)!=0."
         _, a_get = self.values[a]
         _, b_get = self.values[b]
         if a_get() & b_get() == 0:
             self.registers["PC"] += 1
 
     def MUL(self, a, b):
+        "0x4: MUL a, b - sets a to a*b, sets O to ((a*b)>>16)&0xffff."
         a_set, a_get = self.values[a]
         _, b_get = self.values[b]
         result = a_get() * b_get()
@@ -246,6 +261,9 @@ class DCPU16(object):
         self.registers["O"] = overflow
 
     def DIV(self, a, b):
+        """0x5: DIV a, b - sets a to a/b, sets O to ((a<<16)/b)&0xffff. if
+        b==0, sets a and O to 0 instead.
+        """
         a_set, a_get = self.values[a]
         _, b_get = self.values[b]
         a_result, b_result = a_get(), b_get()
@@ -255,6 +273,7 @@ class DCPU16(object):
         self.registers["O"] = overflow
 
     def MOD(self, a, b):
+        "0x6: MOD a, b - sets a to a%b. if b==0, sets a to 0 instead."
         a_set, a_get = self.values[a]
         _, b_get = self.values[b]
         a_set(a_get() % b_get())
