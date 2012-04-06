@@ -202,6 +202,6 @@ class DCPU16(object):
         """
         # push the next word to the stack
         self.registers["SP"] -= 1
-        self.RAM[self.registers["SP"]] = self.get_next()
+        self.RAM[self.registers["SP"]] = self.registers["PC"]
         # and then set the program counter to A
         self.registers["PC"] = a.get()
