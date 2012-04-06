@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from functools import wraps
+from sixteen.words import as_opcode
 
 
 class Debugger(object):
@@ -36,9 +37,15 @@ class Debugger(object):
 				return self.format % c
 		return formatted
 
-	@format_output
 	def step(self):
-		return self.cpu.cycle()
+		c = self.cpu.cycle()
+		if len(c) == 2:
+			name, a = c
+			return "%s %s" % (name, a.dis)
+		elif len(c) == 3:
+			name, a, b = c
+			return "%s %s %s" % (name, a.dis, b.dis)
+		#TODO: make this show hex values, too.
 
 	@format_output
 	def dump(self, address):
