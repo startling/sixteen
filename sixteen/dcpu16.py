@@ -265,8 +265,12 @@ class DCPU16(object):
         b==0, sets a and O to 0 instead.
         """
         a_r, b_r = a(), b()
-        setter(a_r // b_r)
-        overflow = ((a_r << 16) / b_r) & (len(self.RAM) - 1)
+        if b_r == 0:
+            setter(0)
+            overflow = 0
+        else:
+            setter(a_r // b_r)
+            overflow = ((a_r << 16) / b_r) & (len(self.RAM) - 1)
         self.registers["O"] = overflow
 
     @opcode
