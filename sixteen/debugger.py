@@ -42,7 +42,7 @@ class Debugger(object):
 
 	@format_output
 	def dump(self, address):
-		return self.cpu.RAM[int(address, hex)]
+		return self.cpu.RAM[int(address, base=16)]
 
 	@format_output
 	def registers(self, r=None):
@@ -56,7 +56,11 @@ class Debugger(object):
 		inputs = i.split()
 		command = self.commands.get(inputs[0])
 		if command != None:
-			print command(*inputs[1:])
+			try:
+				print command(*inputs[1:])
+			# ignore ArgumentErrors for now.
+			except ArgumentError:
+				pass
 
 	def __call__(self):
 		"Step through the CPU, outputting prompts and taking commands."
