@@ -80,6 +80,8 @@ class NextWord(Box):
         'If any instruction tries to assign a literal value, the assignment fails
         silently. Other than that, the instruction behaves as normal.'
         """
+        # AMBIGUITY: does that apply to next word literals, or just short form
+        # literals?
         pass
     
 
@@ -133,6 +135,8 @@ class POP(Box):
         # handle overflow
         if cpu.registers["SP"] == len(cpu.RAM) - 1:
             cpu.registers["SP"] = 0x0000
+        # AMBIGUITY: does SET POP, A set to the place where the popped value
+        # came from, or the new place where SP points?
     
     def get(self):
         return self.value
