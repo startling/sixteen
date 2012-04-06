@@ -90,3 +90,9 @@ class Debugger(object):
 						break
 					else:
 						self.run(line_in)
+
+
+class ColoredDebugger(Debugger):
+	"A subclass of Debugger with colored prompts."
+	outer_prompt = "\x1b[32m>>\x1b[39m "
+	inner_prompt = "\x1b[36m>>>>\x1b[39m "
