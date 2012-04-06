@@ -42,7 +42,7 @@ class Debugger(object):
 
 	@format_output
 	def dump(self, address):
-		return self.cpu.RAM[int(address)]
+		return self.cpu.RAM[int(address, hex)]
 
 	@format_output
 	def registers(self, r=None):
