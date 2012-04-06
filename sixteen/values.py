@@ -15,7 +15,9 @@ class Box(object):
 
     There's also a `consumed` attribute that starts at None and should be set
     to an int if the Box gets a new word. There's also a @consume decorator
-    (scroll down a bit) that sets it and passes it to the "__init__".
+    (scroll down a bit) that sets it and passes it to the "__init__". And then
+    there's a "consumes" class attribue that is how many words these values 
+    consume.
 
     And then there's the "dis" attribute that should be a human-readable string
     ("disassembled") for this value.
