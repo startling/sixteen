@@ -49,3 +49,10 @@ If you have pip, you can install it like this:
 ````sh
 pip install git+git://github.com/startling/sixteen.git
 ````
+
+## Next Up
+
+* Better tests for JSR and IF\*s.
+* Memory-Mapping, and a subclass of DCPU16 with memory-mapped output.
+* A disassembler
+* An assembler?
