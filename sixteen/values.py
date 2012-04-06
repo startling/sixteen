@@ -17,6 +17,9 @@ class Box(object):
     to an int if the Box gets a new word. There's also a @consume decorator
     (scroll down a bit) that sets it and passes it to the "__init__".
 
+    And then there's the "dis" attribute that should be a human-readable string
+    ("disassembled") for this value.
+
     This class (it *is* a base class) doesn't define "__init__", so you'll need
     to subclass and define it yourself.
     """
@@ -56,7 +59,8 @@ class Register(object):
         def value_init(s, cpu):
             s.container = cpu.registers
 
-        value = type(self.name, (Box,), {"__init__": value_init})
+        value = type(self.name, (Box,),
+                {"__init__": value_init, "dis": self.name})
         value.key = self.name
         return value
 
@@ -66,7 +70,8 @@ class Register(object):
             s.container = cpu.RAM
             s.key = cpu.registers[self.name]
 
-        return type("[%s]" % self.name, (Box,), {"__init__": pointer_init})
+        return type("[%s]" % self.name, (Box,),
+            {"__init__": pointer_init, "dis": "[%s]" % self.name})
 
     def and_next_word(self):
         """Return a box that gets and sets the register the sum of this
@@ -76,6 +81,7 @@ class Register(object):
         def r_init(s, cpu, next_word):
             s.container = cpu.RAM
             s.key = cpu.registers[self.name] + next_word
+            s.dis = "[0x%04x + %s]" % (next_word, self.name)
             # handle overflow
             if s.key >= len(cpu.RAM) - 1:
                 s.key -= (cput.RAM - 1)
@@ -89,6 +95,7 @@ class NextWord(Box):
     @consume
     def __init__(self, cpu, next_word):
         self.value = next_word
+        self.dis = "0x%04x" % next_word
     
     def get(self):
         return self.value
@@ -110,6 +117,7 @@ class NextWordAsPointer(Box):
         "Get and set to and from the address stored in the next word."
         self.container = cpu.RAM
         self.key = next_word
+        self.dis = "[0x%04x]" % next_word
 
 
 def ShortLiteral(n):
@@ -117,6 +125,7 @@ def ShortLiteral(n):
     class LiteralN(Box):
         def __init__(self, cpu):
             self.value = n
+            self.dis = "0x%04x" % n
         
         def get(self):
             return self.value
@@ -133,6 +142,8 @@ def ShortLiteral(n):
 
 class PUSH(Box):
     "0x1a: PUSH / [--SP]"
+    dis = "PUSH"
+
     def __init__(self, cpu):
         "Decrement the counter and point to the address in SP."
         self.container = cpu.RAM
@@ -145,6 +156,8 @@ class PUSH(Box):
 
 class POP(Box):
     "0x18: POP / [SP++]"
+    dis = "POP"
+
     def __init__(self, cpu):
         "Save the value at the pointer for later and increment the counter."
         self.container = cpu.RAM
