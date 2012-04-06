@@ -13,6 +13,10 @@ from sixteen.debugger import Debugger
 f = open(sys.argv[-1])
 
 
+# optionally take a --little or --big option, but default to bigendian
+big_endian = "--little" not in sys.argv or "--big" in sys.argv
+
+
 # initialize a new CPU
 d = DCPU16()
 
@@ -24,7 +28,10 @@ for n, _ in enumerate(d.RAM):
 	# if there are exactly two bytes, go on
 	if len(word) == 2:
 		# unpack the top and the bottom of the word
-		top, bottom = word
+		if big_endian:
+			top, bottom = word
+		else:
+			bottom, top = word
 		# bitshift the top up and then add to the bottom
 		word_int = (top << 8) + bottom
 		# AMBIGUITY: is the byte order big-endian or not?
