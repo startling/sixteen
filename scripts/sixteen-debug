@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"Primitive debugger."
+#TODO: make this a lot nicer
+
+import sys
+from sixteen.dcpu16 import DCPU16
+from sixteen.debugger import Debugger
+
+
+
+# open the file from the command-line
+f = open(sys.argv[-1])
+
+
+# initialize a new CPU
+d = DCPU16()
+
+
+# read the file to the cpu's RAM
+for n, _ in enumerate(d.RAM):
+	# read two bytes as ints
+	word = [ord(c) for c in f.read(2)]
+	# if there are exactly two bytes, go on
+	if len(word) == 2:
+		# unpack the top and the bottom of the word
+		top, bottom = word
+		# bitshift the top up and then add to the bottom
+		word_int = (top << 8) + bottom
+		# set this n in the ram to that number
+		d.RAM[n] = word_int
+	# if there aren't two bytes, stop
+	else:
+		break
+
+
+# close the file
+f.close()
+
+
+# run the debugger on the cpu
+debugger = Debugger(d)
+debugger()
