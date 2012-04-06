@@ -7,7 +7,7 @@ import sys
 import argparse
 import re
 from sixteen.dcpu16 import DCPU16
-from sixteen.debugger import Debugger
+from sixteen.debugger import Debugger, ColoredDebugger
 from sixteen.utilities import HexRead
 
 
@@ -23,6 +23,10 @@ parser.add_argument('--little', '-l', dest="big_endian", action='store_false',
 parser.add_argument('--hex', dest="bin", action='store_false', 
 	help="Denote that this file should be parsed as an ASCII hex dump. "
 	"(Default: binary)"
+)
+
+parser.add_argument('--no-color', dest="color", action='store_false', 
+	help="Disable colored prompts."
 )
 
 parser.add_argument('file',
@@ -67,5 +71,9 @@ f.close()
 
 
 # run the debugger on the cpu
-debugger = Debugger(d)
+if args.color:
+	debugger = ColoredDebugger(d)
+else:
+	debugger = Debugger(d)
+
 debugger()
