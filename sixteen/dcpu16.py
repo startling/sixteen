@@ -62,6 +62,9 @@ class DCPU16(object):
         # add setters and getters for the short literals
         for n in xrange(0x20, 0x40):
             self.values[n] = values.ShortLiteral(n - 0x20)
+    
+        # this list will be used to keep track of how many words were consumed
+        self._consumed = []
         
 
     def __getitem__(self, n):
@@ -78,7 +81,8 @@ class DCPU16(object):
         return self.RAM
 
     def cycle(self):
-        "Run for one cycle."
+        "Run for one cycle and return a list of words consumed."
+        self._consumed = []
         word = self.get_next()
         o, a_code, b_code = as_opcode(word)
         # if this is a special opcode...
@@ -96,6 +100,7 @@ class DCPU16(object):
         "Increment the program counter and return its value."
         v = self.RAM[self.registers["PC"]]
         self.registers["PC"] += 1
+        self._consumed.append(v)
         return v
     
     # opcodes:
