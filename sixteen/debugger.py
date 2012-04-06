@@ -65,8 +65,8 @@ class Debugger(object):
 		if command != None:
 			try:
 				print command(*inputs[1:])
-			# ignore ArgumentErrors for now.
-			except ArgumentError:
+			# ignore argument errors for now.
+			except TypeError:
 				pass
 
 	def __call__(self):
