@@ -2,9 +2,9 @@ This is a DCPU-16 emulator written in python. After it's complete, I'm going to 
 
 Here's what we've got so far:
 
-## a virtual machine for most of the spec
+## a virtual machine 
 
-The last thing I'm having trouble with is getting IF\*'s to jump over all the words in a single instruction.
+I *think* it's spec-complete. Anyway, it's main use is the debugger, because we don't have any IO methods yet. I'll implement memory-mapping soon, too, but none of the spec uses it yet.
 
 ## a basic debugger
 
