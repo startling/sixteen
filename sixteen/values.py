@@ -126,3 +126,18 @@ class PUSH(Box):
         if cpu.registers["SP"] < 0:
             cpu.registers["SP"] = len(cpu.RAM) - 1
         self.key = cpu.registers["SP"]
+
+
+class POP(Box):
+    "0x18: POP / [SP++]"
+    def __init__(self, cpu):
+        self.container = cpu.RAM
+        self.key = cpu.registers["SP"]
+        self.value = self.container[self.key]
+        cpu.registers["SP"] += 1
+        # handle overflow
+        if cpu.registers["SP"] == len(cpu.RAM) - 1:
+            cpu.registers["SP"] = 0x0000
+    
+    def get(self):
+        return self.value
