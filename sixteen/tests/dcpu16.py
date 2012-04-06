@@ -281,3 +281,15 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0x0000)
+
+    def test_mod(self):
+        self.cpu[:4] = [
+            # set A to 0x000c
+            0x7c01, 0x000c,
+            # and then MOD by four
+            0x7c06, 0x0005,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        # make sure it's 2 (12 % 5 == 2)
+        self.assertEquals(self.cpu.registers["A"], 0x0002)
