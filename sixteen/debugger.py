@@ -45,7 +45,7 @@ class Debugger(object):
 			return "%s %s" % (name, a.dis)
 		elif len(c) == 3:
 			name, a, b = c
-			return "%s %s %s" % (name, a.dis, b.dis)
+			return "%s %s, %s" % (name, a.dis, b.dis)
 		#TODO: make this show hex values, too.
 
 	@format_output
