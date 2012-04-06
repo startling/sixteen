@@ -5,8 +5,10 @@
 
 import sys
 import argparse
+import re
 from sixteen.dcpu16 import DCPU16
 from sixteen.debugger import Debugger
+from sixteen.utilities import HexRead
 
 
 parser = argparse.ArgumentParser(
@@ -18,15 +20,22 @@ parser.add_argument('--little', '-l', dest="big_endian", action='store_false',
 	"(Default: big-endian).",
 )
 
+parser.add_argument('--hex', dest="bin", action='store_false', 
+	help="Denote that this file should be parsed as an ASCII hex dump."
+	"(Default: binary)"
+)
+
 parser.add_argument('file',
 	help="The binary file to step through."
 )
 
 args = parser.parse_args()
 
-# open the file from the command-line
-f = open(args.file)
-
+# open the file from the command-line, if it's supposed to be a bin
+if args.bin:
+	f = open(args.file)
+else:
+	f = HexRead(args.file)
 
 # initialize a new CPU
 d = DCPU16()
