@@ -250,3 +250,8 @@ class DCPU16(object):
         _, b_get = self.values[b]
         result = a_get() // b_get()
         a_set(result)
+
+    def MOD(self, a, b):
+        a_set, a_get = self.values[a]
+        _, b_get = self.values[b]
+        a_set(a_get() % b_get())
