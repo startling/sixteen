@@ -292,31 +292,37 @@ class TestDCPU16(unittest.TestCase):
         self.assertEquals(self.cpu.registers["A"], 0xbeef)
 
     def test_IFN(self):
-        self.cpu[:4] = [
-            # if A doesn't equal 0x0000 (it does), set A to 0xbeef
-            0x7c0d, 0x0000, 0x7c01, 0xbeef,
+        self.cpu[:6] = [
+            # if A doesn't equal 0x0001 (it doesn't), set A to 0xbeef
+            0x7c0d, 0x0001, 0x7c01, 0xbeef,
+            # otherwise, set it to 0xdecaf
+            0x7c01, 0xdecaf
         ]
         self.cpu.cycle()
         self.cpu.cycle()
-        self.assertEquals(self.cpu.registers["A"], 0x0000)
+        self.assertEquals(self.cpu.registers["A"], 0xbeef)
 
     def test_IFG(self):
         self.cpu[:4] = [
             # if A > 0x0000 (it shouldn't), set A to 0xbeef
             0x7c0e, 0x0000, 0x7c01, 0xbeef,
+            # otherwise set it to 0xdecaf
+            0x7c01, 0xdecaf
         ]
         self.cpu.cycle()
         self.cpu.cycle()
-        self.assertEquals(self.cpu.registers["A"], 0x0000)
+        self.assertEquals(self.cpu.registers["A"], 0xdecaf)
 
     def test_IFB(self):
         self.cpu[:4] = [
-            # if A & 0x0000 != 0 (false), set A to 0xbeef
-            0x7c0f, 0x0000, 0x7c01, 0xbeef,
+            # if A & 0x0000 != 1 (false), set A to 0xbeef
+            0x7c0f, 0x0001, 0x7c01, 0xbeef,
+            # otherwise set it to 0xdecaf
+            0x7c01, 0xdecaf
         ]
         self.cpu.cycle()
         self.cpu.cycle()
-        self.assertEquals(self.cpu.registers["A"], 0x0000)
+        self.assertEquals(self.cpu.registers["A"], 0xdecaf)
 
     def test_mod(self):
         self.cpu[:4] = [
