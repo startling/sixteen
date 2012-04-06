@@ -42,6 +42,8 @@ class DCPU16(object):
             0x1b: SP.as_value(),
             # PEEK is just a register pointer to SP
             0x19: SP.as_pointer(),
+            # PUSH and POP
+            0x18: values.POP, 0x1a: values.PUSH,
         }
         
         # add Box classes for all the registers
