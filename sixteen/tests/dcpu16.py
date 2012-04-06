@@ -214,3 +214,12 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0xbeef)
+
+    def test_IFN(self):
+        self.cpu[:4] = [
+            # if A doesn't equal 0x0000 (it does), set A to 0xbeef
+            0x7c0d, 0x0000, 0x7c01, 0xbeef,
+        ]
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["A"], 0x0000)
