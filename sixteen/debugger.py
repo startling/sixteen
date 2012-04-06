@@ -54,7 +54,7 @@ class Debugger(object):
 	def run(self, i):
 		"Given an input, parse it and run it, if applicable."
 		inputs = i.split()
-		command = self.commands.get(inputs[0:])
+		command = self.commands.get(inputs[0])
 		if command != None:
 			print command(*inputs[1:])
 
