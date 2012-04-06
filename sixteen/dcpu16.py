@@ -235,3 +235,9 @@ class DCPU16(object):
         _, b_get = self.values[b]
         if a_get() & b_get() == 0:
             self.registers["PC"] += 1
+
+    def MUL(self, a, b):
+        a_set, a_get = self.values[a]
+        _, b_get = self.values[b]
+        result = a_get() * b_get()
+        a_set(result)
