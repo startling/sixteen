@@ -65,6 +65,9 @@ class Register(object):
         def r_init(s, cpu):
             s.container = cpu.RAM
             s.key = cpu.registers[self.name] + cpu.get_next()
+            # handle overflow
+            if s.key >= len(cpu.RAM) - 1:
+                s.key -= (cput.RAM - 1)
 
         return type("[%s + next word]" % self.name, (Box,),
                 {"__init__": r_init})
