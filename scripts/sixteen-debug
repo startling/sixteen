@@ -16,12 +16,12 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument('--little', '-l', dest="big_endian", action='store_false', 
-	help="Denote that this file should be parsed as little-endian."
+	help="Denote that this file should be parsed as little-endian. "
 	"(Default: big-endian).",
 )
 
 parser.add_argument('--hex', dest="bin", action='store_false', 
-	help="Denote that this file should be parsed as an ASCII hex dump."
+	help="Denote that this file should be parsed as an ASCII hex dump. "
 	"(Default: binary)"
 )
 
