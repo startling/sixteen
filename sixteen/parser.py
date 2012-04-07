@@ -51,6 +51,7 @@ class AssemblyParser(Parser):
     registers = ["A", "B", "C", "X", "Y", "Z", "I", "J"]
     rs = r"([a-cx-zijA-CX-ZIJ])"
 
+    # values: all values return their value code and None or their next word
     @parse(rs)
     def register(self, name):
         n = self.registers.index(name.upper())
@@ -65,3 +66,15 @@ class AssemblyParser(Parser):
     def register_plus_next_word(self, num, reg):
         code = 0x10 + self.registers.index(reg.upper())
         return code, literal_eval(num)
+
+    @parse(r"\[SP\+\+\]|POP")
+    def POP(self):
+        return 0x18, None
+
+    @parse(r"\[SP\]|PEEK")
+    def PEEK(self):
+        return 0x19, None
+
+    @parse(r"\[--SP\]|PUSH")
+    def POP(self):
+        return 0x1a, None

@@ -29,3 +29,15 @@ class TestParser(unittest.TestCase):
         self.assertParses("[0x0300 + B]", (0x11, 0x0300)) 
         self.assertParses("[0xffff + I]", (0x16, 0xffff)) 
         self.assertParses("[0x03f0 + J]", (0x17, 0x03f0)) 
+
+    def test_parse_POP(self):
+        self.assertParses("POP", (0x18, None))
+        self.assertParses("[SP++]", (0x18, None))
+
+    def test_parse_POP(self):
+        self.assertParses("PEEK", (0x19, None))
+        self.assertParses("[SP]", (0x19, None))
+
+    def test_parse_PUSH(self):
+        self.assertParses("PUSH", (0x1a, None))
+        self.assertParses("[--SP]", (0x1a, None))
