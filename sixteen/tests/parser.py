@@ -190,3 +190,14 @@ class TestParseInstructions(unittest.TestCase):
         j = "set A, 0x30"
         label, instruction = self.parser.labelled_or_not_instruction(j)
         self.assertEqual((label, instruction), (None, "set A, 0x30"))
+
+    def test_parse_text_with_labels(self):
+        lines = """
+                SET A, 0x30        ; 
+                SET [0x1000], 0x20 ; wooh , comment
+                SUB A, [0x1000]
+                IFN A, 0x10
+        :crash  SET PC, crash
+        """.split("\n")
+        self.assertEqual(self.parser.parse_iterable(lines), [0x7c01, 0x0030,
+            0x7de1, 0x1000, 0x0020, 0x7803, 0x1000, 0xc00d, 0x7dc1, 0x0008])
