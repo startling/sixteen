@@ -94,3 +94,7 @@ class AssemblyParser(Parser):
     @parse(r"\[([^+]+)\]")
     def next_word_pointer(self, num):
         return 0x1e, literal_eval(num)
+
+    @parse(r"([^\[\] \t\n,]+)")
+    def next_word_literal(self, num):
+        return 0x1f, literal_eval(num)
