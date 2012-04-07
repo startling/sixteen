@@ -90,7 +90,7 @@ class DCPU16(object):
             return name, (a, b)
 
     def cycle(self):
-        "Run for one cycle and return a list of words consumed."
+        "Run for one cycle and return the operation and its arguments.."
         op, args = self.parse_instruction(self.get_next())
         getattr(self, op)(*args)
         # return the name of the operation and the arguments
@@ -134,7 +134,6 @@ class DCPU16(object):
     def XOR(self, a, b):
         "0xb: XOR a, b - sets a to a^b."
         a.set(a.get() ^ b.get())
-
 
     def IFX(fn):
         """A decorator for all of the IF operations. They can just return a boolean;
