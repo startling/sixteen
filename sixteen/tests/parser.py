@@ -102,6 +102,12 @@ class TestParser(unittest.TestCase):
     def test_parse_IFB(self):
         self.assertParses("IFB", 0xf)
 
+    def test_instruction(self):
+        self.assertParses("SET A, 0x30", (0x1, 0x0, 0x1f, 0x30, None))
+        self.assertParses("SET A 0x30", (0x1, 0x0, 0x1f, 0x30, None))
+        self.assertParses("SET I, 10", (0x1, 0x06, 0x2a, None, None))
+        self.assertParses("SUB A, [0x1000]", (0x3, 0x0, 0x1e, 0x1000, None))
+
     def test_long_literals(self):
         self.assertParses("0x30", (0x1f, 0x30))
         self.assertParses("0b1111111", (0x1f, 127))
