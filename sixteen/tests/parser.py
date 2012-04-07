@@ -130,7 +130,7 @@ class TestParseInstructions(unittest.TestCase):
         self.assertOp("shr", 0x8)
         self.assertOp("and", 0x9)
         self.assertOp("bor", 0xa)
-        self.assertOp("xor", 0xb)
+        self.assertOp("XOR", 0xb)
 
     def test_instruction(self):
         self.assertParses("SET A, 0x30", (0x1, 0x0, 0x1f, 0x30, None))
@@ -182,3 +182,11 @@ class TestParseInstructions(unittest.TestCase):
         """.split("\n")
         self.assertEqual(self.parser.parse_iterable(lines), [0x7c01, 0x0030,
             0x7de1, 0x1000, 0x0020, 0x7803, 0x1000, 0xc00d])
+
+    def test_labelled_or_not_instruction(self):
+        i = ":start set A, 0x30"
+        label, instruction = self.parser.labelled_or_not_instruction(i)
+        self.assertEqual((label, instruction), ("start", "set A, 0x30"))
+        j = "set A, 0x30"
+        label, instruction = self.parser.labelled_or_not_instruction(j)
+        self.assertEqual((label, instruction), (None, "set A, 0x30"))
