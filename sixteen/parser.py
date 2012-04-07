@@ -153,8 +153,8 @@ class AssemblyParser(Parser):
     def __init__(self):
         self.values = ValueParser()
 
-    @parse(r"^\s*(;.*)?$")
-    def ignore(self, _):
+    @parse(r"^\s*$")
+    def ignore(self):
         return None,
 
     def opcode(self, op):
@@ -166,7 +166,7 @@ class AssemblyParser(Parser):
         return self.special_opcodes[op.upper()]
 
     # ordinary instructions
-    @parse("([^\[\] \t\n]+) (\S+?)\,? (\S+)$")
+    @parse("^(\S+) (\S+?)\,? (\S+)$")
     def instruction(self, op, a, b):
         # get the value codes and extra words for each argument
         a, first_word = self.values.parse(a)
@@ -178,7 +178,7 @@ class AssemblyParser(Parser):
         return (self.opcode(op), a, b) + not_nones + nones
 
     # special instructions
-    @parse("^([^\[\] \t\n,]+),? (\S+?)$")
+    @parse("^(\S+?),? (\S+?)$")
     def nonbasic_instructions(self, op, a):
         a, first_word = self.values.parse(a)
         return (0x0, self.special_opcode(op), a, first_word, None)
