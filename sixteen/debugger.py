@@ -22,6 +22,8 @@ class Debugger(object):
 			"dump": self.dump,
 			"dr": self.dump_range,
 			"dumprange": self.dump_range,
+			"c": self.continue_until,
+			"continue": self.continue_until,
 		}
 
 	def format_output(fn):
@@ -64,6 +66,14 @@ class Debugger(object):
 			return self.cpu.registers
 		else:
 			return self.cpu.registers[r]
+
+	def continue_until(self, pc):
+		"Continue until PC is at the greater than the given address."
+		while True:
+			if self.cpu.registers["PC"] > int(pc, base=16):
+				break
+			print self.step()
+		return "<<"
 
 	def run(self, i):
 		"Given an input, parse it and run it, if applicable."
