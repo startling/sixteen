@@ -3,6 +3,7 @@
 import re
 from sixteen.dcpu16 import DCPU16
 from sixteen.words import from_opcode
+from ast import literal_eval
 
 
 class _meta_parser(type):
@@ -58,3 +59,8 @@ class AssemblyParser(Parser):
     def register_pointer(self, name):
         n = self.registers.index(name.upper())
         return 0x08 + n
+
+    @parse(r"\[(.+)\s?\+\s?%s\]" % rs)
+    def register_plus_next_word(self, num, reg):
+        code = 0x10 + self.registers.index(reg.upper())
+        return code, literal_eval(num)
