@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"A simple disassembler."
+
+import sys
+import argparse
+import re
+from sixteen.dcpu16 import DCPU16
+from sixteen.debugger import Debugger, ColoredDebugger
+from sixteen.utilities import HexRead, file_to_ram
+
+
+parser = argparse.ArgumentParser(
+	description='Disassemble a DCPU-16 binary.'
+)
+
+parser.add_argument('--little', '-l', dest="big_endian", action='store_false', 
+	help="Denote that this file should be parsed as little-endian. "
+	"(Default: big-endian).",
+)
+
+parser.add_argument('--hex', dest="bin", action='store_false', 
+	help="Denote that this file should be parsed as an ASCII hex dump. "
+	"(Default: binary)"
+)
+
+parser.add_argument('file',
+	help="The binary file to step through."
+)
+
+
+args = parser.parse_args()
+
+
+# open the file from the command-line
+if args.bin:
+	f = open(args.file)
+else:
+	f = HexRead(args.file)
+
+# initialize a new CPU
+d = DCPU16()
+
+
+# read the file to the CPU's RAM
+file_to_ram(f, d, args.big_endian)
+
+# close the file
+f.close
+
+
+# while there are opcodes other than 0x0000...
+while any(d.RAM[d.registers["PC"]:]):
+    # parse the opcodes and values out of the next word
+    opcode, values = d.parse_instruction(d.get_next())
+    # print each opcode and its arguments
+    print "%s %s" % (opcode, ", ".join([v.dis for v in values]))
