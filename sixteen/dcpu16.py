@@ -76,26 +76,29 @@ class DCPU16(object):
     def dump(self):
         "Return a friendly dump of the RAM."
         return self.RAM
-
-    def cycle(self):
-        "Run for one cycle and return a list of words consumed."
-        word = self.get_next()
+    
+    def parse_instruction(self, word):
         o, a_code, b_code = as_opcode(word)
         # if this is a special opcode...
         if o == 0x00:
             # arguments are switched for the special opcodes
             a = self.values[b_code](self)
             name = self.special_opcodes[a_code]
-            getattr(self, name)(a)
             # return the name and the arguments
             return name, (a,)
         else:
             a = self.values[a_code](self)
             b = self.values[b_code](self)
             name = self.opcodes[o]
-            getattr(self, name)(a, b)
             # return the name of the operation and the arguments
             return name, (a, b)
+
+    def cycle(self):
+        "Run for one cycle and return a list of words consumed."
+        op, args = self.parse_instruction(self.get_next())
+        getattr(self, op)(*args)
+        # return the name of the operation and the arguments
+        return op, args
 
     def get_next(self):
         "Increment the program counter and return its value."
