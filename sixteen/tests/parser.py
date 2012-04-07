@@ -17,3 +17,9 @@ class TestParser(unittest.TestCase):
         self.assertParses("B", 0x01)
         self.assertParses("Y", 0x04)
         self.assertParses("J", 0x07)
+
+    def test_parse_register_pointers(self):
+        self.assertParses("[A]", 0x08)
+        self.assertParses("[B]", 0x09)
+        self.assertParses("[Y]", 0x0c)
+        self.assertParses("[J]", 0x0f)
