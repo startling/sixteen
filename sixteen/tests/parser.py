@@ -150,8 +150,8 @@ class TestParser(unittest.TestCase):
             0x0020, 0x7803, 0x1000, 0xc00d])
 
     def test_labels(self):
-        self.assertParses("SET PC, :label", (0x1, 0x1c, 0x1f, ":label", None))
-        self.assertParses("SET A, :label", (0x1, 0x00, 0x1f, ":label", None))
+        self.assertParses("SET PC, label", (0x1, 0x1c, 0x1f, "label", None))
+        self.assertParses("SET A, label", (0x1, 0x00, 0x1f, "label", None))
 
     def test_parse_text(self):
         lines = """
