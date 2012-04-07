@@ -26,6 +26,8 @@ class Debugger(object):
 			"continue": self.continue_until,
 			"until": self.until,
 			"u": self.until,
+			"jump": self.jump,
+			"j": self.jump,
 		}
 
 	def format_output(fn):
@@ -84,6 +86,15 @@ class Debugger(object):
 				break
 			print self.step()
 		return "<<"
+
+	def jump(self, pc):
+		"Move the PC to a given address."
+		address = int(pc, base=16)
+		before = self.format % self.cpu.registers["PC"]
+		# subtract one, because the CPU preincremements
+		self.cpu.registers["PC"] = address - 1
+		after = self.format % self.cpu.registers["PC"] + 1
+		return "[%s] -> [%s]" % (before, after)
 
 	def run(self, i):
 		"Given an input, parse it and run it, if applicable."
