@@ -41,7 +41,7 @@ class Parser(object):
                 return method(self, *m.groups())
         else:
             # oh no, nothing matched.
-            return None
+            return False
 
 
 class AssemblyParser(Parser):
