@@ -23,6 +23,7 @@ It'll step through the instructions, printing each one. You can either hit retur
 * `q` or `quit` ends the debugger.
 * `dr` or `dumprange`, which takes to address and dumps them and everything between them.
 * `c` or `continue` takes an address and continues until the program counter is greater than that address.
+* `u` or `until` takes an address and continues until the program counter is exactly equal to that address. Note that this is liable to spin forever, if you pick an address that's in the middle of an instruction or that doesn't get pointed to ever.
 
 It also uses GNU Readline line-editing, so you can scroll through history.
 
