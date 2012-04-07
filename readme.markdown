@@ -22,6 +22,7 @@ It'll step through the instructions, printing each one. You can either hit retur
 * `d` or `dump` takes a single argument, a four-digit long hex number, and prints the value of the memory at that location.
 * `q` or `quit` ends the debugger.
 * `dr` or `dumprange`, which takes to address and dumps them and everything between them.
+* `c` or `continue` takes an address and continues until the program counter is greater than that address.
 
 It also uses GNU Readline line-editing, so you can scroll through history.
 
