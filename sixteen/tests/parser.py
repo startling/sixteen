@@ -56,3 +56,48 @@ class TestParser(unittest.TestCase):
         self.assertParses("[0x0300]", (0x1e, 0x0300)) 
         self.assertParses("[0xffff]", (0x1e, 0xffff)) 
         self.assertParses("[0x03f0]", (0x1e, 0x03f0)) 
+
+    def test_parse_SET(self):
+        self.assertParses("SET", 0x1)
+
+    def test_parse_ADD(self):
+        self.assertParses("ADD", 0x2)
+
+    def test_parse_SUB(self):
+        self.assertParses("SUB", 0x3)
+
+    def test_parse_MUL(self):
+        self.assertParses("MUL", 0x4)
+
+    def test_parse_DIV(self):
+        self.assertParses("DIV", 0x5)
+
+    def test_parse_MOD(self):
+        self.assertParses("MOD", 0x6)
+
+    def test_parse_SHL(self):
+        self.assertParses("SHL", 0x7)
+
+    def test_parse_SHR(self):
+        self.assertParses("SHR", 0x8)
+
+    def test_parse_AND(self):
+        self.assertParses("AND", 0x9)
+
+    def test_parse_BOR(self):
+        self.assertParses("BOR", 0xa)
+
+    def test_parse_XOR(self):
+        self.assertParses("XOR", 0xb)
+
+    def test_parse_IFE(self):
+        self.assertParses("IFE", 0xc)
+
+    def test_parse_IFN(self):
+        self.assertParses("IFN", 0xd)
+
+    def test_parse_IFG(self):
+        self.assertParses("IFG", 0xe)
+
+    def test_parse_IFB(self):
+        self.assertParses("IFB", 0xf)
