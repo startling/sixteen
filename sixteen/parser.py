@@ -47,12 +47,15 @@ class Parser(object):
 class AssemblyParser(Parser):
     # why doesn't this get inherited from Parser?
     __metaclass__ = _meta_parser
+    
+    cpu = DCPU16
+    opcodes = dict((v, k) for k, v in cpu.opcodes.iteritems())
 
     registers = ["A", "B", "C", "X", "Y", "Z", "I", "J"]
-    rs = r"([a-cx-zijA-CX-ZIJ])"
+    rs = r"([a-cx-zijA-CX-ZIJ]{1})"
 
     # values: all values return their value code and None or their next word
-    @parse(rs)
+    @parse(r"%s" % rs)
     def register(self, name):
         n = self.registers.index(name.upper())
         return (n, None)
@@ -94,3 +97,7 @@ class AssemblyParser(Parser):
     @parse(r"\[([^+]+)\]")
     def next_word_pointer(self, num):
         return 0x1e, literal_eval(num)
+
+    @parse("(%s)" % "|".join(opcodes.keys()))
+    def opcode(self, code):
+        return self.opcodes[code]
