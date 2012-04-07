@@ -13,13 +13,19 @@ class TestParser(unittest.TestCase):
         self.assertEquals(self.parse(given), expected)
 
     def test_parse_registers(self):
-        self.assertParses("A", 0x00)
-        self.assertParses("B", 0x01)
-        self.assertParses("Y", 0x04)
-        self.assertParses("J", 0x07)
+        self.assertParses("A", (0x00, None))
+        self.assertParses("B", (0x01, None))
+        self.assertParses("Y", (0x04, None))
+        self.assertParses("J", (0x07, None))
 
     def test_parse_register_pointers(self):
-        self.assertParses("[A]", 0x08)
-        self.assertParses("[B]", 0x09)
-        self.assertParses("[Y]", 0x0c)
-        self.assertParses("[J]", 0x0f)
+        self.assertParses("[A]", (0x08, None))
+        self.assertParses("[B]", (0x09, None))
+        self.assertParses("[Y]", (0x0c, None))
+        self.assertParses("[J]", (0x0f, None))
+
+    def test_parse_next_word_plus_registers(self):
+        self.assertParses("[0x0000 + A]", (0x10, 0x0000)) 
+        self.assertParses("[0x0300 + B]", (0x11, 0x0300)) 
+        self.assertParses("[0xffff + I]", (0x16, 0xffff)) 
+        self.assertParses("[0x03f0 + J]", (0x17, 0x03f0)) 

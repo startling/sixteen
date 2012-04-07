@@ -53,12 +53,13 @@ class AssemblyParser(Parser):
 
     @parse(rs)
     def register(self, name):
-        return self.registers.index(name.upper())
+        n = self.registers.index(name.upper())
+        return (n, None)
 
     @parse(r"\[%s\]" % rs)
     def register_pointer(self, name):
         n = self.registers.index(name.upper())
-        return 0x08 + n
+        return (0x08 + n, None)
 
     @parse(r"\[(.+)\s?\+\s?%s\]" % rs)
     def register_plus_next_word(self, num, reg):
