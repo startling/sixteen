@@ -110,6 +110,10 @@ class AssemblyParser(Parser):
     def opcode(self, code):
         return self.opcodes[code]
 
+    @parse(r"^\s*;.*$")
+    def ignore(self):
+        return None,
+
     # ordinary instructions
     @parse("\s*([^\[\] \t\n]+) (\S+?)\,? ([^; \t\n]+)\s*;?.*$")
     def instruction(self, op, a, b):
