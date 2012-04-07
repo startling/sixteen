@@ -63,38 +63,25 @@ class ParserError(Exception):
     "Oh no, we don't know how to parse this thing."
 
 
-class AssemblyParser(Parser):
-    # why doesn't this get inherited from Parser?
+class ValueParser(Parser):
+    """Parse values. Values all return a value code and one other thing. The
+    one other thing can either be the next word they need or None.
+    """
     __metaclass__ = _meta_parser
-    
-    cpu = DCPU16
-    opcodes = dict((v, k) for k, v in cpu.opcodes.iteritems())
-    special_opcodes = dict((v, k) for k, v in cpu.special_opcodes.iteritems())
 
     registers = ["A", "B", "C", "X", "Y", "Z", "I", "J"]
     rs = r"([a-cx-zijA-CX-ZIJ]{1})"
-        
-    @preprocess
-    def comments(self, inp):
-        return re.sub(r";.*", "", inp)
-     
-    @preprocess
-    def whitespace(self, inp):
-        "Any whitespace leading, trailing, or more than one is insignificant."
-        inp = re.sub(r"^\s+", "", inp)
-        inp = re.sub(r"\s+$", "", inp)
-        return re.sub(r"\s{2,}", " ", inp)
 
     # values: all values return their value code and None or their next word
     @parse(r"^%s$" % rs)
     def register(self, name):
         n = self.registers.index(name.upper())
-        return (n, None)
+        return n, None
 
     @parse(r"\[%s\]" % rs)
     def register_pointer(self, name):
         n = self.registers.index(name.upper())
-        return (0x08 + n, None)
+        return 0x08 + n, None
 
     @parse(r"\[(.+)\s?\+\s?%s\]" % rs)
     def register_plus_next_word(self, num, reg):
@@ -142,31 +129,59 @@ class AssemblyParser(Parser):
         # labels get passed through, to be dealt with later.
         return 0x1f, l
 
-    @parse("^(%s)$" % "|".join(opcodes.keys()))
-    def opcode(self, code):
-        return self.opcodes[code]
+
+class AssemblyParser(Parser):
+    "Parse opcodes and instructions."
+    # why doesn't this get inherited from Parser?
+    __metaclass__ = _meta_parser
+    
+    cpu = DCPU16
+    opcodes = dict((v, k) for k, v in cpu.opcodes.iteritems())
+    special_opcodes = dict((v, k) for k, v in cpu.special_opcodes.iteritems())
+
+    @preprocess
+    def comments(self, inp):
+        return re.sub(r";.*", "", inp)
+     
+    @preprocess
+    def whitespace(self, inp):
+        "Any whitespace leading, trailing, or more than one is insignificant."
+        inp = re.sub(r"^\s+", "", inp)
+        inp = re.sub(r"\s+$", "", inp)
+        return re.sub(r"\s{2,}", " ", inp)
+
+    def __init__(self):
+        self.values = ValueParser()
 
     @parse(r"^\s*(;.*)?$")
     def ignore(self, _):
         return None,
 
+    def opcode(self, op):
+        "Look up an opcode."
+        return self.opcodes[op.upper()]
+
+    def special_opcode(self, op):
+        "Look up a special opcode."
+        return self.special_opcodes[op.upper()]
+
     # ordinary instructions
     @parse("([^\[\] \t\n]+) (\S+?)\,? (\S+)$")
     def instruction(self, op, a, b):
         # get the value codes and extra words for each argument
-        a, first_word = self.parse(a)
-        b, second_word = self.parse(b)
+        a, first_word = self.values.parse(a)
+        b, second_word = self.values.parse(b)
         # filter out Nones
         not_nones = tuple(n for n in (first_word, second_word) if n != None)
         # and then put them back at the end
         nones = tuple(None for _ in range(2 - len(not_nones)))
-        return (self.parse(op), a, b) + not_nones + nones
+        return (self.opcode(op), a, b) + not_nones + nones
 
     # special instructions
     @parse("^([^\[\] \t\n,]+),? (\S+?)$")
     def nonbasic_instructions(self, op, a):
-        a, first_word = self.parse(a)
-        return (0x0, self.special_opcodes[op], a, first_word, None)
+        a, first_word = self.values.parse(a)
+        return (0x0, self.special_opcode(op), a, first_word, None)
 
     def parse_to_ints(self, line):
         parsed = self.parse(line)
