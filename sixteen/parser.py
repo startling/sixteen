@@ -83,7 +83,7 @@ class AssemblyParser(Parser):
         "Any whitespace leading, trailing, or more than one is insignificant."
         inp = re.sub(r"^\s+", "", inp)
         inp = re.sub(r"\s+$", "", inp)
-        return re.sub(r"\s{2,}", "", inp)
+        return re.sub(r"\s{2,}", " ", inp)
 
     # values: all values return their value code and None or their next word
     @parse(r"^%s$" % rs)
@@ -137,7 +137,7 @@ class AssemblyParser(Parser):
         else:
             return 0x1f, num
 
-    @parse(r"^(:\S+)")
+    @parse(r"^([a-z]+)$")
     def label(self, l):
         # labels get passed through, to be dealt with later.
         return 0x1f, l
