@@ -13,11 +13,9 @@ class Box(object):
     to do is to save "key"and "container" attributes, which are used to look up
     or set things in "get" and "set".
 
-    There's also a `consumed` attribute that starts at None and should be set
-    to an int if the Box gets a new word. There's also a @consume decorator
-    (scroll down a bit) that sets it and passes it to the "__init__". And then
-    there's a "consumes" class attribue that is how many words these values 
-    consume.
+    Each Box should have a "consumes" class attribute, too, which is how many
+    words that kind of value consumes. It's alright to leave unset, though; the
+    default is 0.
 
     And then there's the "dis" attribute that should be a human-readable string
     ("disassembled") for this value.
@@ -25,7 +23,6 @@ class Box(object):
     This class (it *is* a base class) doesn't define "__init__", so you'll need
     to subclass and define it yourself.
     """
-    consumed = None
     consumes = 0
 
     def get(self):
@@ -43,8 +40,7 @@ class Box(object):
 def consume(fn):
     @wraps(fn)
     def initialize(self, cpu):
-        self.consumed = cpu.get_next()
-        fn(self, cpu, self.consumed)
+        fn(self, cpu, cpu.get_next())
     return initialize
 
 
@@ -90,7 +86,7 @@ class Register(object):
                 s.key -= len(cpu.RAM) - 1
 
         return type("[%s + next word]" % self.name, (Box,),
-                {"__init__": r_init, "consumes": 1})
+                {"__init__": r_init})
 
 
 class NextWord(Box):
