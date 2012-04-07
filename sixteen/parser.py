@@ -55,7 +55,7 @@ class AssemblyParser(Parser):
     rs = r"([a-cx-zijA-CX-ZIJ]{1})"
 
     # values: all values return their value code and None or their next word
-    @parse(r"%s" % rs)
+    @parse(r"^%s$" % rs)
     def register(self, name):
         n = self.registers.index(name.upper())
         return (n, None)
