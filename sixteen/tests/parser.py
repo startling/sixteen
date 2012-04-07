@@ -125,6 +125,13 @@ class TestParseInstructions(unittest.TestCase):
     def test_parse_IFB(self):
         self.assertOp("IFB", 0xf)
 
+    def test_lowercase_ops(self):
+        self.assertOp("ifb", 0xf)
+        self.assertOp("shr", 0x8)
+        self.assertOp("and", 0x9)
+        self.assertOp("bor", 0xa)
+        self.assertOp("xor", 0xb)
+
     def test_instruction(self):
         self.assertParses("SET A, 0x30", (0x1, 0x0, 0x1f, 0x30, None))
         self.assertParses("SET A 0x30", (0x1, 0x0, 0x1f, 0x30, None))
