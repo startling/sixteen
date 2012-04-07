@@ -150,7 +150,7 @@ class AssemblyParser(Parser):
         return None,
 
     # ordinary instructions
-    @parse("\s*([^\[\] \t\n]+) (\S+?)\,? ([^; \t\n]+)\s*;?.*$")
+    @parse("([^\[\] \t\n]+) (\S+?)\,? (\S+)$")
     def instruction(self, op, a, b):
         # get the value codes and extra words for each argument
         a, first_word = self.parse(a)
