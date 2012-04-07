@@ -9,13 +9,20 @@ from ast import literal_eval
 class _meta_parser(type):
     """A metaclass that collects all the @parse methods into a list of pairs
     named __parse_methods__; we'll use this for Parsers.
+    
+    It also adds all of the @preprocess-ed methods and adds them to
+    self.__preprocessors__.
     """
     def __new__(cls, name, bases, dictionary):
         __parse_methods__ = []
+        __preprocessors__ = []
         for k, v in dictionary.iteritems():
             if getattr(v, "pattern", None):
                 __parse_methods__.append((v.pattern, v))
+            if getattr(v, "is_a_preprocessor", None):
+                __preprocessors__.append(v)
         dictionary["__parse_methods__"] = __parse_methods__
+        dictionary["__preprocessors__"] = __preprocessors__
         return type(name, bases, dictionary)
 
 
@@ -28,14 +35,23 @@ def parse(pattern):
         return fn
     return parser_decorator
 
+def preprocess(fn):
+    "A decorator that marks this method as a preprocessor."
+    fn.is_a_preprocessor = True
+    return fn
+
 
 class Parser(object):
     "A base class for parsers."
     __metaclass__ = _meta_parser
 
     def parse(self, token):
-        "Check all of the __parse_methods__ for a parser that matches this."
+        """Run all of the preprocessors on the input and check all of the
+        __parse_methods__ for a parser that matches this.
+        """
         for pattern, method in self.__parse_methods__:
+            for pre in self.__preprocessors__:
+                token = pre(self, token)
             m = re.match(pattern, token)
             if m:
                 return method(self, *m.groups())
