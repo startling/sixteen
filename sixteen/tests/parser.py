@@ -171,6 +171,7 @@ class TestParseInstructions(unittest.TestCase):
     def test_labels(self):
         self.assertParses("SET PC, label", (0x1, 0x1c, 0x1f, "label", None))
         self.assertParses("SET A, label", (0x1, 0x00, 0x1f, "label", None))
+        self.assertParses("JSR testsub", (0x0, 0x01, 0x1f, "testsub", None))
 
     def test_parse_text(self):
         lines = """
