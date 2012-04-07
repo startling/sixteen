@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.words import as_opcode, from_hex
-from sixteen import values
+from sixteen import boxes
 from functools import wraps
 
 
@@ -25,35 +25,36 @@ class DCPU16(object):
         "PC": 0x000, "SP": 0xffff, "O": 0x0000,
     }
     
-    SP = values.Register("SP")
+    SP = boxes.Register("SP")
 
     # this is a dictionary of value codes to classes that inherit from Box.
     # each of these classes get instantiated with this CPU and then have
     # .get and .set methods.
-    self.values = { 0x1e: values.NextWordAsPointer, 0x1f: values.NextWord,
+    values = {
+        0x1e: boxes.NextWordAsPointer, 0x1f: boxes.NextWord,
         # values for PC, and O
-        0x1c: values.Register("PC").as_value(),
-        0x1d: values.Register("O").as_value(),
+        0x1c: boxes.Register("PC").as_value(),
+        0x1d: boxes.Register("O").as_value(),
         # value for SP
         0x1b: SP.as_value(),
         # PEEK is just a register pointer to SP
         0x19: SP.as_pointer(),
         # PUSH and POP
-        0x18: values.POP, 0x1a: values.PUSH,
+        0x18: boxes.POP, 0x1a: boxes.PUSH,
     }
     
     # add Box classes for all the registers
     for n, r in zip(xrange(0x08), ["A", "B", "C", "X", "Y", "Z", "I", "J"]):
-        register = values.Register(r)
-        self.values[n] = register.as_value()
+        register = boxes.Register(r)
+        values[n] = register.as_value()
         # add register pointers
-        self.values[n + 0x08] = register.as_pointer()
+        values[n + 0x08] = register.as_pointer()
         # add [register + next word]s
-        self.values[n + 0x10] = register.and_next_word()
+        values[n + 0x10] = register.and_next_word()
 
     # add setters and getters for the short literals
     for n in xrange(0x20, 0x40):
-        self.values[n] = values.ShortLiteral(n - 0x20)
+        values[n] = boxes.ShortLiteral(n - 0x20)
 
     def __init__(self):
         # initialize RAM with empty words. None will be treated as empty 0000
@@ -135,7 +136,7 @@ class DCPU16(object):
         a.set(a.get() ^ b.get())
 
 
-    def IF_X(fn):
+    def IFX(fn):
         """A decorator for all of the IF operations. They can just return a boolean;
         if it's False, jump ahead an instruction.
         """
@@ -151,22 +152,22 @@ class DCPU16(object):
                 self.registers["PC"] += 1 + length
         return op
 
-    @IF_X
+    @IFX
     def IFE(self, a, b):
         "0xc: IFE a, b - performs next instruction only if a==b."
         return a.get() == b.get()
 
-    @IF_X
+    @IFX
     def IFN(self, a, b):
         "0xd: IFN a, b - performs next instruction only if a!=b."
         return a.get() != b.get()
 
-    @IF_X
+    @IFX
     def IFG(self, a, b):
         "0xe: IFG a, b - performs next instruction only if a>b."
         return a.get() > b.get()
 
-    @IF_X
+    @IFX
     def IFB(self, a, b):
         "0xf: IFB a, b - performs next instruction only if (a&b)!=0."
         return a.get() & b.get() != 0
