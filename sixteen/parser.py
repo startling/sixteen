@@ -204,8 +204,21 @@ class AssemblyParser(Parser):
 
     def parse_iterable(self, iterable):
         "Given an iterable of assembly code, parse each line."
-        # TODO: recognize labels, remember them, and interpolate them.
+        labels = {}
         code = []
         for line in iterable:
-            code.extend(self.parse_to_ints(line))
-        return list(code)
+            label, instruction = self.labelled_or_not_instruction(line)
+            # if we got a label, remember that label and the address
+            if label != None:
+                labels[label] = len(code)
+            code.extend(self.parse_to_ints(instruction))
+        # and then pass through the code again, replacing labels with addresses
+        final = []
+        for word in code:
+            gotten = labels.get(word)
+            if gotten == None:
+                final.append(word)
+            else:
+                final.append(gotten)
+        #TODO: short labels
+        return final
