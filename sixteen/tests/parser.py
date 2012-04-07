@@ -41,3 +41,12 @@ class TestParser(unittest.TestCase):
     def test_parse_PUSH(self):
         self.assertParses("PUSH", (0x1a, None))
         self.assertParses("[--SP]", (0x1a, None))
+
+    def test_parse_SP(self):
+        self.assertParses("SP", (0x1b, None))
+
+    def test_parse_PC(self):
+        self.assertParses("PC", (0x1c, None))
+
+    def test_parse_O(self):
+        self.assertParses("O", (0x1d, None))

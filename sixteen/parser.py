@@ -78,3 +78,15 @@ class AssemblyParser(Parser):
     @parse(r"\[--SP\]|PUSH")
     def POP(self):
         return 0x1a, None
+
+    @parse("SP")
+    def SP(self):
+        return 0x1b, None
+
+    @parse("PC")
+    def PC(self):
+        return 0x1c, None
+
+    @parse("O")
+    def O(self):
+        return 0x1d, None
