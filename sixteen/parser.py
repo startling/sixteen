@@ -125,3 +125,13 @@ class AssemblyParser(Parser):
         # and then put them back at the end
         nones = tuple(None for _ in range(2 - len(not_nones)))
         return (self.parse(op), a, b) + not_nones + nones
+
+
+    def parse_to_ints(self, line):
+        parsed = self.parse(line)
+        filtered = [p for p in parsed if p != None]
+        if len(filtered) >= 3:
+            word = from_opcode(*filtered[:3])
+            return [word] + filtered[3:]
+        else:
+            return []
