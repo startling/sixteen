@@ -176,3 +176,11 @@ class AssemblyParser(Parser):
             return [word] + filtered[3:]
         else:
             return []
+
+    def parse_iterable(self, iterable):
+        "Given an iterable of assembly code, parse each line."
+        # TODO: recognize labels, remember them, and interpolate them.
+        code = []
+        for line in iterable:
+            code.extend(self.parse_to_ints(line))
+        return list(code)
