@@ -24,6 +24,7 @@ It'll step through the instructions, printing each one. You can either hit retur
 * `dr` or `dumprange`, which takes to address and dumps them and everything between them.
 * `c` or `continue` takes an address and continues until the program counter is greater than that address.
 * `u` or `until` takes an address and continues until the program counter is exactly equal to that address. Note that this is liable to spin forever, if you pick an address that's in the middle of an instruction or that doesn't get pointed to ever.
+* `j` or `jump` moves the PC to a given address. Note that this can lead to nonsensical execution (inlcuding, possibly, an error) because not every address is the start of an instruction.
 
 It also uses GNU Readline line-editing, so you can scroll through history.
 
