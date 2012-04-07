@@ -21,6 +21,7 @@ It'll step through the instructions, printing each one. You can either hit retur
 * `r` or `register`: print all of the registers; it can also take a single argument (e.g., `r A`) and print that single register.
 * `d` or `dump` takes a single argument, a four-digit long hex number, and prints the value of the memory at that location.
 * `q` or `quit` ends the debugger.
+* `dr` or `dumprange`, which takes to address and dumps them and everything between them.
 
 It also uses GNU Readline line-editing, so you can scroll through history.
 
