@@ -72,6 +72,17 @@ class AssemblyParser(Parser):
 
     registers = ["A", "B", "C", "X", "Y", "Z", "I", "J"]
     rs = r"([a-cx-zijA-CX-ZIJ]{1})"
+        
+    @preprocess
+    def comments(self, inp):
+        return re.sub(r";.*", "", inp)
+     
+    @preprocess
+    def whitespace(self, inp):
+        "Any whitespace leading, trailing, or more than one is insignificant."
+        inp = re.sub(r"^\s+", "", inp)
+        inp = re.sub(r"\s+$", "", inp)
+        return re.sub(r"\s{2,}", "", inp)
 
     # values: all values return their value code and None or their next word
     @parse(r"^%s$" % rs)
