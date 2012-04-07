@@ -2,6 +2,7 @@
 
 import unittest
 from sixteen.parser import AssemblyParser
+from itertools import chain
 
 
 class TestParser(unittest.TestCase):
@@ -107,6 +108,7 @@ class TestParser(unittest.TestCase):
         self.assertParses("SET A 0x30", (0x1, 0x0, 0x1f, 0x30, None))
         self.assertParses("SET I, 10", (0x1, 0x06, 0x2a, None, None))
         self.assertParses("SUB A, [0x1000]", (0x3, 0x0, 0x1e, 0x1000, None))
+        self.assertParses("IFN A, 0x10", (0xd, 0x0, 0x30, None, None))
 
     def test_comments(self):
         self.assertParses("SET I, 10; comment", (0x1, 0x06, 0x2a, None, None))
@@ -128,3 +130,15 @@ class TestParser(unittest.TestCase):
         self.assertParses("0", (0x20, None))
         self.assertParses("0x1f", (0x3f, None))
         self.assertParses("0b11", (0x23, None))
+
+    def test_to_ints(self):
+        assembly = """
+                SET A, 0x30        ; 
+                SET [0x1000], 0x20 ; wooh , comment
+                SUB A, [0x1000]
+                IFN A, 0x10
+        """
+        ints = (self.parser.parse_to_ints(l) for l in assembly.split("\n"))
+        flattened = chain(*ints)
+        self.assertEqual(list(flattened), [0x7c01, 0x0030, 0x7de1, 0x1000,
+            0x0020, 0x7803, 0x1000, 0xc00d])
