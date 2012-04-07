@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from sixteen.parser import AssemblyParser
+from sixteen.parser import ValueParser, AssemblyParser
 from itertools import chain
 
 
-class TestParser(unittest.TestCase):
+class TestValues(unittest.TestCase):
     def setUp(self):
-        self.parser = AssemblyParser()
+        self.parser = ValueParser()
         self.parse = self.parser.parse
 
     def assertParses(self, given, expected):
@@ -58,50 +58,72 @@ class TestParser(unittest.TestCase):
         self.assertParses("[0xffff]", (0x1e, 0xffff)) 
         self.assertParses("[0x03f0]", (0x1e, 0x03f0)) 
 
+    def test_long_literals(self):
+        self.assertParses("0x30", (0x1f, 0x30))
+        self.assertParses("0b1111111", (0x1f, 127))
+        self.assertParses("317", (0x1f, 317))
+
+    def test_short_literals(self):
+        self.assertParses("0", (0x20, None))
+        self.assertParses("0x1f", (0x3f, None))
+        self.assertParses("0b11", (0x23, None))
+
+
+class TestParseInstructions(unittest.TestCase):
+    def setUp(self):
+        self.parser = AssemblyParser()
+        self.parse = self.parser.parse
+
+    def assertParses(self, given, expected):
+        self.assertEquals(self.parse(given), expected)
+
+    def assertOp(self, given, expected):
+        self.assertEquals(self.parser.opcode(given), expected)
+
     def test_parse_SET(self):
-        self.assertParses("SET", 0x1)
+        self.assertOp("SET", 0x1)
 
     def test_parse_ADD(self):
-        self.assertParses("ADD", 0x2)
+        self.assertOp("ADD", 0x2)
 
     def test_parse_SUB(self):
-        self.assertParses("SUB", 0x3)
+        self.assertOp("SUB", 0x3)
 
     def test_parse_MUL(self):
-        self.assertParses("MUL", 0x4)
+        self.assertOp("MUL", 0x4)
 
     def test_parse_DIV(self):
-        self.assertParses("DIV", 0x5)
+        self.assertOp("DIV", 0x5)
 
     def test_parse_MOD(self):
-        self.assertParses("MOD", 0x6)
+        self.assertOp("MOD", 0x6)
 
     def test_parse_SHL(self):
-        self.assertParses("SHL", 0x7)
+        self.assertOp("SHL", 0x7)
 
     def test_parse_SHR(self):
-        self.assertParses("SHR", 0x8)
+        self.assertOp("SHR", 0x8)
 
     def test_parse_AND(self):
-        self.assertParses("AND", 0x9)
+        self.assertOp("AND", 0x9)
 
     def test_parse_BOR(self):
-        self.assertParses("BOR", 0xa)
+        self.assertOp("BOR", 0xa)
 
     def test_parse_XOR(self):
-        self.assertParses("XOR", 0xb)
+        self.assertOp("XOR", 0xb)
 
     def test_parse_IFE(self):
-        self.assertParses("IFE", 0xc)
+        self.assertOp("IFE", 0xc)
 
     def test_parse_IFN(self):
-        self.assertParses("IFN", 0xd)
+        self.assertOp("IFN", 0xd)
 
     def test_parse_IFG(self):
-        self.assertParses("IFG", 0xe)
+        self.assertOp("IFG", 0xe)
 
     def test_parse_IFB(self):
-        self.assertParses("IFB", 0xf)
+        self.assertOp("IFB", 0xf)
 
     def test_instruction(self):
         self.assertParses("SET A, 0x30", (0x1, 0x0, 0x1f, 0x30, None))
@@ -127,16 +149,6 @@ class TestParser(unittest.TestCase):
         self.assertParses("    ;comment", (None,))
         self.assertParses("\t      ", (None,))
 
-    def test_long_literals(self):
-        self.assertParses("0x30", (0x1f, 0x30))
-        self.assertParses("0b1111111", (0x1f, 127))
-        self.assertParses("317", (0x1f, 317))
-
-    def test_short_literals(self):
-        self.assertParses("0", (0x20, None))
-        self.assertParses("0x1f", (0x3f, None))
-        self.assertParses("0b11", (0x23, None))
-
     def test_to_ints(self):
         assembly = """
                 SET A, 0x30        ; 
@@ -158,6 +170,7 @@ class TestParser(unittest.TestCase):
                 SET A, 0x30        ; 
                 SET [0x1000], 0x20 ; wooh , comment
                 SUB A, [0x1000]
+
                 IFN A, 0x10
         """.split("\n")
         self.assertEqual(self.parser.parse_iterable(lines), [0x7c01, 0x0030,
