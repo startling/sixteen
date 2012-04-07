@@ -114,6 +114,11 @@ class TestParser(unittest.TestCase):
         self.assertParses("SET I, 10 ;comment", (0x1, 0x06, 0x2a, None, None))
         self.assertParses("SET I, 10 ; comment", (0x1, 0x06, 0x2a, None, None))
 
+    def test_ignores(self):
+        self.assertParses("    ", (None,))
+        self.assertParses(" ;   ", (None,))
+        self.assertParses(" ; hi", (None,))
+
     def test_long_literals(self):
         self.assertParses("0x30", (0x1f, 0x30))
         self.assertParses("0b1111111", (0x1f, 127))
