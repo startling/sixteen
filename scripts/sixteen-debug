@@ -5,10 +5,9 @@
 
 import sys
 import argparse
-import re
 from sixteen.dcpu16 import DCPU16
 from sixteen.debugger import Debugger, ColoredDebugger
-from sixteen.utilities import HexRead
+from sixteen.utilities import HexRead, file_to_ram
 
 
 parser = argparse.ArgumentParser(
@@ -45,25 +44,8 @@ else:
 d = DCPU16()
 
 
-# read the file to the cpu's RAM
-for n, _ in enumerate(d.RAM):
-	# read two bytes as ints
-	word = [ord(c) for c in f.read(2)]
-	# if there are exactly two bytes, go on
-	if len(word) == 2:
-		# unpack the top and the bottom of the word
-		if args.big_endian:
-			top, bottom = word
-		else:
-			bottom, top = word
-		# bitshift the top up and then add to the bottom
-		word_int = (top << 8) + bottom
-		# AMBIGUITY: is the byte order big-endian or not?
-		# set this n in the ram to that number
-		d.RAM[n] = word_int
-	# if there aren't two bytes, stop
-	else:
-		break
+# read from the file to the CPU's RAM
+file_to_ram(f, d, args.big_endian)
 
 
 # close the file
