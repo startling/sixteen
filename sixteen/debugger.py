@@ -39,13 +39,13 @@ class Debugger(object):
 		return formatted
 
 	def step(self):
-		c = self.cpu.cycle()
-		if len(c) == 2:
-			name, a = c
-			return "%s %s" % (name, a.dis)
-		elif len(c) == 3:
-			name, a, b = c
-			return "%s %s, %s" % (name, a.dis, b.dis)
+		op, args = self.cpu.cycle()
+		if len(args) == 1:
+			(a,) = args
+			return "%s %s" % (op, a.dis)
+		elif len(args) == 2:
+			a, b = args
+			return "%s %s, %s" % (op, a.dis, b.dis)
 		#TODO: make this show hex values, too.
 
 	@format_output
