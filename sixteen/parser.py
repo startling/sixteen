@@ -98,6 +98,14 @@ class AssemblyParser(Parser):
     def next_word_pointer(self, num):
         return 0x1e, literal_eval(num)
 
-    @parse("(%s)" % "|".join(opcodes.keys()))
+    @parse(r"^(0x[0-9a-fA-F]+|0b[01]+|0o[0-7]+|[0-9]+)$")
+    def literal(self, num):
+        num = literal_eval(num)
+        if num <= 0x1f:
+            return 0x20 + num, None
+        else:
+            return 0x1f, num
+
+    @parse("^(%s)$" % "|".join(opcodes.keys()))
     def opcode(self, code):
         return self.opcodes[code]
