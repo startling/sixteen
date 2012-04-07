@@ -25,6 +25,35 @@ class DCPU16(object):
         "PC": 0x000, "SP": 0xffff, "O": 0x0000,
     }
     
+    SP = values.Register("SP")
+
+    # this is a dictionary of value codes to classes that inherit from Box.
+    # each of these classes get instantiated with this CPU and then have
+    # .get and .set methods.
+    self.values = { 0x1e: values.NextWordAsPointer, 0x1f: values.NextWord,
+        # values for PC, and O
+        0x1c: values.Register("PC").as_value(),
+        0x1d: values.Register("O").as_value(),
+        # value for SP
+        0x1b: SP.as_value(),
+        # PEEK is just a register pointer to SP
+        0x19: SP.as_pointer(),
+        # PUSH and POP
+        0x18: values.POP, 0x1a: values.PUSH,
+    }
+    
+    # add Box classes for all the registers
+    for n, r in zip(xrange(0x08), ["A", "B", "C", "X", "Y", "Z", "I", "J"]):
+        register = values.Register(r)
+        self.values[n] = register.as_value()
+        # add register pointers
+        self.values[n + 0x08] = register.as_pointer()
+        # add [register + next word]s
+        self.values[n + 0x10] = register.and_next_word()
+
+    # add setters and getters for the short literals
+    for n in xrange(0x20, 0x40):
+        self.values[n] = values.ShortLiteral(n - 0x20)
 
     def __init__(self):
         # initialize RAM with empty words. None will be treated as empty 0000
@@ -34,49 +63,15 @@ class DCPU16(object):
         # copy my own `registers` dict.
         self.registers = self._registers.copy()
 
-        SP = values.Register("SP")
-
-        # this is a dictionary of value codes to classes that inherit from Box.
-        # each of these classes get instantiated with this CPU and then have
-        # .get and .set methods.
-        self.values = { 0x1e: values.NextWordAsPointer, 0x1f: values.NextWord,
-            # values for PC, and O
-            0x1c: values.Register("PC").as_value(),
-            0x1d: values.Register("O").as_value(),
-            # value for SP
-            0x1b: SP.as_value(),
-            # PEEK is just a register pointer to SP
-            0x19: SP.as_pointer(),
-            # PUSH and POP
-            0x18: values.POP, 0x1a: values.PUSH,
-        }
-        
-        # add Box classes for all the registers
-        for n, r in zip(xrange(0x08), ["A", "B", "C", "X", "Y", "Z", "I", "J"]):
-            register = values.Register(r)
-            self.values[n] = register.as_value()
-            # add register pointers
-            self.values[n + 0x08] = register.as_pointer()
-            # add [register + next word]s
-            self.values[n + 0x10] = register.and_next_word()
-
-        # add setters and getters for the short literals
-        for n in xrange(0x20, 0x40):
-            self.values[n] = values.ShortLiteral(n - 0x20)
-
     def __getitem__(self, n):
         "Get the word at a given address."
-        return self.RAM[n] or 0x0000
+        return self.RAM[n]
 
     def __setitem__(self, n, value):
         "Set the word at a given address to a hex value."
         # if we go over the limit, make it 0
         self.RAM[n] = value
 
-    def dump(self):
-        "Return a friendly dump of the RAM."
-        return self.RAM
-    
     def parse_instruction(self, word):
         o, a_code, b_code = as_opcode(word)
         # if this is a special opcode...
