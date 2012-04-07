@@ -88,14 +88,14 @@ class DCPU16(object):
             name = self.special_opcodes[a_code]
             getattr(self, name)(a)
             # return the name and the arguments
-            return name, a
+            return name, (a,)
         else:
             a = self.values[a_code](self)
             b = self.values[b_code](self)
             name = self.opcodes[o]
             getattr(self, name)(a, b)
             # return the name of the operation and the arguments
-            return name, a, b
+            return name, (a, b)
 
     def get_next(self):
         "Increment the program counter and return its value."
