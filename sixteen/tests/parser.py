@@ -153,3 +153,12 @@ class TestParser(unittest.TestCase):
         self.assertParses("SET PC, :label", (0x1, 0x1c, 0x1f, ":label", None))
         self.assertParses("SET A, :label", (0x1, 0x00, 0x1f, ":label", None))
 
+    def test_parse_text(self):
+        lines = """
+                SET A, 0x30        ; 
+                SET [0x1000], 0x20 ; wooh , comment
+                SUB A, [0x1000]
+                IFN A, 0x10
+        """.split("\n")
+        self.assertEqual(self.parser.parse_iterable(lines), [0x7c01, 0x0030,
+            0x7de1, 0x1000, 0x0020, 0x7803, 0x1000, 0xc00d])
