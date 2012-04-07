@@ -110,6 +110,9 @@ class TestParser(unittest.TestCase):
         self.assertParses("SUB A, [0x1000]", (0x3, 0x0, 0x1e, 0x1000, None))
         self.assertParses("IFN A, 0x10", (0xd, 0x0, 0x30, None, None))
 
+    def test_nonbasic_instruction(self):
+        self.assertParses("JSR, 0x0002", (0x0, 0x01, 0x22, None, None))
+
     def test_comments(self):
         self.assertParses("SET I, 10; comment", (0x1, 0x06, 0x2a, None, None))
         self.assertParses("SET I, 10;comment", (0x1, 0x06, 0x2a, None, None))
