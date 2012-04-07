@@ -42,6 +42,17 @@ A: 0010 C: 0000 B: 0000 I: 0000 J: 0000 O: 0000 PC: 0009 SP: ffff Y: 0000 X: 000
 >> quit
 ````
 
+## a disassembler
+
+run it like this:
+
+````sh
+sixteen-dis examples/quick_example.bin
+````
+
+Like sixteen-debug, you can run it with `--little` or `--hex`.
+
+
 ## installation
 
 If you have pip, you can install it like this:
@@ -53,5 +64,4 @@ pip install git+git://github.com/startling/sixteen.git
 ## Next Up
 
 * Memory-Mapping, and a subclass of DCPU16 with memory-mapped output.
-* A disassembler
 * An assembler?
