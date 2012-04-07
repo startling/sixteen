@@ -40,8 +40,11 @@ class Parser(object):
             if m:
                 return method(self, *m.groups())
         else:
-            # oh no, nothing matched.
-            return False
+            raise ParserError(token)
+
+
+class ParserError(Exception):
+    "Oh no, we don't know how to parse this thing."
 
 
 class AssemblyParser(Parser):
