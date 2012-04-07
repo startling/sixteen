@@ -50,3 +50,9 @@ class TestParser(unittest.TestCase):
 
     def test_parse_O(self):
         self.assertParses("O", (0x1d, None))
+
+    def test_parse_next_word_pointer(self):
+        self.assertParses("[0x0000]", (0x1e, 0x0000)) 
+        self.assertParses("[0x0300]", (0x1e, 0x0300)) 
+        self.assertParses("[0xffff]", (0x1e, 0xffff)) 
+        self.assertParses("[0x03f0]", (0x1e, 0x03f0)) 
