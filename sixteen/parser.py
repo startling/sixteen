@@ -90,3 +90,7 @@ class AssemblyParser(Parser):
     @parse("O")
     def O(self):
         return 0x1d, None
+
+    @parse(r"\[([^+]+)\]")
+    def next_word_pointer(self, num):
+        return 0x1e, literal_eval(num)
