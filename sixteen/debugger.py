@@ -20,6 +20,8 @@ class Debugger(object):
 			"registers": self.registers,
 			"d": self.dump,
 			"dump": self.dump,
+			"dr": self.dump_range,
+			"dumprange": self.dump_range,
 		}
 
 	def format_output(fn):
@@ -51,6 +53,10 @@ class Debugger(object):
 	@format_output
 	def dump(self, address):
 		return self.cpu.RAM[int(address, base=16)]
+
+	@format_output
+	def dump_range(self, first, second):
+		return self.cpu.RAM[int(first, base=16):int(second, base=16) + 1]
 
 	@format_output
 	def registers(self, r=None):
