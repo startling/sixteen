@@ -101,3 +101,13 @@ class TestParser(unittest.TestCase):
 
     def test_parse_IFB(self):
         self.assertParses("IFB", 0xf)
+
+    def test_long_literals(self):
+        self.assertParses("0x30", (0x1f, 0x30))
+        self.assertParses("0b1111111", (0x1f, 127))
+        self.assertParses("317", (0x1f, 317))
+
+    def test_short_literals(self):
+        self.assertParses("0", (0x20, None))
+        self.assertParses("0x1f", (0x3f, None))
+        self.assertParses("0b11", (0x23, None))
