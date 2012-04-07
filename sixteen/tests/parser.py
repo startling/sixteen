@@ -112,6 +112,7 @@ class TestParser(unittest.TestCase):
 
     def test_nonbasic_instruction(self):
         self.assertParses("JSR, 0x0002", (0x0, 0x01, 0x22, None, None))
+        self.assertParses("JSR 0x0002", (0x0, 0x01, 0x22, None, None))
 
     def test_comments(self):
         self.assertParses("SET I, 10; comment", (0x1, 0x06, 0x2a, None, None))
