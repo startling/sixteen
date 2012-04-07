@@ -191,6 +191,16 @@ class AssemblyParser(Parser):
             return [word] + filtered[3:]
         else:
             return []
+    
+    def labelled_or_not_instruction(self, instruction):
+        """Extract a label definition from an instruction, if it's there;
+        return that (or None) and the newly-unlabeled instruction.
+        """
+        m = re.match(r"^\s*(:(\w+))?\s*(.+)$", instruction)
+        if m:
+            return m.group(2), m.group(3)
+        else:
+            return None, instruction
 
     def parse_iterable(self, iterable):
         "Given an iterable of assembly code, parse each line."
