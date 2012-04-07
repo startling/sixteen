@@ -106,6 +106,11 @@ class AssemblyParser(Parser):
         else:
             return 0x1f, num
 
+    @parse(r"^(:\S+)")
+    def label(self, l):
+        # labels get passed through, to be dealt with later.
+        return 0x1f, l
+
     @parse("^(%s)$" % "|".join(opcodes.keys()))
     def opcode(self, code):
         return self.opcodes[code]
