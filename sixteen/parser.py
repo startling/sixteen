@@ -109,3 +109,15 @@ class AssemblyParser(Parser):
     @parse("^(%s)$" % "|".join(opcodes.keys()))
     def opcode(self, code):
         return self.opcodes[code]
+
+    # ordinary instructions
+    @parse("\s*([^\[\] \t\n]+) (\S+?)\,? ([^; \t\n]+)\s*;?.*$")
+    def instruction(self, op, a, b):
+        # get the value codes and extra words for each argument
+        a, first_word = self.parse(a)
+        b, second_word = self.parse(b)
+        # filter out Nones
+        not_nones = tuple(n for n in (first_word, second_word) if n != None)
+        # and then put them back at the end
+        nones = tuple(None for _ in range(2 - len(not_nones)))
+        return (self.parse(op), a, b) + not_nones + nones
