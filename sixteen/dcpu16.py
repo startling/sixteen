@@ -150,7 +150,7 @@ class DCPU16(object):
                 # compute the length of the next word's values.
                 length = self.values[n_a].consumes + self.values[n_b].consumes
                 # jump ahead that many words.
-                self.registers["PC"] += 1 + n_l
+                self.registers["PC"] += 1 + length
         return op
 
     @IF_X
