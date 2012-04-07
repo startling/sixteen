@@ -69,6 +69,7 @@ class AssemblyParser(Parser):
     
     cpu = DCPU16
     opcodes = dict((v, k) for k, v in cpu.opcodes.iteritems())
+    special_opcodes = dict((v, k) for k, v in cpu.special_opcodes.iteritems())
 
     registers = ["A", "B", "C", "X", "Y", "Z", "I", "J"]
     rs = r"([a-cx-zijA-CX-ZIJ]{1})"
@@ -161,6 +162,11 @@ class AssemblyParser(Parser):
         nones = tuple(None for _ in range(2 - len(not_nones)))
         return (self.parse(op), a, b) + not_nones + nones
 
+    # special instructions
+    @parse("^([^\[\] \t\n,]+),? (\S+?)$")
+    def nonbasic_instructions(self, op, a):
+        a, first_word = self.parse(a)
+        return (0x0, self.special_opcodes[op], a, first_word, None)
 
     def parse_to_ints(self, line):
         parsed = self.parse(line)
