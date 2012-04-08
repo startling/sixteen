@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import argparse
+import sys
+from sixteen.parser import AssemblyParser
+from sixteen.utilities import HexRead
+
+
+parser = argparse.ArgumentParser(
+	description='Assemble a DCPU-16 binary.'
+)
+
+parser.add_argument('--hex', dest="bin", action='store_false', 
+	help="Denote that this file should be saved as an ASCII hex dump. "
+	"(Default: binary)"
+)
+
+parser.add_argument('--little', '-l', dest="big_endian", action='store_false', 
+	help="Denote that this file should be saved as little-endian. "
+	"(Default: big-endian).",
+)
+
+parser.add_argument('input',
+	help="The source file to assemble."
+)
+
+parser.add_argument('output', nargs="?",
+	help="File to output to; defaults to stdout."
+)
+
+args = parser.parse_args()
+
+
+# initialize an AssemblyParser
+a = AssemblyParser()
+
+
+# open the given file and read it as an iterable
+with open(args.input, "r") as f:
+    # read the code into a file.
+    code = a.parse_iterable(f)
+
+
+# open the output file
+if args.output == None:
+    out = sys.stdout
+else:
+    out = open(args.output, "w")
+
+
+for n, c in enumerate(code):
+    if args.bin:
+        # to get the top, shift right a byte
+        top = c >> 8
+        # to get the bottom, mask away the top
+        bottom = c & 0x00ff
+        # if it's big-endian, write the top byte first
+        # otherwise, write the bottom first.
+        if args.big_endian:
+            out.write(chr(top) + chr(bottom))
+        else:
+            out.write(chr(bottom) + chr(top))
+    else:
+        out.write("%04x " % c)
+        # since this is an ascii hex dump, print a newline
+        # after every eight.
+        if (n + 1) % 8 == 0:
+            out.write("\n")
+
+# if this *is* a hex dump, write a newline.
+if not args.bin:
+    out.write("\n")
