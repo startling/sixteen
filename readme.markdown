@@ -46,6 +46,40 @@ A: 0010 C: 0000 B: 0000 I: 0000 J: 0000 O: 0000 PC: 0009 SP: ffff Y: 0000 X: 000
 >> quit
 ````
 
+## sixteen-curses
+
+This uses the DCPU16 vm and memory-mapped output with curses. The spec is kind of fuzzy at the moment; colors, for example, were deliberately excluded.
+
+run it like this:
+
+````sh
+sixteen-curses --hex examples/vram.hex
+````
+
+When you're satisfied, `ctrl-c` quits and dumps all of the registers. It takes the `--hex` and `--litle` options, just like everything else, and a bunch of other things besides.
+
+Here's the complete `--help`:
+
+````
+usage: sixteen-curses [-h] [--little] [--hex] [--step] [--quit] [--no-dump]
+                      file
+
+Run a DCPU-16 binary, using curses to display output.
+
+positional arguments:
+  file          The binary file to step through.
+
+optional arguments:
+  -h, --help    show this help message and exit
+  --little, -l  Denote that this file should be parsed as little-endian.
+                (Default: big-endian).
+  --hex         Denote that this file should be parsed as an ASCII hex dump.
+                (Default: binary)
+  --step        Wait for a keypress after every instruction.
+  --quit        Run until you press q.
+  --no-dump     Don't dump the registers afterwards.
+````
+
 ## an assembler!
 
 run it like this:
