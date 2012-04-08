@@ -172,7 +172,7 @@ class AssemblyParser(Parser):
         return self.special_opcodes[op.upper()]
 
     # ordinary instructions
-    @parse("^(\S+) (\S+?)\,? (\S+)$")
+    @parse("^(\S+) ([^,]+)\,? (.+)$")
     def instruction(self, op, a, b):
         # get the value codes and extra words for each argument
         a, first_word = self.values.parse(a)
@@ -184,7 +184,7 @@ class AssemblyParser(Parser):
         return (self.opcode(op), a, b) + not_nones + nones
 
     # special instructions
-    @parse("^(\S+?),? (\S+?)$")
+    @parse("^(\S+?),? (\S+)$")
     def nonbasic_instructions(self, op, a):
         a, first_word = self.values.parse(a)
         return (0x0, self.special_opcode(op), a, first_word, None)
