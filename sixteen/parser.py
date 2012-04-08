@@ -77,6 +77,10 @@ class ValueParser(Parser):
     registers = ["A", "B", "C", "X", "Y", "Z", "I", "J"]
     rs = r"([a-cx-zijA-CX-ZIJ]{1})"
 
+    def __init__(self):
+        # a set to store all the labels we've seen
+        self.labels = set()
+
     # values: all values return their value code and None or their next word
     @parse(r"^%s$" % rs)
     def register(self, name):
@@ -136,6 +140,7 @@ class ValueParser(Parser):
 
     @parse(r"^([a-z]+)$")
     def label(self, l):
+        self.labels.add(l)
         # labels get passed through, to be dealt with later.
         return 0x1f, l
 
@@ -227,6 +232,12 @@ class AssemblyParser(Parser):
             if label != None:
                 labels[label] = len(code)
             code.extend(self.parse_to_ints(instruction))
+        # get all the labels that the value parser has seen but that aren't
+        # defined in the code.
+        undefined_labels = [l for l in self.values.labels if l not in labels]
+        # if there are any, raise an error.
+        if len(undefined_labels) > 0:
+            raise LabelError(undefined_labels)
         # and then pass through the code again, replacing labels with addresses
         final = []
         for word in code:
@@ -236,5 +247,14 @@ class AssemblyParser(Parser):
             else:
                 final.append(gotten)
         #TODO: short labels
-        #TODO: error for unknown labels
         return final
+
+class LabelError(Exception):
+    def __init__(self, values):
+        self.values = values
+
+    def __str__(self):
+        if len(self.values) == 1:
+            return "%r is an undefined label." % self.values[0]
+        else:
+            return "%s are undefined labels." % ", ".join(self.values)
