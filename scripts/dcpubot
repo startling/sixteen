@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# adapted from http://www.habnabit.org/twistedex.html
+# thanks, habnabit
+
+import sys
+import argparse
+from twisted.internet import reactor, protocol
+from twisted.words.protocols import irc
+from twisted.python import log
+from twisted.words.protocols import irc
+from twisted.application import internet, service
+from sixteen.parser import AssemblyParser, ParserError, LabelError
+from sixteen.dcpu16 import DCPU16
+from sixteen.utilities import OpcodeError
+
+
+# argument parsin' stuff
+parser = argparse.ArgumentParser(
+	description='An irc bot that assembles and evaluates DCPU16 assembly.'
+)
+
+parser.add_argument("URL", help="The hostname for the irc server.")
+parser.add_argument("channel", help="The irc channel to connect to.")
+parser.add_argument("port", help="The port to connect to. (default: 6667)",
+        type=int, default=6667, nargs="?")
+
+args = parser.parse_args()
+
+
+class DCPUBot(irc.IRCClient):
+    "An irc bot that assembles and evaluates DCPU16 assembly."
+    nickname = "dcpubot"
+
+    # the amount of cycles to run each command for
+    cycle_limit = 10
+    
+    def signedOn(self):
+        for channel in self.factory.channels:
+            self.join(channel)
+
+    def privmsg(self, user, channel, msg):
+        user = user.split("!", 1)[0]
+        # if we get a message that starts with "dcpubot:"...
+        if msg.startswith(self.nickname + ":"):
+            # split the given code at "/"
+            lines = msg.replace(self.nickname + ":", "").split("/")
+            # initialize an AssemblyParser
+            asm = AssemblyParser()
+            try:
+                # try assembling the code
+                code = asm.parse_iterable(lines)
+                # read the code to a vm's cpu
+                cpu = DCPU16()
+                cpu.RAM[:len(code)] = code
+                cycle_count = 0
+                # run for a maximum of self.cycle_limit times
+                for _ in xrange(self.cycle_limit):
+                    try:
+                        op, args = cpu.cycle()
+                        # and then add to the cycle_count
+                        cycle_count += 1 + sum(x.consumes for x in args)
+                    # if there's an illegal opcode (probably 0x0000), stop.
+                    except OpcodeError as k:
+                        break
+                # nicely format the code and the registers
+                assembled = " ".join(["%04x" % c for c in code])
+                formatted = ["%s: %04x" % (k, v) for k, v in
+                        cpu.registers.items() if v != 0]
+                # message back the code, the registers, and the cycle count
+                self.msg(channel, "%s: %s -> %s (%d)" % (user, assembled,
+                    " ".join(formatted), cycle_count))
+            except ParserError as e:
+                self.msg(channel, "%s: parse error: %s" % (user, e))
+            except OpcodeError as k:
+                self.msg(channel, "%s: opcode error: %s" % (user, k))
+            except LabelError as l:
+                self.msg(channel, "%s: label error: %s" % (user, l))
+
+
+class BotFactory(protocol.ClientFactory):
+    protocol = DCPUBot
+    channels = [args.channel]
+
+
+reactor.connectTCP(args.URL, args.port, BotFactory())
+log.startLogging(sys.stdout)
+reactor.run()
