@@ -14,6 +14,10 @@ class TestMemoryMap(unittest.TestCase):
         self.memory[5] = 23
         self.assertEquals(self.memory[5], 23)
 
+    def test_negative_access(self):
+        self.memory[-5] = 30
+        self.assertEquals(self.memory[15], 30)
+
     def test_out_of_bounds(self):
         self.assertRaises(IndexError, lambda: self.memory[25])
         self.assertRaises(IndexError, lambda: self.memory[-25])
