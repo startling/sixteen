@@ -123,10 +123,12 @@ class ValueParser(Parser):
         return 0x1e, literal_eval(num)
 
     @parse(r"^(0x[0-9a-fA-F]+|0b[01]+|0o[0-7]+|[0-9]+)$")
-    def literal(self, num):
+    def literal(self, n):
         #TODO: negative literals
-        num = literal_eval(num)
-        if num <= 0x1f:
+        num = literal_eval(n)
+        if num > 0xffff:
+            raise ParserError(n)
+        elif num <= 0x1f:
             return 0x20 + num, None
         else:
             return 0x1f, num
