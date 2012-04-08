@@ -18,17 +18,27 @@ class MemoryMap(object):
         self._map = [initial] * number
 
     def __setitem__(self, n, value):
-        # make sure that n is in bounds
-        if n >= self.number or n < - self.number:
-            raise IndexError("list index out of range")
-        elif n < 0:
-            n = self.number + n
-        self._map[n] = value
-        # check each callback
-        for (start, end), callback in self.callbacks:
-            # if it's within the bounds, call the callback
-            if n >= start and n <= end:
-                callback(n, value)
+        # if this is a slice object
+        if isinstance(n, slice):
+            # remove the Nones in the slice
+            args = [r for r in (n.start, n.stop, n.step) if r != None]
+            # and then call range with the slice's arguments.
+            for x, v in zip(range(*args), value):
+                # set each thing in the range to the corresponding thing in the
+                # values.
+                self[x] = v
+        else:
+            # make sure that n is in bounds
+            if n >= self.number or n < - self.number:
+                raise IndexError("list index out of range")
+            elif n < 0:
+                n = self.number + n
+            self._map[n] = value
+            # check each callback
+            for (start, end), callback in self.callbacks:
+                # if it's within the bounds, call the callback
+                if n >= start and n <= end:
+                    callback(n, value)
 
     def __getitem__(self, n):
         return self._map[n]
