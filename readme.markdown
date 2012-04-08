@@ -46,6 +46,23 @@ A: 0010 C: 0000 B: 0000 I: 0000 J: 0000 O: 0000 PC: 0009 SP: ffff Y: 0000 X: 000
 >> quit
 ````
 
+## an assembler!
+
+run it like this:
+
+````sh
+sixteen-asm examples/quick_example.hex
+````
+
+It can take `--hex` (to output an ASCII hex dump) and `--little` (to output little-endian binary), too.
+
+It supports most things; the only things that it doesn't support are:
+
+* data
+* short literal labels
+
+Aditionally, I want to do something more with debugging symbols. Watch this space.
+
 ## a disassembler
 
 run it like this:
@@ -68,4 +85,3 @@ pip install git+git://github.com/startling/sixteen.git
 ## Next Up
 
 * Memory-Mapping, and a subclass of DCPU16 with memory-mapped output.
-* An assembler?
