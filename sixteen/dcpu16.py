@@ -99,7 +99,10 @@ class DCPU16(object):
     def get_next(self):
         "Increment the program counter and return its value."
         v = self.RAM[self.registers["PC"]]
-        self.registers["PC"] += 1
+        if self.registers["PC"] < len(self.RAM) - 1:
+            self.registers["PC"] += 1
+        else:
+            self.registers["PC"] = 0x0000
         return v
     
     # opcodes:
