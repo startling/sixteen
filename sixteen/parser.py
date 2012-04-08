@@ -102,7 +102,7 @@ class ValueParser(Parser):
         return 0x19, None
 
     @parse(r"\[--SP\]|PUSH")
-    def POP(self):
+    def PUSH(self):
         return 0x1a, None
 
     @parse("SP")
