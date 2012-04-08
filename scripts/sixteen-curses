@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys
+import argparse
+from sixteen.utilities import HexRead, file_to_ram, OpcodeError
+from sixteen.curses_display import Curses, TerminalCPU
+
+
+parser = argparse.ArgumentParser(
+	description='Run a DCPU-16 binary, using curses to display output.'
+)
+
+parser.add_argument('--little', '-l', dest="big_endian", action='store_false', 
+	help="Denote that this file should be parsed as little-endian. "
+	"(Default: big-endian).",
+)
+
+parser.add_argument('--hex', dest="bin", action='store_false', 
+	help="Denote that this file should be parsed as an ASCII hex dump. "
+	"(Default: binary)"
+)
+
+parser.add_argument('--step', action='store_true', 
+	help="Wait for a keypress after every instruction."
+)
+
+parser.add_argument('--quit', action='store_true',
+    help="Run until you press q.")
+
+parser.add_argument('file',
+	help="The binary file to step through."
+)
+
+parser.add_argument('--no-dump', dest="dump", action="store_false",
+    help="Don't dump the registers afterwards."
+)
+
+args = parser.parse_args()
+
+
+# open the file from the command-line, if it's supposed to be a bin
+if args.bin:
+	f = open(args.file)
+else:
+	f = HexRead(args.file)
+
+
+try:
+    with Curses() as c:
+        if args.quit:
+            c.nodelay(1)
+        # initialize a CPU
+        t = TerminalCPU(c)
+        # read the file to its RAM
+        file_to_ram(f, t)
+        while True:
+            try:
+                t.cycle()
+                c.refresh()
+                # wait for input after, if we're supposed to.
+                if args.step:
+                    c.getch()
+                if args.quit:
+                    # get (non-blocking) keypress, check if it's "q"
+                    key = c.getch()
+                    if key != -1 and chr(key) == "q":
+                        break
+            # break if we get an OpcodeError, probably 0x0000
+            except OpcodeError:
+                break
+        # if this wasn't in --quit mode
+        if not args.quit:
+            # and then pause
+            c.getch()
+# if there's a ctrl-c, ignore it but break out of the loop.
+except KeyboardInterrupt:
+    pass
+
+
+if args.dump:
+    print  ", ".join("%s: %04x" % rs for rs in t.registers.items())
