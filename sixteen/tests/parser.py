@@ -139,6 +139,14 @@ class TestParseInstructions(unittest.TestCase):
         self.assertParses("SUB A, [0x1000]", (0x3, 0x0, 0x1e, 0x1000, None))
         self.assertParses("IFN A, 0x10", (0xd, 0x0, 0x30, None, None))
 
+    def test_spaces_in_brackets(self):
+        a = self.parser.parse("SET A, [0x30+A]")
+        b = self.parser.parse("SET A, [0x30 + A]")
+        self.assertEquals(a, b)
+        c = self.parser.parse("SET [0x30+A], A")
+        d = self.parser.parse("SET [0x30 + A], A")
+        self.assertEquals(c, d)
+
     def test_nonbasic_instruction(self):
         self.assertParses("JSR, 0x0002", (0x0, 0x01, 0x22, None, None))
         self.assertParses("JSR 0x0002", (0x0, 0x01, 0x22, None, None))
