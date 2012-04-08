@@ -141,6 +141,8 @@ If you have pip, you can install it like this:
 pip install git+git://github.com/startling/sixteen.git
 ````
 
-## Next Up
+## up next:
 
-* Memory-Mapping, and a subclass of DCPU16 with memory-mapped output.
+* fix some quirks in the assembly parser
+* a web frontend for local and remote use
+* memory-mapped input, in preparation for the input specs.
