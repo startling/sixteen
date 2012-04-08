@@ -122,10 +122,11 @@ class ValueParser(Parser):
     def next_word_pointer(self, num):
         return 0x1e, literal_eval(num)
 
-    @parse(r"^(0x[0-9a-fA-F]+|0b[01]+|0o[0-7]+|[0-9]+)$")
-    def literal(self, n):
-        #TODO: negative literals
+    @parse(r"^([-+]?)(0x[0-9a-fA-F]+|0b[01]+|0o[0-7]+|[0-9]+)$")
+    def literal(self, sign, n):
         num = literal_eval(n)
+        if sign == "-" and num != 0:
+            num = 0x10000 - num
         if num > 0xffff:
             raise ParserError(n)
         elif num <= 0x1f:
