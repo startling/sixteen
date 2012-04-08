@@ -10,8 +10,8 @@ class MemoryMap(object):
         "callbacks" should be a list like this: [
             ((0, 10), call)
         ], where "call" is a function that gets called whenever a value stored
-        at 0-10 gets changed. The callback gets called with the changed value
-        as its single argument.
+        at 0-10 gets changed. The callback gets called with the changed value's
+        index and the new value as its arguments.
         """
         self.callbacks = callbacks
         self.number = number
@@ -28,7 +28,7 @@ class MemoryMap(object):
         for (start, end), callback in self.callbacks:
             # if it's within the bounds, call the callback
             if n >= start and n <= end:
-                callback(n)
+                callback(n, value)
 
     def __getitem__(self, n):
         return self._map[n]
