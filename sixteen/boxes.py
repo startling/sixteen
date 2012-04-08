@@ -168,7 +168,7 @@ class POP(Box):
         self.value = self.container[self.key]
         cpu.registers["SP"] += 1
         # handle overflow
-        if cpu.registers["SP"] == len(cpu.RAM) - 1:
+        if cpu.registers["SP"] > len(cpu.RAM) - 1:
             cpu.registers["SP"] = 0x0000
         # AMBIGUITY: does SET POP, A set to the place where the popped value
         # came from, or the new place where SP points?
