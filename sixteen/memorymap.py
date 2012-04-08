@@ -22,7 +22,7 @@ class MemoryMap(object):
         if n >= self.number or n < - self.number:
             raise IndexError("list index out of range")
         elif n < 0:
-            n = self.number - n
+            n = self.number + n
         self._map[n] = value
         # check each callback
         for (start, end), callback in self.callbacks:
