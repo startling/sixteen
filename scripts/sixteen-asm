@@ -21,8 +21,8 @@ parser.add_argument('--little', '-l', dest="big_endian", action='store_false',
 	"(Default: big-endian).",
 )
 
-parser.add_argument('input',
-	help="The source file to assemble."
+parser.add_argument('input', nargs="?",
+	help="The source file to assemble; defaults to STDIN."
 )
 
 parser.add_argument('output', nargs="?",
@@ -37,9 +37,16 @@ a = AssemblyParser()
 
 
 # open the given file and read it as an iterable
-with open(args.input, "r") as f:
-    # read the code into a file.
-    code = a.parse_iterable(f)
+if args.input == None:
+    in_file = sys.stdin
+else:
+    in_file = open(args.input, "r")
+
+# read the code into a file.
+code = a.parse_iterable(in_file)
+
+# and close it.
+in_file.close()
 
 
 # open the output file
@@ -71,3 +78,7 @@ for n, c in enumerate(code):
 # if this *is* a hex dump, write a newline.
 if not args.bin:
     out.write("\n")
+
+
+# and close the output file
+out.close()
