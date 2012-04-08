@@ -146,7 +146,8 @@ class AssemblyParser(Parser):
 
     @preprocess
     def comments(self, inp):
-        return re.sub(r";.*", "", inp)
+        "Remove comments and the whitespace up to them."
+        return re.sub(r"\s*;.*", "", inp)
      
     @preprocess
     def whitespace(self, inp):
