@@ -324,6 +324,7 @@ class TestDCPU16(unittest.TestCase):
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["A"], 0xdecaf)
 
+
     def test_mod(self):
         self.cpu[:4] = [
             # set A to 0x000c
@@ -408,3 +409,20 @@ class TestDCPU16(unittest.TestCase):
         # make sure the PC goes back to 0x0002
         self.cpu.cycle()
         self.assertEquals(self.cpu.registers["PC"], 0x0002)
+
+    def test_pc_overflow(self):
+        self.cpu[:3] = [
+            # add 2 to A
+            0x8802, 
+            # set PC, 0xffff
+            0x7dc1, 0xffff
+        ]
+        # SET PC, PC -- a no-op.
+        self.cpu.RAM[0xffff] = 0x71c1
+        self.cpu
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEquals(self.cpu.registers["PC"], 0xffff)
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.assertEqual(self.cpu.registers["A"], 0x0004)
