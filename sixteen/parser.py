@@ -99,27 +99,27 @@ class ValueParser(Parser):
         return code, literal_eval(num)
 
     #TODO: case-insensitive for all of these
-    @parse(r"\[SP\+\+\]|POP")
+    @parse(r"\[SP\+\+\]|POP|pop|\[sp\+\+\]")
     def POP(self):
         return 0x18, None
 
-    @parse(r"\[SP\]|PEEK")
+    @parse(r"\[SP\]|PEEK|\[sp\]|peek")
     def PEEK(self):
         return 0x19, None
 
-    @parse(r"\[--SP\]|PUSH")
+    @parse(r"\[--SP\]|PUSH|\[--sp\]|push")
     def PUSH(self):
         return 0x1a, None
 
-    @parse("SP")
+    @parse("SP|sp")
     def SP(self):
         return 0x1b, None
 
-    @parse("PC")
+    @parse("PC|pc")
     def PC(self):
         return 0x1c, None
 
-    @parse("O")
+    @parse("O|o")
     def O(self):
         return 0x1d, None
 
@@ -225,9 +225,9 @@ class AssemblyParser(Parser):
         """Extract a label definition from an instruction, if it's there;
         return that (or None) and the newly-unlabeled instruction.
         """
-        m = re.match(r"^\s*(:(\w+))?\s*(.+)$", instruction)
+        m = re.match(r"^\s*(:(\w+))?\s*(.*)$", instruction)
         if m:
-            return m.group(2), m.group(3)
+            return m.group(2), m.group(3) or None
         else:
             return None, instruction
 
@@ -240,7 +240,8 @@ class AssemblyParser(Parser):
             # if we got a label, remember that label and the address
             if label != None:
                 labels[label] = len(code)
-            code.extend(self.parse_to_ints(instruction))
+            if instruction != None:
+                code.extend(self.parse_to_ints(instruction))
         # get all the labels that the value parser has seen but that aren't
         # defined in the code.
         undefined_labels = [l for l in self.values.labels if l not in labels]
