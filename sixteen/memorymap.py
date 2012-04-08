@@ -37,7 +37,7 @@ class MemoryMap(object):
             # check each callback
             for (start, end), callback in self.callbacks:
                 # if it's within the bounds, call the callback
-                if n >= start and n <= end:
+                if n >= start and n < end:
                     callback(n, value)
 
     def __getitem__(self, n):
