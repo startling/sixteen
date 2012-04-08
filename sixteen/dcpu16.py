@@ -7,6 +7,9 @@ from functools import wraps
 
 
 class DCPU16(object):
+    # DCPU16 has 0x10000 cells
+    cells = 0x10000
+
     opcodes = {
         0x00: "SPEC",
         0x01: "SET", 0x02: "ADD", 0x03: "SUB", 0x04: "MUL", 0x05: "DIV",
@@ -58,10 +61,8 @@ class DCPU16(object):
         values[n] = boxes.ShortLiteral(n - 0x20)
 
     def __init__(self):
-        # initialize RAM with empty words. None will be treated as empty 0000
-        # words everywhere, because having 0x10000 Words around is expensive
-        # right now.
-        self.RAM = [0x0000] * 0x10000
+        # initialize RAM with empty words.
+        self.RAM = [0x0000] * self.cells
         # copy my own `registers` dict.
         self.registers = self._registers.copy()
 
