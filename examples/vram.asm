@@ -10,3 +10,5 @@ set [0x8007], 111
 set [0x8008], 114
 set [0x8009], 108
 set [0x800a], 100
+
+:loop set PC, loop
