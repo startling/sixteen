@@ -74,6 +74,31 @@ sixteen-dis examples/quick_example.bin
 Like sixteen-debug, you can run it with `--little` or `--hex`.
 
 
+## dcpubot
+
+This is an irc bot that assembles and runs (a subset of) dcpu-16 assembly. Run it like this:
+
+````sh
+dcpubot irc.example.com "#channel"
+````
+
+When you're in the same channel as it, you can issue it commands like so:
+
+````
+03:08 < startling> dcpubot: set a, 0xbeef / set b, 0xabcd / set c, 0xdeed
+````
+
+And it'll reply with something like...
+
+````
+03:08 < dcpubot> startling: 7c01 beef 7c11 abcd 7c21 deed -> A: beef C: deed B: abcd PC: 0007 (6)
+````
+
+That is, a hex dump of the assembled code, a dump of all the non-zero registers, and a word count.
+
+He hangs out on #0x10c-dev, so be sure to stop by and say hi.
+
+
 ## installation
 
 If you have pip, you can install it like this:
