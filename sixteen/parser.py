@@ -93,6 +93,7 @@ class ValueParser(Parser):
         code = 0x10 + self.registers.index(reg.upper())
         return code, literal_eval(num)
 
+    #TODO: case-insensitive for all of these
     @parse(r"\[SP\+\+\]|POP")
     def POP(self):
         return 0x18, None
@@ -123,6 +124,7 @@ class ValueParser(Parser):
 
     @parse(r"^(0x[0-9a-fA-F]+|0b[01]+|0o[0-7]+|[0-9]+)$")
     def literal(self, num):
+        #TODO: negative literals
         num = literal_eval(num)
         if num <= 0x1f:
             return 0x20 + num, None
@@ -231,4 +233,5 @@ class AssemblyParser(Parser):
             else:
                 final.append(gotten)
         #TODO: short labels
+        #TODO: error for unknown labels
         return final
