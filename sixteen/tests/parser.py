@@ -147,6 +147,11 @@ class TestParseInstructions(unittest.TestCase):
         d = self.parser.parse("SET [0x30 + A], A")
         self.assertEquals(c, d)
 
+    def test_spaces_in_brackets_nonbasic(self):
+        a = self.parser.parse("JSR [0x30+A]")
+        b = self.parser.parse("JSR [0x30 + A]")
+        self.assertEquals(a, b)
+
     def test_nonbasic_instruction(self):
         self.assertParses("JSR, 0x0002", (0x0, 0x01, 0x22, None, None))
         self.assertParses("JSR 0x0002", (0x0, 0x01, 0x22, None, None))
