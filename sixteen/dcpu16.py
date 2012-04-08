@@ -22,7 +22,7 @@ class DCPU16(object):
         "A": 0x0000, "B": 0x0000, "C": 0x0000, "X": 0x0000, "Y": 0x0000,
         "Z": 0x0000, "I": 0x0000, "J": 0x0000,
         # special registers
-        "PC": 0x000, "SP": 0xffff, "O": 0x0000,
+        "PC": 0x000, "SP": 0x0000, "O": 0x0000,
     }
     
     SP = boxes.Register("SP")
