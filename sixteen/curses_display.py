@@ -42,3 +42,32 @@ class Curses(object):
     def __getattr__(self, name):
         "If this object doesn't have a thing, check the screen too."
         return getattr(self.screen, name)
+
+
+class TerminalCPU(DCPU16):
+    # speculative: vram starts at 0x8000 and ends at 0x8180
+    vram = (0x8000, 0x8180)
+    # speculative: height, width of the display
+    height, width = (12, 32)
+
+    def __init__(self, c):
+        """Given a curses window, initialize a cpu with memory-mapped output to
+        that window.
+        """
+        self.window = c
+        self.RAM = MemoryMap(self.cells, [(self.vram, self.curses_write)])
+        # copy my own `registers` dict.
+        self.registers = self._registers.copy()
+
+    def curses_write(self, position, value):
+        "This gets called whenever a cell within the vram is changed."
+        # low seven bits is the character in ascii, so mask away all the rest
+        # the rest is unspec'd color data probably.
+        char = chr(value & 0b0000000001111111)
+        # subtract the lower bound of the vram the given position
+        offset = position - self.vram[0]
+        # calculate the x, y position.
+        x = offset % self.width
+        y = offset // self.width
+        # and then add the character
+        self.window.addch(y, x, value)
