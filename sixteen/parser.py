@@ -184,7 +184,11 @@ class AssemblyParser(Parser):
         return (self.opcode(op), a, b) + not_nones + nones
 
     # special instructions
-    @parse("^(\S+?),? (\S+)$")
+    # (that horrible regex for the second argument is to allow spaces only
+    # inside of brackets with a +; this way, things stay unambiguous between
+    # ordinary and non-basic instructions, yet there can still be spaces inside
+    # brackets.)
+    @parse("^(\S+?),? (\S+|\[\S+\s\+\s\S+\])$")
     def nonbasic_instructions(self, op, a):
         a, first_word = self.values.parse(a)
         return (0x0, self.special_opcode(op), a, first_word, None)
