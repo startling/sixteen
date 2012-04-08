@@ -50,3 +50,10 @@ def file_to_ram(f, cpu, bigendian=True, offset=0):
         # if there aren't two bytes, stop
         else:
             break
+
+class OpcodeError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return "%r is an unknown opcode." % self.value

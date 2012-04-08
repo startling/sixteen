@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.words import as_opcode, from_hex
+from sixteen.utilities import OpcodeError
 from sixteen import boxes
 from functools import wraps
 
@@ -79,13 +80,17 @@ class DCPU16(object):
         if o == 0x00:
             # arguments are switched for the special opcodes
             a = self.values[b_code](self)
-            name = self.special_opcodes[a_code]
+            name = self.special_opcodes.get(a_code)
+            if name == None:
+                raise OpcodeError(o)
             # return the name and the arguments
             return name, (a,)
         else:
             a = self.values[a_code](self)
             b = self.values[b_code](self)
-            name = self.opcodes[o]
+            name = self.opcodes.get(o)
+            if name == None:
+                raise OpcodeError(o)
             # return the name of the operation and the arguments
             return name, (a, b)
 
