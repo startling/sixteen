@@ -43,6 +43,9 @@ class MemoryMap(object):
     def __getitem__(self, n):
         return self._map[n]
 
+    def __len__(self):
+        return self.number
+
     def register(self, (start, end), callback):
         "Register a new callback."
         self.callbacks.append((start, end), callback)
