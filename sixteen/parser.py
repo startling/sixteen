@@ -3,6 +3,7 @@
 import re
 from sixteen.dcpu16 import DCPU16
 from sixteen.words import from_opcode
+from sixteen.utilities import OpcodeError
 from ast import literal_eval
 
 
@@ -175,11 +176,19 @@ class AssemblyParser(Parser):
 
     def opcode(self, op):
         "Look up an opcode."
-        return self.opcodes[op.upper()]
+        gotten = self.opcodes.get(op.upper())
+        if gotten == None:
+            raise OpcodeError(op)
+        else:
+            return gotten
 
     def special_opcode(self, op):
         "Look up a special opcode."
-        return self.special_opcodes[op.upper()]
+        gotten = self.special_opcodes.get(op.upper())
+        if gotten == None:
+            raise OpcodeError(op)
+        else:
+            return gotten
 
     # ordinary instructions
     @parse("^(\S+) ([^,]+)\,? (.+)$")
