@@ -35,7 +35,7 @@ class TestValues(unittest.TestCase):
         self.assertParses("POP", (0x18, None))
         self.assertParses("[SP++]", (0x18, None))
 
-    def test_parse_POP(self):
+    def test_parse_PEEK(self):
         self.assertParses("PEEK", (0x19, None))
         self.assertParses("[SP]", (0x19, None))
 
