@@ -32,3 +32,25 @@ class TestMemoryMap(unittest.TestCase):
         self.memory[:2] = [12, 13]
         self.assertEquals(self.memory[0], 12)
         self.assertEquals(self.memory[1], 13)
+
+
+class TestCallbacks(unittest.TestCase):
+    def setUp(self):
+        self.my_dict = {}
+        def listappend(n, v):
+            self.my_dict[n] = v
+        self.memory = MemoryMap(20, [((0, 16), listappend)])
+
+    def test_set(self):
+        self.memory[5] = 20
+        self.assertEquals(self.my_dict, {5: 20})
+
+    def test_set_negative(self):
+        self.memory[-5] = 20
+        self.assertEquals(self.my_dict, {15: 20})
+
+    def test_not_called(self):
+        self.memory[19] = 31
+        self.memory[-1] = 29
+        self.assertNotIn(19, self.my_dict.keys())
+        self.assertNotIn(-1, self.my_dict.keys())
