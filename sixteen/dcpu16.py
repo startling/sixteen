@@ -206,11 +206,12 @@ class DCPU16(object):
 
     def SHL(self, a, b):
         "0x7: SHL a, b - sets a to a<<b, sets O to ((a<<b)>>16)&0xffff."
-        total = a.get() << b.get()
+        a_r, b_r = a.get(), b.get()
+        total = a_r << b_r
         # mask away the high end for the actual value
         a.set(total & 0xffff)
         # shift away the low end for the overflow
-        self.registers["O"] = total >> 16
+        self.registers["O"] = ((a_r >> b_r ) >> 16) & 0xffff
 
     def SHR(self, a, b):
         "0x8: SHR a, b - sets a to a>>b, sets O to ((a<<16)>>b)&0xffff"
