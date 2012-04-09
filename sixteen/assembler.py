@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from sixteen.parser import Parser, Defer
+import re
 from ast import literal_eval
+from sixteen.words import from_opcode
+from sixteen.parser import Parser, Defer
+from sixteen.dcpu16 import DCPU16
 
 
 class ValueParser(Parser):
@@ -99,3 +102,88 @@ def label(self, l):
     self.labels.add(l)
     # labels get passed through, to be dealt with later.
     return 0x1f, l
+
+
+class AssemblyParser(Parser):
+    cpu = DCPU16
+    opcodes = dict((v, k) for k, v in cpu.opcodes.iteritems())
+    special_opcodes = dict((v, k) for k, v in cpu.special_opcodes.iteritems())
+
+    def __init__(self):
+        self.values = ValueParser()
+
+    def labelled_or_not_instruction(self, instruction):
+        """Extract a label definition from an instruction, if it's there;
+        return that (or None) and the newly-unlabeled instruction.
+        """
+        m = re.match(r"^\s*(:(\w+))?\s*(.*)$", instruction)
+        if m:
+            return m.group(2), m.group(3) or None
+        else:
+            return None, instruction
+
+    def opcode(self, op):
+        "Look up an opcode."
+        gotten = self.opcodes.get(op.upper())
+        if gotten == None:
+            raise Defer()
+        else:
+            return gotten
+
+    def special_opcode(self, op):
+        "Look up a special opcode."
+        gotten = self.special_opcodes.get(op.upper())
+        if gotten == None:
+            raise OpcodeError(op)
+        else:
+            return gotten
+
+    def parse_to_ints(self, line):
+        parsed = self.parse(line)
+        filtered = [p for p in parsed if p != None]
+        if len(filtered) >= 3:
+            word = from_opcode(*filtered[:3])
+            return [word] + filtered[3:]
+        else:
+            return []
+
+@AssemblyParser.preprocess
+def comments(self, inp):
+    "Remove comments and the whitespace up to them."
+    return re.sub(r"\s*;.*", "", inp)
+
+@AssemblyParser.preprocess
+def whitespace(self, inp):
+    "Any whitespace leading, trailing, or more than one is insignificant."
+    inp = re.sub(r"^\s+", "", inp)
+    inp = re.sub(r"\s+$", "", inp)
+    return re.sub(r"\s{2,}", " ", inp)
+
+
+@AssemblyParser.register(r"^\s*$")
+def ignore(self):
+    return None,
+
+
+# ordinary instructions
+@AssemblyParser.register("^(\S+) ([^,]+)\,? (.+)$")
+def instruction(self, op, a, b):
+    # get the value codes and extra words for each argument
+    a, first_word = self.values.parse(a)
+    b, second_word = self.values.parse(b)
+    # filter out Nones
+    not_nones = tuple(n for n in (first_word, second_word) if n != None)
+    # and then put them back at the end
+    nones = tuple(None for _ in range(2 - len(not_nones)))
+    return (self.opcode(op), a, b) + not_nones + nones
+
+# special instructions
+# (that horrible regex for the second argument is to allow spaces only
+# inside of brackets with a +; this way, things stay unambiguous between
+# ordinary and non-basic instructions, yet there can still be spaces inside
+# brackets.)
+@AssemblyParser.register("^(\S+?),? (\S+|\[\S+\s\+\s\S+\])$")
+def nonbasic_instructions(self, op, a):
+    a, first_word = self.values.parse(a)
+    return (0x0, self.special_opcode(op), a, first_word, None)
+
