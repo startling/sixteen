@@ -31,26 +31,66 @@ class TestValues(unittest.TestCase):
         self.assertParses("[0xffff + I]", (0x16, 0xffff)) 
         self.assertParses("[0x03f0 + J]", (0x17, 0x03f0)) 
 
+    def test_parse_lowercase_registers(self):
+        self.assertParses("a", (0x00, None))
+        self.assertParses("u", (0x01, None))
+        self.assertParses("y", (0x04, None))
+        self.assertParses("j", (0x07, None))
+
+    def test_parse_lowercase_register_pointers(self):
+        self.assertParses("[a]", (0x08, None))
+        self.assertParses("[b]", (0x09, None))
+        self.assertParses("[y]", (0x0c, None))
+        self.assertParses("[j]", (0x0f, None))
+
+    def test_parse_lowercase_next_word_plus_registers(self):
+        self.assertParses("[0x0000 + a]", (0x10, 0x0000)) 
+        self.assertParses("[0x0300 + b]", (0x11, 0x0300)) 
+        self.assertParses("[0xffff + i]", (0x16, 0xffff)) 
+        self.assertParses("[0x03f0 + j]", (0x17, 0x03f0)) 
+        self.assertParses("[0xffff + i]", (0x16, 0xffff)) 
+
     def test_parse_POP(self):
         self.assertParses("POP", (0x18, None))
         self.assertParses("[SP++]", (0x18, None))
+
+    def test_parse_POP_lowercase(self):
+        self.assertParses("pop", (0x18, None))
+        self.assertParses("[sp++]", (0x18, None))
 
     def test_parse_PEEK(self):
         self.assertParses("PEEK", (0x19, None))
         self.assertParses("[SP]", (0x19, None))
 
+    def test_parse_PEEK_lowercase(self):
+        self.assertParses("peek", (0x19, None))
+        self.assertParses("[sp]", (0x19, None))
+
     def test_parse_PUSH(self):
         self.assertParses("PUSH", (0x1a, None))
         self.assertParses("[--SP]", (0x1a, None))
 
+    def test_parse_PUSH_lowercase(self):
+        self.assertParses("push", (0x1a, None))
+        self.assertParses("[--sp]", (0x1a, None))
+
     def test_parse_SP(self):
         self.assertParses("SP", (0x1b, None))
+
+    def test_parse_SP_lowercase(self):
+        self.assertParses("sp", (0x1b, None))
 
     def test_parse_PC(self):
         self.assertParses("PC", (0x1c, None))
 
+    def test_parse_PC_lowercase(self):
+        self.assertParses("pc", (0x1c, None))
+
     def test_parse_O(self):
         self.assertParses("O", (0x1d, None))
+
+    def test_parse_O_lowercase(self):
+        self.assertParses("o", (0x1d, None))
 
     def test_parse_next_word_pointer(self):
         self.assertParses("[0x0000]", (0x1e, 0x0000)) 
