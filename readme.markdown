@@ -90,10 +90,7 @@ sixteen-asm examples/quick_example.hex
 
 It can take `--hex` (to output an ASCII hex dump) and `--little` (to output little-endian binary), too.
 
-It supports most things; the only things that it doesn't support are:
-
-* data
-* short literal labels
+It supports all the ordinary opcodes, plus the pseudo-intructions `dat` and `jmp`.
 
 Aditionally, I want to do something more with debugging symbols. Watch this space.
 
@@ -143,6 +140,4 @@ pip install git+git://github.com/startling/sixteen.git
 
 ## up next:
 
-* fix some quirks in the assembly parser
 * a web frontend for local and remote use
-* memory-mapped input, in preparation for the input specs.
