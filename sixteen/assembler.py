@@ -218,7 +218,12 @@ def dat(self, name, words, _):
     data = re.split(r"\s|,", words)
     #TODO: string data
     return [self.values.literal(d, both=False) for d in data if d]
-    
+
+        
+@AssemblyParser.register("^(jmp|JMP) (.+)$")
+def jmp(self, _, address):
+    return self.instruction("set pc, %s" % address)
+
 
 class LabelError(Exception):
     def __init__(self, values):
