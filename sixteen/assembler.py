@@ -97,7 +97,7 @@ def literal(self, sign, n, both=True):
     else:
         return num
 
-@ValueParser.register(r"([a-zA-Z_]+)")
+@ValueParser.register(r"(\S+)")
 def label(self, l):
     if l.upper() in self.registers:
         raise Defer()
