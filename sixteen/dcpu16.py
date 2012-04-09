@@ -227,6 +227,9 @@ class DCPU16(object):
         """
         # push the next word to the stack
         self.registers["SP"] -= 1
+        # handle underflow
+        if self.registers["SP"] < 0:
+            self.registers["SP"] = len(self.RAM) + self.registers["SP"]
         self.RAM[self.registers["SP"]] = self.registers["PC"]
         # and then set the program counter to A
         self.registers["PC"] = a.get()
