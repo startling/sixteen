@@ -140,15 +140,6 @@ class AssemblyParser(Parser):
         else:
             return gotten
 
-    def parse_to_ints(self, line):
-        parsed = self.parse(line)
-        filtered = [p for p in parsed if p != None]
-        if len(filtered) >= 3:
-            word = from_opcode(*filtered[:3])
-            return [word] + filtered[3:]
-        else:
-            return filtered
-
     def parse_iterable(self, iterable):
         "Given an iterable of assembly code, parse each line."
         labels = {}
@@ -159,7 +150,7 @@ class AssemblyParser(Parser):
             if label != None:
                 labels[label] = len(code)
             if instruction != None:
-                code.extend(self.parse_to_ints(instruction))
+                code.extend(self.parse(instruction))
         # get all the labels that the value parser has seen but that aren't
         # defined in the code.
         undefined_labels = [l for l in self.values.labels if l not in labels]
@@ -193,7 +184,7 @@ def whitespace(self, inp):
 
 @AssemblyParser.register(r"^\s*$")
 def ignore(self):
-    return None,
+    return ()
 
 
 # special instructions
@@ -203,7 +194,10 @@ def nonbasic_instructions(self, op, a):
     # illegal opcode
     o = self.special_opcode(op)
     a, first_word = self.values.parse(a)
-    return (0x0, o, a, first_word, None)
+    if first_word == None:
+        return (from_opcode(0x0, o, a,),)
+    else:
+        return (from_opcode(0x0, o, a,), first_word)
 
 
 # ordinary instructions
@@ -217,9 +211,7 @@ def instruction(self, op, a, b):
     b, second_word = self.values.parse(b)
     # filter out Nones
     not_nones = tuple(n for n in (first_word, second_word) if n != None)
-    # and then put them back at the end
-    nones = tuple(None for _ in range(2 - len(not_nones)))
-    return (o, a, b) + not_nones + nones
+    return (from_opcode(o, a, b),) + not_nones
 
 @AssemblyParser.register("^(dat|DAT|.dat) (([^ ,]+,?\s?)+)$")
 def dat(self, name, words, _):
