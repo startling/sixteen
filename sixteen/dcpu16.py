@@ -211,7 +211,7 @@ class DCPU16(object):
         # mask away the high end for the actual value
         a.set(total & 0xffff)
         # shift away the low end for the overflow
-        self.registers["O"] = ((a_r >> b_r ) >> 16) & 0xffff
+        self.registers["O"] = ((a_r << b_r ) >> 16) & 0xffff
 
     def SHR(self, a, b):
         "0x8: SHR a, b - sets a to a>>b, sets O to ((a<<16)>>b)&0xffff"
