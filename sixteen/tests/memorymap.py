@@ -39,7 +39,7 @@ class TestCallbacks(unittest.TestCase):
         self.my_dict = {}
         def listappend(n, v):
             self.my_dict[n] = v
-        self.memory = MemoryMap(20, [((0, 16), listappend)])
+        self.memory = MemoryMap(20, write=[((0, 16), listappend)])
 
     def test_set(self):
         self.memory[5] = 20
@@ -54,3 +54,24 @@ class TestCallbacks(unittest.TestCase):
         self.memory[-1] = 29
         self.assertNotIn(19, self.my_dict.keys())
         self.assertNotIn(-1, self.my_dict.keys())
+
+
+class TestWriteCallbacks(unittest.TestCase):
+    def setUp(self):
+        def times_two(n):
+            return n * 2
+        self.memory = MemoryMap(20, read=[((0, 16), times_two)])
+
+    def test_get(self):
+        self.assertEquals(self.memory[1], 2)
+        self.assertEquals(self.memory[6], 12)
+
+    def test_set(self):
+        self.memory[2] = 5
+        self.assertEquals(self.memory[2], 4)
+
+    def test_negative(self):
+        self.assertEquals(self.memory[-19], 2)
+
+    def test_not_called(self):
+        self.assertEquals(self.memory[19], 0)
