@@ -3,7 +3,7 @@
 
 import argparse
 import sys
-from sixteen.parser import AssemblyParser
+from sixteen.assembler import AssemblyParser
 from sixteen.utilities import HexRead
 
 

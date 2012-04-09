@@ -10,7 +10,7 @@ from twisted.words.protocols import irc
 from twisted.python import log
 from twisted.words.protocols import irc
 from twisted.application import internet, service
-from sixteen.parser import AssemblyParser, ParserError, LabelError
+from sixteen.assembler import AssemblyParser, ParserError, LabelError
 from sixteen.dcpu16 import DCPU16
 from sixteen.utilities import OpcodeError
 
