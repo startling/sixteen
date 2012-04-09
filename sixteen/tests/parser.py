@@ -2,6 +2,7 @@
 
 import unittest
 from sixteen.assembler import ValueParser, AssemblyParser
+from sixteen.words import from_opcode
 from itertools import chain
 
 
@@ -119,7 +120,11 @@ class TestParseInstructions(unittest.TestCase):
         self.parse = self.parser.parse
 
     def assertParses(self, given, expected):
-        self.assertEquals(self.parse(given), expected)
+        self.assertEquals(self.parse(given), (from_opcode(*expected[:3]),) +
+                expected[3:])
+
+    def assertEmpty(self, given):
+        self.assertEquals(self.parse(given), ())
 
     def assertOp(self, given, expected):
         self.assertEquals(self.parser.opcode(given), expected)
@@ -177,11 +182,11 @@ class TestParseInstructions(unittest.TestCase):
         self.assertOp("XOR", 0xb)
 
     def test_instruction(self):
-        self.assertParses("SET A, 0x30", (0x1, 0x0, 0x1f, 0x30, None))
-        self.assertParses("SET A 0x30", (0x1, 0x0, 0x1f, 0x30, None))
-        self.assertParses("SET I, 10", (0x1, 0x06, 0x2a, None, None))
-        self.assertParses("SUB A, [0x1000]", (0x3, 0x0, 0x1e, 0x1000, None))
-        self.assertParses("IFN A, 0x10", (0xd, 0x0, 0x30, None, None))
+        self.assertParses("SET A, 0x30", (0x1, 0x0, 0x1f, 0x30))
+        self.assertParses("SET A 0x30", (0x1, 0x0, 0x1f, 0x30))
+        self.assertParses("SET I, 10", (0x1, 0x06, 0x2a))
+        self.assertParses("SUB A, [0x1000]", (0x3, 0x0, 0x1e, 0x1000))
+        self.assertParses("IFN A, 0x10", (0xd, 0x0, 0x30))
 
     def test_spaces_in_brackets(self):
         a = self.parser.parse("SET A, [0x30+A]")
@@ -200,38 +205,26 @@ class TestParseInstructions(unittest.TestCase):
         self.assertEquals(a, b)
 
     def test_nonbasic_instruction(self):
-        self.assertParses("JSR, 0x0002", (0x0, 0x01, 0x22, None, None))
-        self.assertParses("JSR 0x0002", (0x0, 0x01, 0x22, None, None))
+        self.assertParses("JSR, 0x0002", (0x0, 0x01, 0x22))
+        self.assertParses("JSR 0x0002", (0x0, 0x01, 0x22))
 
     def test_comments(self):
-        self.assertParses("SET I, 10; comment", (0x1, 0x06, 0x2a, None, None))
-        self.assertParses("SET I, 10;comment", (0x1, 0x06, 0x2a, None, None))
-        self.assertParses("SET I, 10 ;comment", (0x1, 0x06, 0x2a, None, None))
-        self.assertParses("SET I, 10 ; comment", (0x1, 0x06, 0x2a, None, None))
+        self.assertParses("SET I, 10; comment", (0x1, 0x06, 0x2a))
+        self.assertParses("SET I, 10;comment", (0x1, 0x06, 0x2a))
+        self.assertParses("SET I, 10 ;comment", (0x1, 0x06, 0x2a))
+        self.assertParses("SET I, 10 ; comment", (0x1, 0x06, 0x2a))
 
     def test_ignores(self):
-        self.assertParses(" SET A, 0x30   ", (0x1, 0x0, 0x1f, 0x30, None))
-        self.assertParses("\t SET I, 10 ; hi", (0x1, 0x06, 0x2a, None, None))
-        self.assertParses("; hi comment", (None,))
-        self.assertParses("    ;comment", (None,))
-        self.assertParses("\t      ", (None,))
-
-    def test_to_ints(self):
-        assembly = """
-                SET A, 0x30        ; 
-                SET [0x1000], 0x20 ; wooh , comment
-                SUB A, [0x1000]
-                IFN A, 0x10
-        """
-        ints = (self.parser.parse_to_ints(l) for l in assembly.split("\n"))
-        flattened = chain(*ints)
-        self.assertEqual(list(flattened), [0x7c01, 0x0030, 0x7de1, 0x1000,
-            0x0020, 0x7803, 0x1000, 0xc00d])
+        self.assertParses(" SET A, 0x30   ", (0x1, 0x0, 0x1f, 0x30))
+        self.assertParses("\t SET I, 10 ; hi", (0x1, 0x06, 0x2a))
+        self.assertEmpty("; hi comment")
+        self.assertEmpty("    ;comment")
+        self.assertEmpty("\t      ")
 
     def test_labels(self):
-        self.assertParses("SET PC, label", (0x1, 0x1c, 0x1f, "label", None))
-        self.assertParses("SET A, label", (0x1, 0x00, 0x1f, "label", None))
-        self.assertParses("JSR testsub", (0x0, 0x01, 0x1f, "testsub", None))
+        self.assertParses("SET PC, label", (0x1, 0x1c, 0x1f, "label"))
+        self.assertParses("SET A, label", (0x1, 0x00, 0x1f, "label"))
+        self.assertParses("JSR testsub", (0x0, 0x01, 0x1f, "testsub"))
 
     def test_parse_text(self):
         lines = """
