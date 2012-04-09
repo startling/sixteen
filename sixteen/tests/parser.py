@@ -33,7 +33,7 @@ class TestValues(unittest.TestCase):
 
     def test_parse_lowercase_registers(self):
         self.assertParses("a", (0x00, None))
-        self.assertParses("u", (0x01, None))
+        self.assertParses("b", (0x01, None))
         self.assertParses("y", (0x04, None))
         self.assertParses("j", (0x07, None))
 
