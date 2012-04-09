@@ -6,10 +6,11 @@ from functools import wraps, partial
 
 class _meta_parser(type):
     def __init__(cls, name, bases, dictionary):
-        # make sure each subclass of the Parser has its own empty "_by_name"
-        # and "registered" attributes.
+        # make sure each subclass of the Parser has its own empty "_by_name",
+        # "preprocessors", and "registered" attributes.
         cls._by_name = {}
         cls.registered = []
+        cls.preprocessors = []
         type.__init__(cls, name, bases, dictionary)
 
 
@@ -45,8 +46,17 @@ class Parser(object):
 
         return parse_function_decorator
 
+    @classmethod
+    def preprocess(cls, fn):
+        "A decorator that registers its decorated function as a preprocessor."
+        cls.preprocessors.append(fn)
+
     def parse(self, word):
         "Try each registered parse function in turn to find one that matches."
+        # run each preprocessor on the input, first.
+        for preprocess in self.preprocessors:
+            word = preprocess(self, word)
+
         for method in self.registered:
             try:
                 return method(self, word)
