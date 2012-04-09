@@ -99,6 +99,8 @@ def literal(self, sign, n, both=True):
 
 @ValueParser.register(r"([a-zA-Z_]+)")
 def label(self, l):
+    if l.upper() in self.registers:
+        raise Defer()
     self.labels.add(l)
     # labels get passed through, to be dealt with later.
     return 0x1f, l
@@ -147,6 +149,35 @@ class AssemblyParser(Parser):
         else:
             return []
 
+    def parse_iterable(self, iterable):
+        "Given an iterable of assembly code, parse each line."
+        labels = {}
+        code = []
+        for line in iterable:
+            label, instruction = self.labelled_or_not_instruction(line)
+            # if we got a label, remember that label and the address
+            if label != None:
+                labels[label] = len(code)
+            if instruction != None:
+                code.extend(self.parse_to_ints(instruction))
+        # get all the labels that the value parser has seen but that aren't
+        # defined in the code.
+        undefined_labels = [l for l in self.values.labels if l not in labels]
+        # if there are any, raise an error.
+        if len(undefined_labels) > 0:
+            raise LabelError(undefined_labels)
+        # and then pass through the code again, replacing labels with addresses
+        final = []
+        for word in code:
+            gotten = labels.get(word)
+            if gotten == None:
+                final.append(word)
+            else:
+                final.append(gotten)
+        #TODO: short labels
+        return final
+
+
 @AssemblyParser.preprocess
 def comments(self, inp):
     "Remove comments and the whitespace up to them."
@@ -184,3 +215,12 @@ def instruction(self, op, a, b):
     nones = tuple(None for _ in range(2 - len(not_nones)))
     return (self.opcode(op), a, b) + not_nones + nones
 
+class LabelError(Exception):
+    def __init__(self, values):
+        self.values = values
+
+    def __str__(self):
+        if len(self.values) == 1:
+            return "%r is an undefined label." % self.values[0]
+        else:
+            return "%s are undefined labels." % ", ".join(self.values)
