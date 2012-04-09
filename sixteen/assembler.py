@@ -5,6 +5,9 @@ from ast import literal_eval
 
 
 class ValueParser(Parser):
+    """Parse values. Values all return a value code and one other thing. The
+    one other thing can either be the next word they need or None.
+    """
     registers = ["A", "B", "C", "X", "Y", "Z", "I", "J"]
     def __init__(self):
         # a set to store all the labels we've seen
