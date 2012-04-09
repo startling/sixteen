@@ -218,7 +218,7 @@ class DCPU16(object):
         a_r, b_r = a.get(), b.get()
         a.set(a_r >> b_r)
         # shift left and mask away the low end for the overflow
-        self.registers["O"] = (a_r << (16 - b_r)) & 0xffff
+        self.registers["O"] = ((a_r << 16) >> b_r) & 0xffff
 
     # Special operations
     def JSR(self, a):
