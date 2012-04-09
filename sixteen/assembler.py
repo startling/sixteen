@@ -147,7 +147,7 @@ class AssemblyParser(Parser):
             word = from_opcode(*filtered[:3])
             return [word] + filtered[3:]
         else:
-            return []
+            return filtered
 
     def parse_iterable(self, iterable):
         "Given an iterable of assembly code, parse each line."
@@ -220,6 +220,13 @@ def instruction(self, op, a, b):
     # and then put them back at the end
     nones = tuple(None for _ in range(2 - len(not_nones)))
     return (o, a, b) + not_nones + nones
+
+@AssemblyParser.register("^(dat|DAT|.dat) (([^ ,]+,?\s?)+)$")
+def dat(self, name, words, _):
+    data = re.split(r"\s|,", words)
+    #TODO: string data
+    return [self.values.literal(d, both=False) for d in data if d]
+    
 
 class LabelError(Exception):
     def __init__(self, values):
