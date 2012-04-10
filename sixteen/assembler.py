@@ -97,6 +97,13 @@ def literal(self, sign, n, both=True):
     else:
         return num
 
+@ValueParser.register(r"^\[(\S+)\]$")
+def label_pointer(self, l):
+    if l.upper() in self.registers:
+        raise Defer()
+    self.labels.add(l)
+    return 0x1e, l
+
 @ValueParser.register(r"^(\S+)$")
 def label(self, l):
     if l.upper() in self.registers:

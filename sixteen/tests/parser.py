@@ -290,7 +290,6 @@ class TestParseInstructions(unittest.TestCase):
         lines = ":start set PC, start + 0xffff"
         self.assertEqual(self.parser.parse_iterable([lines]), [0x7dc1, 0xffff])
 
-    @unittest.expectedFailure
     def test_label_pointer(self):
         lines = ":start set PC, [start]"
         self.assertEqual(self.parser.parse_iterable([lines]), [0x79c1, 0x0000])
