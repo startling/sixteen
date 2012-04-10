@@ -305,7 +305,7 @@ class TestParseInstructions(unittest.TestCase):
     @unittest.expectedFailure
     def test_label_plus_register(self):
         lines = ":start set PC, [start + A]"
-        self.assertEqual(self.parser.parse_iterable([lines]), [0x41c1, 0xffff])
+        self.assertEqual(self.parser.parse_iterable([lines]), [0x41c1, 0x0000])
 
     def test_parse_lots_of_text(self):
         "Make sure the parser doesn't choke."
