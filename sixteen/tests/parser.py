@@ -120,11 +120,11 @@ class TestParseInstructions(unittest.TestCase):
         self.parse = self.parser.parse
 
     def assertParses(self, given, expected):
-        self.assertEquals(self.parse(given), (from_opcode(*expected[:3]),) +
+        self.assertEquals(self.parse(given), [from_opcode(*expected[:3])] +
                 expected[3:])
 
     def assertEmpty(self, given):
-        self.assertEquals(self.parse(given), ())
+        self.assertEquals(self.parse(given), [])
 
     def assertOp(self, given, expected):
         self.assertEquals(self.parser.opcode(given), expected)
@@ -182,14 +182,14 @@ class TestParseInstructions(unittest.TestCase):
         self.assertOp("XOR", 0xb)
 
     def test_instruction(self):
-        self.assertParses("SET A, 0x30", (0x1, 0x0, 0x1f, 0x30))
-        self.assertParses("SET A 0x30", (0x1, 0x0, 0x1f, 0x30))
-        self.assertParses("SET I, 10", (0x1, 0x06, 0x2a))
-        self.assertParses("SUB A, [0x1000]", (0x3, 0x0, 0x1e, 0x1000))
-        self.assertParses("IFN A, 0x10", (0xd, 0x0, 0x30))
+        self.assertParses("SET A, 0x30", [0x1, 0x0, 0x1f, 0x30])
+        self.assertParses("SET A 0x30", [0x1, 0x0, 0x1f, 0x30])
+        self.assertParses("SET I, 10", [0x1, 0x06, 0x2a])
+        self.assertParses("SUB A, [0x1000]", [0x3, 0x0, 0x1e, 0x1000])
+        self.assertParses("IFN A, 0x10", [0xd, 0x0, 0x30])
 
     def test_instruction_spaces(self):
-        self.assertParses("SET A,0x30", (0x1, 0x0, 0x1f, 0x30))
+        self.assertParses("SET A,0x30", [0x1, 0x0, 0x1f, 0x30])
 
     def test_spaces_in_brackets(self):
         a = self.parser.parse("SET A, [0x30+A]")
@@ -208,26 +208,26 @@ class TestParseInstructions(unittest.TestCase):
         self.assertEquals(a, b)
 
     def test_nonbasic_instruction(self):
-        self.assertParses("JSR, 0x0002", (0x0, 0x01, 0x22))
-        self.assertParses("JSR 0x0002", (0x0, 0x01, 0x22))
+        self.assertParses("JSR, 0x0002", [0x0, 0x01, 0x22])
+        self.assertParses("JSR 0x0002", [0x0, 0x01, 0x22])
 
     def test_comments(self):
-        self.assertParses("SET I, 10; comment", (0x1, 0x06, 0x2a))
-        self.assertParses("SET I, 10;comment", (0x1, 0x06, 0x2a))
-        self.assertParses("SET I, 10 ;comment", (0x1, 0x06, 0x2a))
-        self.assertParses("SET I, 10 ; comment", (0x1, 0x06, 0x2a))
+        self.assertParses("SET I, 10; comment", [0x1, 0x06, 0x2a])
+        self.assertParses("SET I, 10;comment", [0x1, 0x06, 0x2a])
+        self.assertParses("SET I, 10 ;comment", [0x1, 0x06, 0x2a])
+        self.assertParses("SET I, 10 ; comment", [0x1, 0x06, 0x2a])
 
     def test_ignores(self):
-        self.assertParses(" SET A, 0x30   ", (0x1, 0x0, 0x1f, 0x30))
-        self.assertParses("\t SET I, 10 ; hi", (0x1, 0x06, 0x2a))
+        self.assertParses(" SET A, 0x30   ", [0x1, 0x0, 0x1f, 0x30])
+        self.assertParses("\t SET I, 10 ; hi", [0x1, 0x06, 0x2a])
         self.assertEmpty("; hi comment")
         self.assertEmpty("    ;comment")
         self.assertEmpty("\t      ")
 
     def test_labels(self):
-        self.assertParses("SET PC, label", (0x1, 0x1c, 0x1f, "label"))
-        self.assertParses("SET A, label", (0x1, 0x00, 0x1f, "label"))
-        self.assertParses("JSR testsub", (0x0, 0x01, 0x1f, "testsub"))
+        self.assertParses("SET PC, label", [0x1, 0x1c, 0x1f, "label"])
+        self.assertParses("SET A, label", [0x1, 0x00, 0x1f, "label"])
+        self.assertParses("JSR testsub", [0x0, 0x01, 0x1f, "testsub"])
 
     def test_parse_text(self):
         lines = """
@@ -237,7 +237,7 @@ class TestParseInstructions(unittest.TestCase):
 
                 IFN A, 0x10
         """.split("\n")
-        self.assertEqual(self.parser.parse_iterable(lines), [0x7c01, 0x0030,
+        self.assertEqual(self.parser.parse_tree(lines), [0x7c01, 0x0030,
             0x7de1, 0x1000, 0x0020, 0x7803, 0x1000, 0xc00d])
 
     def test_labelled_or_not_instruction(self):
@@ -256,7 +256,7 @@ class TestParseInstructions(unittest.TestCase):
                 IFN A, 0x10
         :crash  SET PC, crash
         """.split("\n")
-        self.assertEqual(self.parser.parse_iterable(lines), [0x7c01, 0x0030,
+        self.assertEqual(self.parser.parse_tree(lines), [0x7c01, 0x0030,
             0x7de1, 0x1000, 0x0020, 0x7803, 0x1000, 0xc00d, 0x7dc1, 0x0008])
 
     def test_dat(self):
@@ -273,60 +273,60 @@ class TestParseInstructions(unittest.TestCase):
 
     def test_dat_text(self):
         assembly = ["dat 0x30, 0x48"]
-        self.assertEqual(self.parser.parse_iterable(assembly), [0x0030, 0x048])
+        self.assertEqual(self.parser.parse_tree(assembly), [0x0030, 0x048])
 
     def test_dat_label(self):
         assembly = ["dat 0x30, label"]
-        self.assertEqual(self.parser.parse_iterable(assembly), [0x0030, "label"])
+        self.assertEqual(self.parser.parse_tree(assembly), [0x0030, "label"])
 
     def test_dat_string(self):
         assembly = ["dat \"ab\""]
-        self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"), ord("b"),])
+        self.assertEqual(self.parser.parse_tree(assembly), [ord("a"), ord("b"),])
         assembly = ["dat \"a\", 0"]
-        self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"), 0])
+        self.assertEqual(self.parser.parse_tree(assembly), [ord("a"), 0])
         assembly = ["dat 0, \"b\""]
-        self.assertEqual(self.parser.parse_iterable(assembly), [0, ord("b")])
+        self.assertEqual(self.parser.parse_tree(assembly), [0, ord("b")])
         assembly = ["dat 0, 'b'"]
-        self.assertEqual(self.parser.parse_iterable(assembly), [0, ord("b")])
+        self.assertEqual(self.parser.parse_tree(assembly), [0, ord("b")])
 
     def test_dat_string_quotes(self):
         assembly = [r'dat "a\""']
-        self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"),
+        self.assertEqual(self.parser.parse_tree(assembly), [ord("a"),
             ord('"'),])
 
     def test_data_label(self):
         assembly = [':data dat data']
-        self.assertEqual(self.parser.parse_iterable(assembly), [0])
+        self.assertEqual(self.parser.parse_tree(assembly), [0])
 
     @unittest.expectedFailure
     def test_dat_string_commas(self):
         assembly = [r'dat "a,b"']
-        self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"),
+        self.assertEqual(self.parser.parse_tree(assembly), [ord("a"),
             ord(","), ord('b'),])
 
     @unittest.expectedFailure
     def test_dat_string_spaces(self):
         assembly = [r'dat "a b"']
-        self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"),
+        self.assertEqual(self.parser.parse_tree(assembly), [ord("a"),
             ord(" "), ord('b'),])
 
     @unittest.expectedFailure
     def test_label_plus_literal(self):
         lines = ":start set PC, start + 0xffff"
-        self.assertEqual(self.parser.parse_iterable([lines]), [0x7dc1, 0xffff])
+        self.assertEqual(self.parser.parse_tree([lines]), [0x7dc1, 0xffff])
 
     def test_label_pointer(self):
         lines = ":start set PC, [start]"
-        self.assertEqual(self.parser.parse_iterable([lines]), [0x79c1, 0x0000])
+        self.assertEqual(self.parser.parse_tree([lines]), [0x79c1, 0x0000])
 
     @unittest.expectedFailure
     def test_label_plus_literal_pointer(self):
         lines = ":start set PC, [start + 0xffff]"
-        self.assertEqual(self.parser.parse_iterable([lines]), [0x79c1, 0xffff])
+        self.assertEqual(self.parser.parse_tree([lines]), [0x79c1, 0xffff])
 
     def test_label_plus_register(self):
         lines = ":start set PC, [start + A]"
-        self.assertEqual(self.parser.parse_iterable([lines]), [0x41c1, 0x0000])
+        self.assertEqual(self.parser.parse_tree([lines]), [0x41c1, 0x0000])
 
     def test_parse_lots_of_text(self):
         "Make sure the parser doesn't choke."
@@ -357,4 +357,4 @@ class TestParseInstructions(unittest.TestCase):
 ; Hang forever. X should now be 0x40 if everything went right.
 :crash        SET PC, crash            ; 7dc1 001a [*]
         """.split("\n")
-        self.parser.parse_iterable(lines)
+        self.parser.parse_tree(lines)
