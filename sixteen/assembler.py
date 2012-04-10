@@ -233,6 +233,14 @@ def instruction(self, op, a, _, b):
     return (from_opcode(o, a, b),) + not_nones
 
 
+def string_literal(literal):
+    match = re.match(r'"(.+)"|\'(.+)\'', literal)
+    if match:
+        return [ord(c) for c in match.group(1)]
+    else:
+        raise Defer()
+
+
 @AssemblyParser.register("^(dat|DAT|.dat) (([^ ,]+,?\s?)+)$")
 def dat(self, name, words, _):
     given = (w for w in re.split(r"\s|,", words) if w)
@@ -241,8 +249,11 @@ def dat(self, name, words, _):
         try:
             data.append(self.values.literal(d, both=False))
         except Defer:
-            # otherwise, its a label.
-            data.append(d)
+            # otherwise, its either a label or a string literal.
+            try:
+                data.extend(string_literal(d))
+            except Defer:
+                data.append(d)
     return data
 
         

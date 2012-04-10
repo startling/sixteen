@@ -279,14 +279,13 @@ class TestParseInstructions(unittest.TestCase):
         assembly = ["dat 0x30, label"]
         self.assertEqual(self.parser.parse_iterable(assembly), [0x0030, "label"])
 
-    @unittest.expectedFailure
     def test_dat_string(self):
         assembly = ["dat \"ab\""]
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"), ord("b"),])
         assembly = ["dat \"a\", 0"]
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"), 0])
         assembly = ["dat 0, \"b\""]
-        self.assertEqual(self.parser.parse_iterable(assembly), [ord("b"), 0])
+        self.assertEqual(self.parser.parse_iterable(assembly), [0, ord("b")])
 
     @unittest.expectedFailure
     def test_label_plus_literal(self):
