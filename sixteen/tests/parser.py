@@ -294,6 +294,10 @@ class TestParseInstructions(unittest.TestCase):
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"),
             ord('"'),])
 
+    def test_data_label(self):
+        assembly = [':data dat data']
+        self.assertEqual(self.parser.parse_iterable(assembly), [0])
+
     @unittest.expectedFailure
     def test_dat_string_commas(self):
         assembly = [r'dat "a,b"']
