@@ -188,6 +188,10 @@ class TestParseInstructions(unittest.TestCase):
         self.assertParses("SUB A, [0x1000]", (0x3, 0x0, 0x1e, 0x1000))
         self.assertParses("IFN A, 0x10", (0xd, 0x0, 0x30))
 
+    @unittest.expectedFailure
+    def test_instruction_spaces(self):
+        self.assertParses("SET A,0x30", (0x1, 0x0, 0x1f, 0x30))
+
     def test_spaces_in_brackets(self):
         a = self.parser.parse("SET A, [0x30+A]")
         b = self.parser.parse("SET A, [0x30 + A]")
