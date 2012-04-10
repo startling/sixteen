@@ -234,9 +234,10 @@ def instruction(self, op, a, _, b):
 
 
 def string_literal(literal):
-    match = re.match(r'"(.+)"|\'(.+)\'', literal)
+    match = re.match(r'^"(.+)"|\'(.+)\'$', literal)
     if match:
-        return [ord(c) for c in match.group(1)]
+        unescaped = re.sub(r'\\(.)', r'\1', match.group(1))
+        return [ord(c) for c in unescaped]
     else:
         raise Defer()
 
