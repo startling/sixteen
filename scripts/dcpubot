@@ -22,7 +22,8 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument("URL", help="The hostname for the irc server.")
-parser.add_argument("channel", help="The irc channel to connect to.")
+parser.add_argument("channels", help="The irc channels to connect to.",
+        nargs="+")
 parser.add_argument("port", help="The port to connect to. (default: 6667)",
         type=int, default=6667, nargs="?")
 
@@ -81,7 +82,7 @@ class DCPUBot(irc.IRCClient):
 
 class BotFactory(protocol.ClientFactory):
     protocol = DCPUBot
-    channels = [args.channel]
+    channels = args.channels
 
 
 reactor.connectTCP(args.URL, args.port, BotFactory())
