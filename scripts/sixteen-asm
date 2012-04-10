@@ -43,7 +43,7 @@ else:
     in_file = open(args.input, "r")
 
 # read the code into a file.
-code = a.parse_iterable(in_file)
+code = a.parse_tree(in_file)
 
 # and close it.
 in_file.close()

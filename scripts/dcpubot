@@ -51,7 +51,7 @@ class DCPUBot(irc.IRCClient):
             asm = AssemblyParser()
             try:
                 # try assembling the code
-                code = asm.parse_iterable(lines)
+                code = asm.parse_tree(lines)
                 # read the code to a vm's cpu
                 cpu = DCPU16()
                 cpu.RAM[:len(code)] = code
