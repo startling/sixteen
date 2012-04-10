@@ -240,13 +240,11 @@ class TestParseInstructions(unittest.TestCase):
         self.assertEqual(self.parser.parse_tree(lines), [0x7c01, 0x0030,
             0x7de1, 0x1000, 0x0020, 0x7803, 0x1000, 0xc00d])
 
-    def test_labelled_or_not_instruction(self):
-        i = ":start set A, 0x30"
-        label, instruction = self.parser.labelled_or_not_instruction(i)
-        self.assertEqual((label, instruction), ("start", "set A, 0x30"))
-        j = "set A, 0x30"
-        label, instruction = self.parser.labelled_or_not_instruction(j)
-        self.assertEqual((label, instruction), (None, "set A, 0x30"))
+    def test_label_definition(self):
+        instruction = self.parser.parse(":start set A, 0x30")
+        self.assertIn(("start", instruction), self.parser.labels)
+        instruction = self.parser.parse("set A, 0x30")
+        self.assertEquals(instruction, [0x7c01, 0x0030])
 
     def test_parse_text_with_labels(self):
         lines = """
