@@ -97,6 +97,18 @@ def literal(self, sign, n, both=True):
     else:
         return num
 
+
+@ValueParser.register(r"^\[(\S+)\s?\+\s?(\S+)\]$")
+def label_plus_register_pointer(self, label, register):
+    if label.upper() in self.registers:
+        raise Defer()
+    if register.upper() not in self.registers:
+        raise Defer()
+    self.labels.add(label)
+    index = self.registers.index(register.upper())
+    return index + 0x10, label
+
+
 @ValueParser.register(r"^\[(\S+)\]$")
 def label_pointer(self, l):
     if l.upper() in self.registers:
