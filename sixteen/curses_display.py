@@ -4,6 +4,7 @@ import curses
 import locale
 from sixteen.dcpu16 import DCPU16
 from sixteen.memorymap import MemoryMap
+from sixteen.registermap import RegisterMap
 
 
 class Curses(object):
@@ -55,11 +56,16 @@ class TerminalCPU(DCPU16):
         that window.
         """
         self.window = c
-        self.RAM = MemoryMap(self.cells, [(self.vram, self.curses_write)])
-        # copy my own `registers` dict.
-        self.registers = self._registers.copy()
+        self.RAM = MemoryMap(self.cells, [(self.vram, self.curses_write_vram)])
+        # listen to all registers
+        register_listeners = []
+        for r in self._registers:
+            list.append(register_listeners, 
+                    (r, self.curses_write_registers))
+        self.registers = RegisterMap(self._registers.copy(),
+                write=register_listeners)
 
-    def curses_write(self, position, value):
+    def curses_write_vram(self, position, value):
         "This gets called whenever a cell within the vram is changed."
         # low seven bits is the character in ascii, so mask away all the rest
         # the rest is unspec'd color data probably.
@@ -72,3 +78,13 @@ class TerminalCPU(DCPU16):
         # and then add the character
         self.window.addch(y, x, char)
         self.window.refresh()
+
+    def curses_write_registers(self, register, value):
+        # TODO: A more efficient generation of the string
+        register_string = "Registers -- "
+        rs = map(lambda (r, v): "%s : %04x" % (r, v),
+                self.registers.items())
+        register_string += ', '.join(rs)
+        y = self.height+1
+        x = 0
+        self.window.addstr(y, x, register_string)
