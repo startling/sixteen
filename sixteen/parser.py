@@ -10,7 +10,9 @@ class _meta_parser(type):
         # "preprocessors", and "registered" attributes.
         cls._by_name = {}
         cls.registered = []
+        cls.translators = []
         cls.preprocessors = []
+        #TODO: inherit these.
         type.__init__(cls, name, bases, dictionary)
 
 
@@ -51,6 +53,11 @@ class Parser(object):
         "A decorator that registers its decorated function as a preprocessor."
         cls.preprocessors.append(fn)
 
+    @classmethod
+    def translator(cls, fn):
+        "Register a function that translates the AST into whatever output."
+        cls.translators.append(fn)
+
     def parse(self, word):
         "Try each registered parse function in turn to find one that matches."
         # run each preprocessor on the input, first.
@@ -72,6 +79,13 @@ class Parser(object):
         pass it self.
         """
         return partial(self._by_name[name], self)
+
+    def parse_tree(self, iterable):
+        "Parse an iterable into a tree and run all of the translators on it."
+        tree = [self.parse(i) for i in iterable]
+        for translate in self.translators:
+            tree = translate(self, tree)
+        return tree
 
  
 class ParserError(Exception):
