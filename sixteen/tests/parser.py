@@ -286,6 +286,8 @@ class TestParseInstructions(unittest.TestCase):
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"), 0])
         assembly = ["dat 0, \"b\""]
         self.assertEqual(self.parser.parse_iterable(assembly), [0, ord("b")])
+        assembly = ["dat 0, 'b'"]
+        self.assertEqual(self.parser.parse_iterable(assembly), [0, ord("b")])
 
     def test_dat_string_quotes(self):
         assembly = [r'dat "a\""']
