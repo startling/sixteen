@@ -24,6 +24,10 @@ parser.add_argument('--hex', dest="bin", action='store_false',
 	"(Default: binary)"
 )
 
+parser.add_argument('--addresses', '-a', action='store_true',
+    help="Add the starting address for each instruction in a comment."
+)
+
 parser.add_argument('file',
 	help="The binary file to step through."
 )
@@ -51,11 +55,15 @@ f.close
 
 # while there are opcodes other than 0x0000...
 while any(d.RAM[d.registers["PC"]:]):
+    address = d.registers["PC"]
     next_word = d.get_next()
     try:
         # parse the opcodes and values out of the next word
         opcode, values = d.parse_instruction(next_word)
         # print each opcode and its arguments
-        print "%s %s" % (opcode, ", ".join([v.dis for v in values]))
+        assembly = "%s %s" % (opcode, ", ".join([v.dis for v in values]))
     except OpcodeError:
-        print "DAT 0x%04x" % next_word
+        assembly = "DAT 0x%04x" % next_word
+    if args.addresses:
+        assembly = "%-20s ; 0x%04x" % (assembly, address)
+    print assembly
