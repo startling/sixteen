@@ -71,3 +71,4 @@ class TerminalCPU(DCPU16):
         y = offset // self.width
         # and then add the character
         self.window.addch(y, x, char)
+        self.window.refresh()
