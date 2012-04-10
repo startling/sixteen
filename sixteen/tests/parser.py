@@ -272,6 +272,10 @@ class TestParseInstructions(unittest.TestCase):
         assembly = ["dat 0x30, 0x48"]
         self.assertEqual(self.parser.parse_iterable(assembly), [0x0030, 0x048])
 
+    def test_dat_label(self):
+        assembly = ["dat 0x30, label"]
+        self.assertEqual(self.parser.parse_iterable(assembly), [0x0030, "label"])
+
     def test_parse_lots_of_text(self):
         "Make sure the parser doesn't choke."
         lines = """
