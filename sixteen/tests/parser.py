@@ -276,6 +276,7 @@ class TestParseInstructions(unittest.TestCase):
         assembly = ["dat 0x30, label"]
         self.assertEqual(self.parser.parse_iterable(assembly), [0x0030, "label"])
 
+    @unittest.expectedFailure
     def test_dat_string(self):
         assembly = ["dat \"ab\""]
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"), ord("b"),])
@@ -284,14 +285,17 @@ class TestParseInstructions(unittest.TestCase):
         assembly = ["dat 0, \"b\""]
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("b"), 0])
 
+    @unittest.expectedFailure
     def test_label_plus_literal(self):
         lines = ":start set PC, start + 0xffff"
         self.assertEqual(self.parser.parse_iterable([lines]), [0x7dc1, 0xffff])
 
+    @unittest.expectedFailure
     def test_label_plus_literal_pointer(self):
         lines = ":start set PC, [start + 0xffff]"
         self.assertEqual(self.parser.parse_iterable([lines]), [0x79c1, 0xffff])
 
+    @unittest.expectedFailure
     def test_label_plus_register(self):
         lines = ":start set PC, [start + A]"
         self.assertEqual(self.parser.parse_iterable([lines]), [0x41c1, 0xffff])
