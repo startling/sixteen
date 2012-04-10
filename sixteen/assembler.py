@@ -173,6 +173,8 @@ def ignore(self):
 # label definitions
 @AssemblyParser.register(r"^(:(\w+))\s*(.*)$")
 def label_definition(self, _, label, instruction):
+    if label in (l for l, _ in self.labels):
+        raise LabelError("multiple definitions for %s" % label)
     parsed = self.parse(instruction)
     self.labels.append((label, parsed,))
     return parsed
@@ -243,7 +245,6 @@ def jmp(self, _, address):
 def add_labels(self, tree):
     "Parse the tree and replace labels with addresses."
     #TODO: raise an error for undefined labels
-    #TODO: raise an error for multiply-defined labels
     for l, value in self.labels:
         # first pass -- get the location of the labelled node
         for num, node in enumerate(tree):
