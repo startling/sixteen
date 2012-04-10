@@ -28,10 +28,8 @@ class MemoryMap(object):
     def __setitem__(self, n, value):
         # if this is a slice object
         if isinstance(n, slice):
-            # remove the Nones in the slice
-            args = [r for r in (n.start, n.stop, n.step) if r != None]
-            # and then call range with the slice's arguments.
-            for x, v in zip(range(*args), value):
+            # call range with the slice's arguments and the values to set.
+            for x, v in zip(range(*n.indices(len(self))), value):
                 # set each thing in the range to the corresponding thing in the
                 # values.
                 self[x] = v
@@ -51,10 +49,8 @@ class MemoryMap(object):
     def __getitem__(self, n):
         # if this is a slice object
         if isinstance(n, slice):
-            # remove the Nones in the slice
-            args = [r for r in (n.start, n.stop, n.step) if r != None]
             # and then call range with the slice's arguments.
-            return [self[x] for x in range(*args)]
+            return [self[x] for x in range(*n.indices(len(self)))]
         else:
             # make sure that n is in bounds
             if n >= self.number or n < - self.number:
