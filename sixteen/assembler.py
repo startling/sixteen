@@ -244,7 +244,12 @@ def jmp(self, _, address):
 @AssemblyParser.translator
 def add_labels(self, tree):
     "Parse the tree and replace labels with addresses."
-    #TODO: raise an error for undefined labels
+    # raise an error for undefined labels
+    undefined = [l for l in self.values.labels if l not in 
+            (x for x, _ in self.labels)]
+    if undefined:
+        raise UndefinedLabel(undefined)
+    # replace all of the labels with their locations
     for l, value in self.labels:
         # first pass -- get the location of the labelled node
         for num, node in enumerate(tree):
@@ -271,6 +276,10 @@ def concatenate(self, tree):
 
 
 class LabelError(Exception):
+    pass
+
+
+class UndefinedLabel(Exception):
     def __init__(self, values):
         self.values = values
 
