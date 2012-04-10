@@ -99,6 +99,7 @@ def literal(self, sign, n, both=True):
 
 @ValueParser.register(r"^\[(\S+)\]$")
 def label_pointer(self, l):
+    print "got a label pointer"
     if l.upper() in self.registers:
         raise Defer()
     self.labels.add(l)
@@ -195,8 +196,8 @@ def ignore(self):
 
 
 # special instructions
-@AssemblyParser.register("^(\S+?),? (.+)$")
-def nonbasic_instructions(self, op, a):
+@AssemblyParser.register("^(\S+?)(,|\s)\s?(.+)$")
+def nonbasic_instructions(self, op, _, a):
     # parse the opcode first, so it Defers right of the bat if this is an
     # illegal opcode
     o = self.special_opcode(op)
@@ -208,8 +209,8 @@ def nonbasic_instructions(self, op, a):
 
 
 # ordinary instructions
-@AssemblyParser.register("^(\S+) ([^,]+)\,? (.+)$")
-def instruction(self, op, a, b):
+@AssemblyParser.register("^(\S+) ([^,]+)(,|\s)\s?(.+)$")
+def instruction(self, op, a, _, b):
     # parse the opcode first, so it Defers right of the bat if this is an
     # illegal opcode
     o = self.opcode(op)
