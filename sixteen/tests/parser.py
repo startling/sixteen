@@ -284,6 +284,14 @@ class TestParseInstructions(unittest.TestCase):
         assembly = ["dat 0, \"b\""]
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("b"), 0])
 
+    def test_label_plus_literal(self):
+        lines = ":start set PC, start + 0xffff"
+        self.assertEqual(self.parser.parse_iterable([lines]), [0x7dc1, 0xffff])
+
+    def test_label_plus_register(self):
+        lines = ":start set PC, [start + A]"
+        self.assertEqual(self.parser.parse_iterable([lines]), [0x41c1, 0xffff])
+
     def test_parse_lots_of_text(self):
         "Make sure the parser doesn't choke."
         lines = """
