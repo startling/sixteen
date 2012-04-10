@@ -17,12 +17,12 @@ class ValueParser(Parser):
         self.labels = set()
 
 
-@ValueParser.register("SP|sp")
+@ValueParser.register("^SP|sp$")
 def sp(self):
     return 0x1b, None
 
 
-@ValueParser.register("(\S+)")
+@ValueParser.register("^(\S+)$")
 def register(self, r):
     try:
         return self.registers.index(r.upper()), None
@@ -30,7 +30,7 @@ def register(self, r):
         raise Defer()
 
 
-@ValueParser.register(r"\[(\S+)\]")
+@ValueParser.register(r"^\[(\S+)\]$")
 def register_pointer(self, name):
     try:
         return self.registers.index(name.upper()) + 0x08, None
@@ -38,7 +38,7 @@ def register_pointer(self, name):
         raise Defer()
 
 
-@ValueParser.register(r"\[([^+ ]+)\s?\+\s?([^+ ])\]")
+@ValueParser.register(r"^\[([^+ ]+)\s?\+\s?([^+ ])\]$")
 def register_plus_next_word(self, num, reg):
     try:
         code = 0x10 + self.registers.index(reg.upper())
@@ -47,37 +47,37 @@ def register_plus_next_word(self, num, reg):
         Defer()
 
 
-@ValueParser.register(r"\[SP\+\+\]|POP|pop|\[sp\+\+\]")
+@ValueParser.register(r"^\[SP\+\+\]|POP|pop|\[sp\+\+\]$")
 def POP(self):
     return 0x18, None
 
 
-@ValueParser.register(r"\[SP\]|PEEK|\[sp\]|peek")
+@ValueParser.register(r"^\[SP\]|PEEK|\[sp\]|peek$")
 def PEEK(self):
     return 0x19, None
 
 
-@ValueParser.register(r"\[--SP\]|PUSH|\[--sp\]|push")
+@ValueParser.register(r"^\[--SP\]|PUSH|\[--sp\]|push$")
 def PUSH(self):
     return 0x1a, None
 
 
-@ValueParser.register("SP|sp")
+@ValueParser.register("^SP|sp$")
 def SP(self):
     return 0x1b, None
 
 
-@ValueParser.register("PC|pc")
+@ValueParser.register("^PC|pc$")
 def PC(self):
     return 0x1c, None
 
 
-@ValueParser.register("O|o")
+@ValueParser.register("^O|o$")
 def O(self):
     return 0x1d, None
 
 
-@ValueParser.register(r"\[(.+)\]")
+@ValueParser.register(r"^\[(.+)\]$")
 def next_word_pointer(self, num):
     return 0x1e, self.literal(num, both=False)
 
@@ -97,7 +97,7 @@ def literal(self, sign, n, both=True):
     else:
         return num
 
-@ValueParser.register(r"(\S+)")
+@ValueParser.register(r"^(\S+)$")
 def label(self, l):
     if l.upper() in self.registers:
         raise Defer()
