@@ -213,11 +213,18 @@ def instruction(self, op, a, b):
     not_nones = tuple(n for n in (first_word, second_word) if n != None)
     return (from_opcode(o, a, b),) + not_nones
 
+
 @AssemblyParser.register("^(dat|DAT|.dat) (([^ ,]+,?\s?)+)$")
 def dat(self, name, words, _):
-    data = re.split(r"\s|,", words)
-    #TODO: string data
-    return [self.values.literal(d, both=False) for d in data if d]
+    given = (w for w in re.split(r"\s|,", words) if w)
+    data = []
+    for d in given:
+        try:
+            data.append(self.values.literal(d, both=False))
+        except Defer:
+            # otherwise, its a label.
+            data.append(d)
+    return data
 
         
 @AssemblyParser.register("^(jmp|JMP) (.+)$")
