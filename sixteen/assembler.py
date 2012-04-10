@@ -279,7 +279,7 @@ class LabelError(Exception):
     pass
 
 
-class UndefinedLabel(Exception):
+class UndefinedLabel(LabelError):
     def __init__(self, values):
         self.values = values
 
