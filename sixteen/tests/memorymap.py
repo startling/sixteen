@@ -72,6 +72,9 @@ class TestWriteCallbacks(unittest.TestCase):
 
     def test_negative(self):
         self.assertEquals(self.memory[-19], 2)
+        self.memory[19] = 5
+        self.assertEquals(self.memory[-1], 5)
 
     def test_not_called(self):
-        self.assertEquals(self.memory[19], 0)
+        self.memory[19] = 5
+        self.assertEquals(self.memory[19], 5)
