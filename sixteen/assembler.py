@@ -2,6 +2,7 @@
 
 import re
 from ast import literal_eval
+from itertools import chain
 from sixteen.words import from_opcode
 from sixteen.parser import Parser, Defer
 from sixteen.dcpu16 import DCPU16
@@ -132,16 +133,7 @@ class AssemblyParser(Parser):
 
     def __init__(self):
         self.values = ValueParser()
-
-    def labelled_or_not_instruction(self, instruction):
-        """Extract a label definition from an instruction, if it's there;
-        return that (or None) and the newly-unlabeled instruction.
-        """
-        m = re.match(r"^\s*(:(\w+))?\s*(.*)$", instruction)
-        if m:
-            return m.group(2), m.group(3) or None
-        else:
-            return None, instruction
+        self.labels = []
 
     def opcode(self, op):
         "Look up an opcode."
@@ -159,34 +151,6 @@ class AssemblyParser(Parser):
         else:
             return gotten
 
-    def parse_iterable(self, iterable):
-        "Given an iterable of assembly code, parse each line."
-        labels = {}
-        code = []
-        for line in iterable:
-            label, instruction = self.labelled_or_not_instruction(line)
-            # if we got a label, remember that label and the address
-            if label != None:
-                labels[label] = len(code)
-            if instruction != None:
-                code.extend(self.parse(instruction))
-        # get all the labels that the value parser has seen but that aren't
-        # defined in the code.
-        undefined_labels = [l for l in self.values.labels if l not in labels]
-        # if there are any, raise an error.
-        if len(undefined_labels) > 0:
-            raise LabelError(undefined_labels)
-        # and then pass through the code again, replacing labels with addresses
-        final = []
-        for word in code:
-            gotten = labels.get(word)
-            if gotten == None:
-                final.append(word)
-            else:
-                final.append(gotten)
-        #TODO: short labels
-        return final
-
 
 @AssemblyParser.preprocess
 def comments(self, inp):
@@ -203,7 +167,15 @@ def whitespace(self, inp):
 
 @AssemblyParser.register(r"^\s*$")
 def ignore(self):
-    return ()
+    return []
+
+
+# label definitions
+@AssemblyParser.register(r"^(:(\w+))\s*(.*)$")
+def label_definition(self, _, label, instruction):
+    parsed = self.parse(instruction)
+    self.labels.append((label, parsed,))
+    return parsed
 
 
 # special instructions
@@ -214,9 +186,9 @@ def nonbasic_instructions(self, op, _, a):
     o = self.special_opcode(op)
     a, first_word = self.values.parse(a)
     if first_word == None:
-        return (from_opcode(0x0, o, a,),)
+        return [from_opcode(0x0, o, a,)]
     else:
-        return (from_opcode(0x0, o, a,), first_word)
+        return [from_opcode(0x0, o, a,), first_word]
 
 
 # ordinary instructions
@@ -229,8 +201,8 @@ def instruction(self, op, a, _, b):
     a, first_word = self.values.parse(a)
     b, second_word = self.values.parse(b)
     # filter out Nones
-    not_nones = tuple(n for n in (first_word, second_word) if n != None)
-    return (from_opcode(o, a, b),) + not_nones
+    not_nones = list(n for n in (first_word, second_word) if n != None)
+    return [from_opcode(o, a, b)] + not_nones
 
 
 def string_literal(literal):
@@ -265,6 +237,36 @@ def dat(self, name, words, _):
 @AssemblyParser.register("^(jmp|JMP) (.+)$")
 def jmp(self, _, address):
     return self.instruction("set pc, %s" % address)
+
+
+@AssemblyParser.translator
+def add_labels(self, tree):
+    "Parse the tree and replace labels with addresses."
+    #TODO: raise an error for undefined labels
+    #TODO: raise an error for multiply-defined labels
+    for l, value in self.labels:
+        # first pass -- get the location of the labelled node
+        for num, node in enumerate(tree):
+            if node is value:
+                location = sum(len(_node) for _node in tree[:num])
+                break
+        else:
+            raise LabelError(l)
+        # second pass -- replace all instances of that label with the node's
+        # location.
+        for node in tree:
+            try:
+                index = node.index(l)
+                node[index] = location
+            except ValueError:
+                pass
+    return tree
+
+
+@AssemblyParser.translator
+def concatenate(self, tree):
+    "Turn all of the nodes into one big list."
+    return list(chain(*tree))
 
 
 class LabelError(Exception):
