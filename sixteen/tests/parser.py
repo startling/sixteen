@@ -276,6 +276,14 @@ class TestParseInstructions(unittest.TestCase):
         assembly = ["dat 0x30, label"]
         self.assertEqual(self.parser.parse_iterable(assembly), [0x0030, "label"])
 
+    def test_dat_string(self):
+        assembly = ["dat \"ab\""]
+        self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"), ord("b"),])
+        assembly = ["dat \"a\", 0"]
+        self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"), 0])
+        assembly = ["dat 0, \"b\""]
+        self.assertEqual(self.parser.parse_iterable(assembly), [ord("b"), 0])
+
     def test_parse_lots_of_text(self):
         "Make sure the parser doesn't choke."
         lines = """
