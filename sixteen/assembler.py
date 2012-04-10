@@ -99,7 +99,6 @@ def literal(self, sign, n, both=True):
 
 @ValueParser.register(r"^\[(\S+)\]$")
 def label_pointer(self, l):
-    print "got a label pointer"
     if l.upper() in self.registers:
         raise Defer()
     self.labels.add(l)
