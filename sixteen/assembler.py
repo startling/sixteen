@@ -174,7 +174,7 @@ def ignore(self):
 @AssemblyParser.register(r"^(:(\w+))\s*(.*)$")
 def label_definition(self, _, label, instruction):
     if label in (l for l, _ in self.labels):
-        raise LabelError("multiple definitions for %s" % label)
+        raise MultipleLabelDefs(label)
     parsed = self.parse(instruction)
     self.labels.append((label, parsed,))
     return parsed
@@ -288,3 +288,11 @@ class UndefinedLabel(Exception):
             return "%r is an undefined label." % self.values[0]
         else:
             return "%s are undefined labels." % ", ".join(self.values)
+
+
+class MultipleLabelDefs(LabelError):
+    def __init__(self, value):
+        self.values = value
+
+    def __str__(self):
+        return "%r is defined multiple times." % self.values[0]
