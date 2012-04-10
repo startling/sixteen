@@ -287,7 +287,6 @@ class TestParseInstructions(unittest.TestCase):
         assembly = ["dat 0, \"b\""]
         self.assertEqual(self.parser.parse_iterable(assembly), [0, ord("b")])
 
-    @unittest.expectedFailure
     def test_dat_string_quotes(self):
         assembly = [r'dat "a\""']
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"),
@@ -301,7 +300,7 @@ class TestParseInstructions(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_dat_string_spaces(self):
-        assembly = [r'dat "a,b"']
+        assembly = [r'dat "a b"']
         self.assertEqual(self.parser.parse_iterable(assembly), [ord("a"),
             ord(" "), ord('b'),])
 
