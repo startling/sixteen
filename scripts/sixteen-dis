@@ -7,7 +7,7 @@ import argparse
 import re
 from sixteen.dcpu16 import DCPU16
 from sixteen.debugger import Debugger, ColoredDebugger
-from sixteen.utilities import HexRead, file_to_ram
+from sixteen.utilities import HexRead, file_to_ram, OpcodeError
 
 
 parser = argparse.ArgumentParser(
@@ -51,7 +51,11 @@ f.close
 
 # while there are opcodes other than 0x0000...
 while any(d.RAM[d.registers["PC"]:]):
-    # parse the opcodes and values out of the next word
-    opcode, values = d.parse_instruction(d.get_next())
-    # print each opcode and its arguments
-    print "%s %s" % (opcode, ", ".join([v.dis for v in values]))
+    next_word = d.get_next()
+    try:
+        # parse the opcodes and values out of the next word
+        opcode, values = d.parse_instruction(next_word)
+        # print each opcode and its arguments
+        print "%s %s" % (opcode, ", ".join([v.dis for v in values]))
+    except OpcodeError:
+        print "DAT 0x%04x" % next_word
