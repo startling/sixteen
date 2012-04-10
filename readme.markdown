@@ -141,3 +141,5 @@ pip install git+git://github.com/startling/sixteen.git
 ## up next:
 
 * a web frontend for local and remote use
+* `[label + x]` and `[register + label]` pseudo-values.
+* string literals
