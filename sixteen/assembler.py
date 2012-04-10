@@ -234,15 +234,19 @@ def instruction(self, op, a, _, b):
 
 
 def string_literal(literal):
-    match = re.match(r'^"(.+)"|\'(.+)\'$', literal)
-    if match:
-        unescaped = re.sub(r'\\(.)', r'\1', match.group(1))
+    double_quoted = re.match(r'^"(.+)"$', literal)
+    single_quoted = re.match(r"^'(.+)'$", literal)
+    if double_quoted:
+        unescaped = re.sub(r'\\(.)', r'\1', double_quoted.group(1))
+        return [ord(c) for c in unescaped]
+    elif single_quoted:
+        unescaped = re.sub(r'\\(.)', r'\1', single_quoted.group(1))
         return [ord(c) for c in unescaped]
     else:
         raise Defer()
 
 
-@AssemblyParser.register("^(dat|DAT|.dat) (([^ ,]+,?\s?)+)$")
+@AssemblyParser.register("^(dat|DAT|.dat) ((.+,?\s?)+)$")
 def dat(self, name, words, _):
     given = (w for w in re.split(r"\s|,", words) if w)
     data = []
