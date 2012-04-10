@@ -90,7 +90,7 @@ sixteen-asm examples/quick_example.hex
 
 It can take `--hex` (to output an ASCII hex dump) and `--little` (to output little-endian binary), too.
 
-It supports all the ordinary opcodes, plus the pseudo-intructions `dat` and `jmp`.
+It supports all the ordinary opcodes, plus the pseudo-intructions `dat` and `jmp` and labels. Labels can be used like `label` where any value would go, or `[label]` (to use it as a pointer), or `[label + register]`. String literals can be used with `dat`, but there are a few quirks involved; namely, they can't contain spaces or commas. They *can* contain escaped quotes though.
 
 Aditionally, I want to do something more with debugging symbols. Watch this space.
 
@@ -141,5 +141,3 @@ pip install git+git://github.com/startling/sixteen.git
 ## up next:
 
 * a web frontend for local and remote use
-* `[label + x]` and `[register + label]` pseudo-values.
-* string literals
