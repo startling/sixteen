@@ -288,6 +288,10 @@ class TestParseInstructions(unittest.TestCase):
         lines = ":start set PC, start + 0xffff"
         self.assertEqual(self.parser.parse_iterable([lines]), [0x7dc1, 0xffff])
 
+    def test_label_plus_literal_pointer(self):
+        lines = ":start set PC, [start + 0xffff]"
+        self.assertEqual(self.parser.parse_iterable([lines]), [0x79c1, 0xffff])
+
     def test_label_plus_register(self):
         lines = ":start set PC, [start + A]"
         self.assertEqual(self.parser.parse_iterable([lines]), [0x41c1, 0xffff])
