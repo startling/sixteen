@@ -295,4 +295,4 @@ class MultipleLabelDefs(LabelError):
         self.values = value
 
     def __str__(self):
-        return "%r is defined multiple times." % self.values[0]
+        return "%r is defined multiple times." % self.values
