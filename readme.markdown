@@ -1,3 +1,5 @@
+# sixteen
+
 This is a DCPU-16 emulator written in python. After it's complete, I'm going to make sure it's all rpython and write a JIT using pypy. Exciting stuff.
 
 Here's what we've got so far:
@@ -141,3 +143,7 @@ pip install git+git://github.com/startling/sixteen.git
 ## up next:
 
 * a web frontend for local and remote use
+* fix the quirky parts of the parser
+* speculative input
+* a raw terminal mode frontend (because curses sucks)
+* more debugger commands (including error-catching in the debugger)
