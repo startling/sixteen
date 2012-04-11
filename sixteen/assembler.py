@@ -18,12 +18,12 @@ class ValueParser(Parser):
         self.labels = set()
 
 
-@ValueParser.register("^SP|sp$")
+@ValueParser.pattern("^SP|sp$")
 def sp(self):
     return 0x1b, None
 
 
-@ValueParser.register("^(\S+)$")
+@ValueParser.pattern("^(\S+)$")
 def register(self, r):
     try:
         return self.registers.index(r.upper()), None
@@ -31,7 +31,7 @@ def register(self, r):
         raise Defer()
 
 
-@ValueParser.register(r"^\[(\S+)\]$")
+@ValueParser.pattern(r"^\[(\S+)\]$")
 def register_pointer(self, name):
     try:
         return self.registers.index(name.upper()) + 0x08, None
@@ -39,7 +39,7 @@ def register_pointer(self, name):
         raise Defer()
 
 
-@ValueParser.register(r"^\[([^+ ]+)\s?\+\s?([^+ ])\]$")
+@ValueParser.pattern(r"^\[([^+ ]+)\s?\+\s?([^+ ])\]$")
 def register_plus_next_word(self, num, reg):
     try:
         code = 0x10 + self.registers.index(reg.upper())
@@ -48,42 +48,42 @@ def register_plus_next_word(self, num, reg):
         Defer()
 
 
-@ValueParser.register(r"^\[SP\+\+\]|POP|pop|\[sp\+\+\]$")
+@ValueParser.pattern(r"^\[SP\+\+\]|POP|pop|\[sp\+\+\]$")
 def POP(self):
     return 0x18, None
 
 
-@ValueParser.register(r"^\[SP\]|PEEK|\[sp\]|peek$")
+@ValueParser.pattern(r"^\[SP\]|PEEK|\[sp\]|peek$")
 def PEEK(self):
     return 0x19, None
 
 
-@ValueParser.register(r"^\[--SP\]|PUSH|\[--sp\]|push$")
+@ValueParser.pattern(r"^\[--SP\]|PUSH|\[--sp\]|push$")
 def PUSH(self):
     return 0x1a, None
 
 
-@ValueParser.register("^SP|sp$")
+@ValueParser.pattern("^SP|sp$")
 def SP(self):
     return 0x1b, None
 
 
-@ValueParser.register("^PC|pc$")
+@ValueParser.pattern("^PC|pc$")
 def PC(self):
     return 0x1c, None
 
 
-@ValueParser.register("^O|o$")
+@ValueParser.pattern("^O|o$")
 def O(self):
     return 0x1d, None
 
 
-@ValueParser.register(r"^\[(.+)\]$")
+@ValueParser.pattern(r"^\[(.+)\]$")
 def next_word_pointer(self, num):
     return 0x1e, self.literal(num, both=False)
 
 
-@ValueParser.register(r"^([-+]?)(0x[0-9a-fA-F]+|0b[01]+|0o[0-7]+|[0-9]+)$")
+@ValueParser.pattern(r"^([-+]?)(0x[0-9a-fA-F]+|0b[01]+|0o[0-7]+|[0-9]+)$")
 def literal(self, sign, n, both=True):
     num = literal_eval(n)
     if sign == "-" and num != 0:
@@ -99,7 +99,7 @@ def literal(self, sign, n, both=True):
         return num
 
 
-@ValueParser.register(r"^\[(\S+)\s?\+\s?(\S+)\]$")
+@ValueParser.pattern(r"^\[(\S+)\s?\+\s?(\S+)\]$")
 def label_plus_register_pointer(self, label, register):
     if label.upper() in self.registers:
         raise Defer()
@@ -110,14 +110,14 @@ def label_plus_register_pointer(self, label, register):
     return index + 0x10, label
 
 
-@ValueParser.register(r"^\[(\S+)\]$")
+@ValueParser.pattern(r"^\[(\S+)\]$")
 def label_pointer(self, l):
     if l.upper() in self.registers:
         raise Defer()
     self.labels.add(l)
     return 0x1e, l
 
-@ValueParser.register(r"^(\S+)$")
+@ValueParser.pattern(r"^(\S+)$")
 def label(self, l):
     if l.upper() in self.registers:
         raise Defer()
@@ -165,13 +165,13 @@ def whitespace(self, inp):
     return re.sub(r"\s{2,}", " ", inp)
 
 
-@AssemblyParser.register(r"^\s*$")
+@AssemblyParser.pattern(r"^\s*$")
 def ignore(self):
     return []
 
 
 # label definitions
-@AssemblyParser.register(r"^(:(\w+))\s*(.*)$")
+@AssemblyParser.pattern(r"^(:(\w+))\s*(.*)$")
 def label_definition(self, _, label, instruction):
     if label in (l for l, _ in self.labels):
         raise MultipleLabelDefs(label)
@@ -181,7 +181,7 @@ def label_definition(self, _, label, instruction):
 
 
 # special instructions
-@AssemblyParser.register("^(\S+?)(,|\s)\s?(.+)$")
+@AssemblyParser.pattern("^(\S+?)(,|\s)\s?(.+)$")
 def nonbasic_instructions(self, op, _, a):
     # parse the opcode first, so it Defers right of the bat if this is an
     # illegal opcode
@@ -194,7 +194,7 @@ def nonbasic_instructions(self, op, _, a):
 
 
 # ordinary instructions
-@AssemblyParser.register("^(\S+) ([^,]+)(,|\s)\s?(.+)$")
+@AssemblyParser.pattern("^(\S+) ([^,]+)(,|\s)\s?(.+)$")
 def instruction(self, op, a, _, b):
     # parse the opcode first, so it Defers right of the bat if this is an
     # illegal opcode
@@ -220,7 +220,7 @@ def string_literal(literal):
         raise Defer()
 
 
-@AssemblyParser.register("^(dat|DAT|.dat) ((.+,?\s?)+)$")
+@AssemblyParser.pattern("^(dat|DAT|.dat) ((.+,?\s?)+)$")
 def dat(self, name, words, _):
     given = (w for w in re.split(r"\s|,", words) if w)
     data = []
@@ -236,7 +236,7 @@ def dat(self, name, words, _):
     return data
 
         
-@AssemblyParser.register("^(jmp|JMP) (.+)$")
+@AssemblyParser.pattern("^(jmp|JMP) (.+)$")
 def jmp(self, _, address):
     return self.instruction("set pc, %s" % address)
 
