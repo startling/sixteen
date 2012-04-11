@@ -171,8 +171,8 @@ def ignore(self):
 
 
 # label definitions
-@AssemblyParser.pattern(r"^(:(\w+))\s*(.*)$")
-def label_definition(self, _, label, instruction):
+@AssemblyParser.pattern(r"^:(\w+)\s*(.*)$")
+def label_definition(self, label, instruction):
     if label in (l for l, _ in self.labels):
         raise MultipleLabelDefs(label)
     parsed = self.parse(instruction)
@@ -181,8 +181,8 @@ def label_definition(self, _, label, instruction):
 
 
 # special instructions
-@AssemblyParser.pattern("^(\S+?)(,|\s)\s?(.+)$")
-def nonbasic_instructions(self, op, _, a):
+@AssemblyParser.pattern("^(\S+?)(?:,|\s)\s?(.+)$")
+def nonbasic_instructions(self, op, a):
     # parse the opcode first, so it Defers right of the bat if this is an
     # illegal opcode
     o = self.special_opcode(op)
@@ -194,8 +194,8 @@ def nonbasic_instructions(self, op, _, a):
 
 
 # ordinary instructions
-@AssemblyParser.pattern("^(\S+) ([^,]+)(,|\s)\s?(.+)$")
-def instruction(self, op, a, _, b):
+@AssemblyParser.pattern("^(\S+) ([^,]+)(?:,|\s)\s?(.+)$")
+def instruction(self, op, a, b):
     # parse the opcode first, so it Defers right of the bat if this is an
     # illegal opcode
     o = self.opcode(op)
@@ -220,8 +220,8 @@ def string_literal(literal):
         raise Defer()
 
 
-@AssemblyParser.pattern("^(dat|DAT|.dat) ((.+,?\s?)+)$")
-def dat(self, name, words, _):
+@AssemblyParser.pattern("^(?:dat|DAT|.dat) ((?:.+,?\s?)+)$")
+def dat(self, words):
     given = (w for w in re.split(r"\s|,", words) if w)
     data = []
     for d in given:
@@ -236,8 +236,8 @@ def dat(self, name, words, _):
     return data
 
         
-@AssemblyParser.pattern("^(jmp|JMP) (.+)$")
-def jmp(self, _, address):
+@AssemblyParser.pattern("^(?:jmp|JMP) (.+)$")
+def jmp(self, address):
     return self.instruction("set pc, %s" % address)
 
 
