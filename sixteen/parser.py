@@ -20,7 +20,7 @@ class Parser(object):
     __metaclass__ = _meta_parser
         
     @classmethod
-    def register(cls, pattern):
+    def pattern(cls, pattern):
         """This is a function that, given a regular expression pattern, returns
         a decorator that registers its decorated function as a parse function
         for this parser and wraps it in a function that raises Defer if the
@@ -41,12 +41,17 @@ class Parser(object):
                 else:
                     raise Defer()
 
-            # save this thing in a dict by its name and in an ordered list
-            cls._by_name[fn.__name__] = parse_function_wrapper
-            cls.registered.append(parse_function_wrapper)
+            cls.register(parse_function_wrapper)
             return parse_function_wrapper
 
         return parse_function_decorator
+
+    @classmethod
+    def register(cls, fn):
+        "Register the decorated function as a parse function."
+        # save this thing in a dict by its name and in an ordered list
+        cls._by_name[fn.__name__] = fn
+        cls.registered.append(fn)
 
     @classmethod
     def preprocess(cls, fn):
