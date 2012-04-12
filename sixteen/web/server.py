@@ -3,6 +3,7 @@ from twisted.internet import protocol, reactor
 from txws import WebSocketFactory
 from sixteen.dcpu16 import DCPU16
 from sixteen.memorymap import MemoryMap
+from sixteen.characters import characters
 
 
 class WebCPU(DCPU16):
@@ -24,6 +25,8 @@ class WebCPU(DCPU16):
         self.RAM = MemoryMap(self.cells, [
             (self.vram, self.change_letter)
         ])
+        # read the default characters to the RAM
+        self.RAM[self.chars[0]:] = characters
 
     def change_letter(self, index, value):
         "This is called whenever a cell of vram is changed."
