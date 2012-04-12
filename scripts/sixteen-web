@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from sixteen.web.server import DCPU16Protocol
+from txws import WebSocketFactory
+from twisted.internet import protocol, reactor
+
+
+class DCPU16Factory(protocol.Factory):
+    protocol = DCPU16Protocol
+    # set [0x8000], 0b1100000001100001 / sub pc, 1
+    # that is, set the first character to "a", light red on black
+    code = [0x7de1, 0x8000, 0xc061, 0x85c3]
+
+    def buildProtocol(self, addr):
+        return self.protocol(self.code)
+
+
+reactor.listenTCP(8080, WebSocketFactory(DCPU16Factory()))
+reactor.run()
