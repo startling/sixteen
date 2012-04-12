@@ -2,19 +2,26 @@
 
 
 class RegisterMap(object):
-    def __init__(self, registers, write=None, read=None, initial=0x0000):
-        """TODO: Documentation. Is very similar to MemoryMap.
+    def __init__(self, registers, write=None, read=None):
+        """Given a dictionary of registers and two optional list of pairs of
+        ranges to callbacks, make a RegisterMap object. Here's how the
+        write_callbacks work:
 
-        registers is a dictionary of register --> int
+        "write_callbacks" should be a list like this: [ ("key", call) ], where
+        "call" is a function that gets called whenever the value stores at
+        "key" gets changed. The callback gets called with the changed value's
+        index and the new value as its arguments.
+
+        "read_callbacks" should be a similar list, but these callbacks get
+        called whenever that key is *read*, and their returned value is
+        returned.
         """
-
         if read == None:
             read = []
         if write == None:
             write = []
         self.read_callbacks = read
         self.write_callbacks = write
-        self.registers = registers
         self._map = registers
     
     def __setitem__(self, r, value):
