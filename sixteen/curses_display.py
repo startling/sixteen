@@ -58,10 +58,8 @@ class TerminalCPU(DCPU16):
         self.window = c
         self.RAM = MemoryMap(self.cells, [(self.vram, self.curses_write_vram)])
         # listen to all registers
-        register_listeners = []
-        for r in self._registers:
-            list.append(register_listeners, 
-                    (r, self.curses_write_registers))
+        register_listeners = [(r, self.curses_write_registers) for r in
+                self._registers]
         self.registers = RegisterMap(self._registers.copy(),
                 write=register_listeners)
 
@@ -80,11 +78,6 @@ class TerminalCPU(DCPU16):
         self.window.refresh()
 
     def curses_write_registers(self, register, value):
-        # TODO: A more efficient generation of the string
-        register_string = "Registers -- "
-        rs = map(lambda (r, v): "%s : %04x" % (r, v),
-                self.registers.items())
-        register_string += ', '.join(rs)
-        y = self.height+1
-        x = 0
-        self.window.addstr(y, x, register_string)
+        rs = ["%s: %04x" % (r, v) for r, v in self.registers.items()]
+        self.window.addstr(self.height + 1, 0, " ".join(rs))
+        self.window.refresh()
