@@ -9,4 +9,5 @@ setup(
     author_email = "tdixon51793@gmail.com",
     packages = ["sixteen"],
     scripts = glob("scripts/*"),
+    install_requires = ["twisted", "txws"],
 )
