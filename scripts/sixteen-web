@@ -8,9 +8,11 @@ from twisted.internet import protocol, reactor
 
 class DCPU16Factory(protocol.Factory):
     protocol = DCPU16Protocol
-    # set [0x8000], 0b1100000001100001 / sub pc, 1
-    # that is, set the first character to "a", light red on black
-    code = [0x7de1, 0x8000, 0xc061, 0x85c3]
+    # set set [0x8280], 0b0010 / [0x8000], 0b1100000001100001 / sub pc, 1
+    # so... set the background to green
+    # set the first character to "a", light red on black
+    # and loop.
+    code = [0x89e1, 0x8280, 0x7de1, 0x8000, 0xc061, 0x85c3]
 
     def buildProtocol(self, addr):
         return self.protocol(self.code)
