@@ -12,10 +12,10 @@ class WebCPU(DCPU16):
     height, width = (12, 32)
 
     # characters are 0x8180 - 0x827f
-    chars = (0x8180, 0x827f)
+    chars = (0x8180, 0x8280)
     
     # background color is located at 0x8280
-    background = 0x8280
+    background = (0x8280, 0x8281)
 
     def __init__(self, protocol):
         "Given a twisted protocol, initialize a WebCPU."
@@ -23,10 +23,15 @@ class WebCPU(DCPU16):
         # copy my own `registers` dict.
         self.registers = self._registers.copy()
         self.RAM = MemoryMap(self.cells, [
-            (self.vram, self.change_letter)
+            (self.vram, self.change_letter),
+            (self.background, self.change_background),
         ])
         # read the default characters to the RAM
         self.RAM[self.chars[0]:] = characters
+
+    def change_background(self, index, value):
+        background = self.color(value & 0x0f)
+        self.protocol.change_background = background
 
     def change_letter(self, index, value):
         "This is called whenever a cell of vram is changed."
@@ -76,6 +81,7 @@ class DCPU16Protocol(protocol.Protocol):
         self.cpu = WebCPU(self)
         # and the letters_changed list
         self.letters_changed = []
+        self.change_background = None
         # read the code from the factory to the RAM
         self.cpu.RAM[:len(code)] = code
 
@@ -86,5 +92,10 @@ class DCPU16Protocol(protocol.Protocol):
 
     def write_changes(self):
         "Write the changes to the websockets client and reset."
-        self.transport.write(json.dumps(self.letters_changed))
+        changes = {
+            "background": self.change_background,
+            "cells": self.letters_changed,
+        }
+        self.transport.write(json.dumps(changes))
         self.letters_changed = []
+        self.change_background = None
