@@ -18,32 +18,22 @@ class RegisterMap(object):
         self._map = registers
     
     def __setitem__(self, r, value):
-        # FIXME: I have no idea what this does -- reynir
-        # if this is a slice object
-        if isinstance(r, slice):
-            pass
-        else:
-            if not (r in self._map):
-                raise KeyError(r)
-            self._map[r] = value
-            for r_other, callback in self.write_callbacks:
-                if r == r_other:
-                    callback(r, value)
+        if not (r in self._map):
+            raise KeyError(r)
+        self._map[r] = value
+        for r_other, callback in self.write_callbacks:
+            if r == r_other:
+                callback(r, value)
 
     def __getitem__(self, r):
-        # FIXME: Again, no idea -- reynir
-        # if this is a slice object
-        if isinstance(r, slice):
-            pass
+        if not (r in self._map):
+            raise KeyError(r)
+        for r_other, callback in self.read_callbacks:
+            if r == r_other:
+                return callback(r)
         else:
-            if not (r in self._map):
-                raise KeyError(r)
-            for r_other, callback in self.read_callbacks:
-                if r == r_other:
-                    return callback(r)
-            else:
-                # if it didn't get any of the callbacks, do nothing unusual.
-                return self._map[r]
+            # if it didn't get any of the callbacks, do nothing unusual.
+            return self._map[r]
 
     def __len__(self):
         return len(self._map)
