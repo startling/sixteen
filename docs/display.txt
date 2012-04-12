@@ -1,0 +1,75 @@
+; 0x8000 - 0x8180 ; Display (32x12)
+; 0x8180 - 0x8280 ; Characters
+; 0x8280 - 0x8281 ; Misc
+; 
+; The display is 32x12 (128x96) surrounded by a
+; 16 pixel border / background.
+; 
+; A display cell is a single word:
+; 
+;   ccccccccbiiiiiii
+; 
+;   i = Character index.
+;   b = Cell should blink.
+;   c = Color.
+; 
+; 
+; Color is defined as:
+; 
+;   ffffbbbb
+; 
+;   f = Foreground color
+;   b = Background color
+; 
+;   Both are mapped as:
+; 
+;    hrgb
+; 
+;    h = Highlight
+;    r = Red
+;    g = Green
+;    b = Blue
+; 
+;    When a channel is set, its value is 0xAA.
+; 
+;    When both red and green are set and highlight is not set,
+;      green is 0xFF (ie, b0110 gives 0xFFAAFF00 assuming
+;      0xAARRGGBB).
+; 
+;    When highlight is set, all values are
+;      +0x55 (set channel is 0xFF, unset channel is 0x55).
+; 
+; 
+; A character is two words
+; 
+;   aaaaaaaabbbbbbbb
+;   ccccccccdddddddd
+; 
+;   Where each bit defines if a pixel is visible or not.
+;   Each letter in the representation is one column of pixels
+;   in the character.
+; 
+;   a = column 0, b = column 1, c = column 2, d = column 3
+; 
+;   ie
+; 
+;   'A' in notch's default font would be 0x7E09, 0x7E00.
+; 
+;    0123
+;   +----+ +----+
+;  0|0100| | #  |
+;  1|1010| |# # |
+;  2|1010| |# # |
+;  3|1110| |### |
+;  4|1010| |# # |
+;  5|1010| |# # |
+;  6|1010| |# # |
+;  7|0000| |    |
+;   +----+ |----+
+; 
+; 
+; Misc is defined as:
+; 
+; (0x8280[0] & 0xF) defines background color of screen,
+; as defined by the background color lookup.
+
