@@ -31,6 +31,10 @@ socket.onmessage = function(msg) {
     data = JSON.parse(msg.data);
     // just log it for now.
     console.log(data);
+    // if we get a background color, change the canvas' border.
+    if (data["background"] != null) {
+        canvas.style.borderColor = data["background"];
+    };
 };
 
 
