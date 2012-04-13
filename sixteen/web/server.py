@@ -89,14 +89,13 @@ class WebCPU(DCPU16):
         r = (bits & 0b0100) >> 2
         g = (bits & 0b0010) >> 1
         b = (bits & 0b0001)
+        r = r and 0xAA
+        g = g and 0xAA
+        b = b and 0xAA
         if h:
-            r = r and 0xFF
-            g = g and 0xFF
-            b = b and 0xFF
-        else:
-            r = r and 0xAA
-            b = b and 0xAA
-            g = g and 0xAA
+            r += 0x55 
+            g += 0x55 
+            b += 0x55 
         return "#%02x%02x%02x" % (r, g, b)
 
 
