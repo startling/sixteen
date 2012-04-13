@@ -41,8 +41,6 @@ socket.onopen = function(msg) {
 socket.onmessage = function(msg) {
     // get the json data from the message
     data = JSON.parse(msg.data);
-    // just log it for now.
-    console.log(data);
     // if we get a background color, change the canvas' border.
     if (data["background"] != null) {
         canvas.style.borderColor = data["background"];
@@ -56,6 +54,11 @@ socket.onmessage = function(msg) {
 
     // and then change all the cells
     data.cells.forEach(draw_cell);
+    
+    // register a callback to send a reply in
+    setTimeout(function () {
+        socket.send("");
+    }, 10);
 };
 
 
@@ -68,8 +71,8 @@ function draw_pixel(x, y) {
 
 function draw_cell(n) {
     // adjust the coordinates
-    x = char_width * n.x;
-    y = char_height * n.y;
+    var x = char_width * n.x;
+    var y = char_height * n.y;
     // draw the background
     context.fillStyle = n.background;
     context.fillRect(x, y, char_width, char_height);
@@ -81,7 +84,7 @@ function draw_cell(n) {
         var column = 0;
         row.forEach(function (cell) {
             if (cell == 1) {
-                draw_pixel(column, r);
+                draw_pixel((n.x * pixel_width) + column, (n.y * pixel_height) + r);
             };
             column++;
         });
