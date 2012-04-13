@@ -18,11 +18,16 @@ class WebCPU(DCPU16):
     # background color is located at 0x8280
     background = (0x8280, 0x8281)
 
+    # 16 char keyboard ring buffer at 0x9000 - 0x900f
+    keyring = (0x9000, 0x900f)
+
     def __init__(self, protocol):
         "Given a twisted protocol, initialize a WebCPU."
         self.protocol = protocol
         # copy my own `registers` dict.
         self.registers = self._registers.copy()
+        # initialize the keypointer offset
+        self.key_offset = 0
         self.RAM = MemoryMap(self.cells, [
             (self.vram, self.change_letter),
             (self.background, self.change_background),
@@ -83,6 +88,21 @@ class WebCPU(DCPU16):
             "background": self.color(background),
         })
 
+    def keyboard_input(self, key):
+        """ Thanks, Rick.
+        > < startling> so how does input work? writes to the first location
+        >     between 0x9000 - 0x900f that's not zero?
+        > < Rick> virtualkeyboard has an internal offset that starts at 0
+        > < Rick> it checks if [0x9000+offset] is zero
+        > < Rick> if it's not
+        > < Rick> it drops input
+        > < Rick> if it is, it sets the value to the key and (offset+1)%16
+        > < startling> wonderful.
+        """
+        if self.RAM[self.key_offset] == 0:
+            self.RAM[self.key_offset] = key
+            self.key_offset = (self.key_offset + 1) % 16
+
     def color(self, bits):
         "Turn a four-bit hrgb color into an HTML/CSS hex color."
         h = bits >> 3
@@ -111,7 +131,9 @@ class DCPU16Protocol(protocol.Protocol):
         self.cpu.RAM[:len(code)] = code
 
     def dataReceived(self, data):
-        #TODO: get keyboard input.
+        keypresses = json.loads(data)
+        for k in keypresses:
+            self.cpu.keyboard_input(ord(k))
         self.cpu.cycle()
         self.write_changes()
 
