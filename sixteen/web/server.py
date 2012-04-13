@@ -4,6 +4,7 @@ from txws import WebSocketFactory
 from sixteen.dcpu16 import DCPU16
 from sixteen.memorymap import MemoryMap
 from sixteen.characters import characters
+from sixteen.words import bit_iter
 
 
 class WebCPU(DCPU16):
@@ -25,9 +26,33 @@ class WebCPU(DCPU16):
         self.RAM = MemoryMap(self.cells, [
             (self.vram, self.change_letter),
             (self.background, self.change_background),
+            (self.chars, self.change_character),
         ])
         # read the default characters to the RAM
         self.RAM[self.chars[0]:] = characters
+
+    def change_character(self, index, value):
+        # return the whole character because half-characters are a pain.
+        # if it's an even index, it's the first of a pair.
+        if index % 2 == 0:
+            top = value
+            bottom = self.RAM[index + 1]
+            location = (index - self.chars[0]) // 2
+        else:
+            top = self.RAM[index - 1]
+            bottom = value
+            location = ((index - 1) - self.chars[0]) // 2
+        # oragnize the bits into columns
+        columns = [
+            [x for x in bit_iter(top >> 8, 8)],
+            [x for x in bit_iter(top & 0xff, 8)][::-1],
+            [x for x in bit_iter(bottom >> 8, 8)][::-1],
+            [x for x in bit_iter(bottom & 0xff, 8)][::-1],
+        ]
+        # zip them, to rearrange them into rows.
+        rows = zip(*columns)
+        # and set the chars_changed to the rows
+        self.protocol.chars_changed[location] = rows
 
     def change_background(self, index, value):
         background = self.color(value & 0x0f)
@@ -77,11 +102,12 @@ class WebCPU(DCPU16):
 
 class DCPU16Protocol(protocol.Protocol):
     def __init__(self, code):
-        # intialize the cpu
-        self.cpu = WebCPU(self)
         # and the letters_changed list
         self.letters_changed = []
+        self.chars_changed = {}
         self.change_background = None
+        # intialize the cpu
+        self.cpu = WebCPU(self)
         # read the code from the factory to the RAM
         self.cpu.RAM[:len(code)] = code
 
@@ -95,7 +121,9 @@ class DCPU16Protocol(protocol.Protocol):
         changes = {
             "background": self.change_background,
             "cells": self.letters_changed,
+            "characters": self.chars_changed,
         }
         self.transport.write(json.dumps(changes))
         self.letters_changed = []
+        self.chars_changed = {}
         self.change_background = None
