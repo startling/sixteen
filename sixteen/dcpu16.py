@@ -203,7 +203,12 @@ class DCPU16(object):
 
     def MOD(self, a, b):
         "0x6: MOD a, b - sets a to a%b. if b==0, sets a to 0 instead."
-        a.set(a.get() % b.get())
+        a_r = a.get()
+        b_r = b.get()
+        if b_r == 0:
+            a.set(0)
+        else:
+            a.set(a_r % b_r)
 
     def SHL(self, a, b):
         "0x7: SHL a, b - sets a to a<<b, sets O to ((a<<b)>>16)&0xffff."
