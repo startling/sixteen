@@ -63,8 +63,7 @@ socket = new WebSocket("ws://localhost:4314");
 socket.onopen = function(msg) {
     // when the socket opens, let us debuggers know
     console.log("[Socket opened]");
-    // and then send some blank text back, so the cpu cycles.
-    socket.send("[]");
+    socket.send(JSON.stringify([[], 100]));
 }
 
 socket.onmessage = function(msg) {
@@ -101,9 +100,9 @@ socket.onmessage = function(msg) {
 function cycle () {
     // register a callback to send a reply in.
     setTimeout(function () {
-        socket.send(JSON.stringify(keypresses));
+        socket.send(JSON.stringify([keypresses, 400]));
         keypresses = [];
-    }, .01);
+    }, 100);
 }
 
 
