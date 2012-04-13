@@ -1,4 +1,4 @@
-.container {
+.container, .error {
     display: box;
     margin-left: auto;
     margin-right: auto;
@@ -7,11 +7,20 @@
 
     box-shadow: 0 0 3px #000;
     -moz-box-shadow: 0 0 3px #000;
+    -webkit-box-shadow: 0 0 3px #000;
     
+
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+
     /* center the canvas. */
     text-align: center;
 
-    width: 544px;
+    width: 545px;
+}
+
+.container {
     height: 416px;
 
     /* start the background off as black. */
@@ -27,4 +36,11 @@ canvas {
 
     /* start the background off as black. */
     background-color: #000;
+}
+
+.error {
+    cursor: pointer;
+    padding: 5px 10px;
+    font: 1em Georgia;
+    background: #FF5555;
 }
