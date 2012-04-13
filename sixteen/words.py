@@ -13,6 +13,8 @@ From the docs:
 > instruction has the format: bbbbbbaaaaaaoooo
 """
 
+from math import log
+
 
 def from_hex(word):
     return int(word, base=16)
@@ -44,3 +46,16 @@ def from_opcode(o, a, b):
     # a gets shifted left by four, because o is four bits long.
     # b gets shifted left by ten, because o is four bits and a is six.
     return o ^ (a << 4) ^ (b << 10)
+
+
+def bit_iter(bits, n):
+    "Iterate over the bits of an integer, padding it to `n` digits."
+    if bits == 0:
+        length = 0
+    else:
+        length = int(1 + log(bits, 2))
+    difference = n - length
+    for _ in xrange(difference):
+        yield 0
+    for x in xrange(length -1, -1, -1):
+        yield 1 & (bits >> x)
