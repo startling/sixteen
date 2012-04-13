@@ -82,8 +82,8 @@ class Register(object):
             s.key = cpu.registers[self.name] + next_word
             s.dis = "[0x%04x + %s]" % (next_word, self.name)
             # handle overflow
-            if s.key >= len(cpu.RAM) - 1:
-                s.key -= len(cpu.RAM) - 1
+            if s.key >= len(cpu.RAM):
+                s.key -= len(cpu.RAM)
 
         return type("[%s + next word]" % self.name, (Box,),
                 {"__init__": r_init})
