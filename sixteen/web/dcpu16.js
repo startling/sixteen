@@ -3,6 +3,9 @@ var canvas = null;
 var context = null;
 var socket = null;
 
+// a list that we'll put keypresses in and send to the server.
+var keypresses = []
+
 // characters is an empty object that we'll use to keep track of 
 var characters = {};
 
@@ -20,6 +23,12 @@ function init() {
     canvas.width = char_width * 32;
     canvas.height = char_height * 12;
     context = canvas.getContext("2d");
+
+    // add a keypress handler that shifts keypresses to the 
+    // place where we keep them.
+    document.addEventListener("keypress", function (key) {
+        keypresses.shift(String.fromCharCode(key.charCode));
+    });
 }
 
 
@@ -35,7 +44,7 @@ socket.onopen = function(msg) {
     // when the socket opens, let us debuggers know
     console.log("[Socket opened]");
     // and then send some blank text back, so the cpu cycles.
-    socket.send("");
+    socket.send("[]");
 }
 
 socket.onmessage = function(msg) {
@@ -57,7 +66,8 @@ socket.onmessage = function(msg) {
     
     // register a callback to send a reply in
     setTimeout(function () {
-        socket.send("");
+        socket.send(JSON.stringify(keypresses));
+        keypresses = [];
     }, 10);
 };
 
