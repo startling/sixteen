@@ -28,6 +28,8 @@ class WebCPU(DCPU16):
         self.registers = self._registers.copy()
         # initialize the keypointer offset
         self.key_offset = 0
+        # this gets turned into True if we suspect the program is halting.
+        self.halt = False
         self.RAM = MemoryMap(self.cells, [
             (self.vram, self.change_letter),
             (self.background, self.change_background),
@@ -125,6 +127,21 @@ class WebCPU(DCPU16):
             b += 0x55 
         return "#%02x%02x%02x" % (r, g, b)
 
+    def is_halting(self):
+        if self.halt:
+            return True
+        else:
+            # if it's sub pc, 1, it's a halt...
+            if self.RAM[self.registers["PC"]] == 0x85c3:
+                self.halt = True
+            else:
+                # if it's something like :loop set pc, loop, it's a halt
+                first = self.RAM[self.registers["PC"]]
+                second = self.RAM[self.registers["PC"] + 1]
+                if first == 0x7dc1 and second == self.registers["PC"]:
+                    self.halt = True
+            return self.halt
+
 
 class DCPU16Protocol(protocol.Protocol):
     def __init__(self, code):
@@ -143,7 +160,8 @@ class DCPU16Protocol(protocol.Protocol):
         for k in keypresses:
             self.cpu.keyboard_input(ord(k))
         try:
-            self.cpu.cycle()
+            if not self.cpu.is_halting():
+                self.cpu.cycle()
         except Exception as e:
             self.errors.append(str(e))
         self.write_changes()
