@@ -3,6 +3,9 @@ var canvas = null;
 var context = null;
 var socket = null;
 
+// characters is an empty object that we'll use to keep track of 
+var characters = {};
+
 
 function init() {
     // on the window's load, get canvas and its 2D context
@@ -35,6 +38,12 @@ socket.onmessage = function(msg) {
     if (data["background"] != null) {
         canvas.style.borderColor = data["background"];
     };
+
+    // iterate through the given new characters and change our map of
+    // characters.
+    Object.keys(data["characters"]).forEach(function (key) {
+        characters[key] = data["characters"][key];
+    });
 };
 
 
