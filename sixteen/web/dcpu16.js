@@ -64,12 +64,33 @@ socket.onmessage = function(msg) {
     // and then change all the cells
     data.cells.forEach(draw_cell);
     
-    // register a callback to send a reply in
+    if (data["errors"].length == 0) {
+        cycle();
+    } else {
+        data["errors"].forEach(error_handler);
+    };
+};
+
+
+function cycle () {
+    // register a callback to send a reply in.
     setTimeout(function () {
         socket.send(JSON.stringify(keypresses));
         keypresses = [];
     }, 10);
-};
+}
+
+
+function error_handler (text) {
+    var div = document.createElement("div");
+    div.appendChild(document.createTextNode(text));
+    div.classList.add("error");
+    div.onclick = function () {
+        document.body.removeChild(div);
+        cycle();
+    };
+    document.body.appendChild(div);
+}
 
 
 function draw_pixel(x, y) {
