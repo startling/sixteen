@@ -68,7 +68,7 @@ class WebCPU(DCPU16):
         # bitshift away the lower four bits to get the foreground
         foreground = color >> 4
         # mask away the high four bits to get the background.
-        background = (color & 0x00001111)
+        background = color & 0b00001111
         # let the protocol know what changed.
         self.protocol.letters_changed.append({
             # calculate the x, y position.
