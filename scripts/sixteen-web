@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import argparse
 from sixteen.utilities import HexRead
+import sixteen.web
 from sixteen.web.server import DCPU16Protocol
 from txws import WebSocketFactory
 from twisted.internet import protocol, reactor
+from twisted.web.server import Site
+from twisted.web.static import File
 
 
 parser = argparse.ArgumentParser(
@@ -50,6 +54,7 @@ while True:
 
 f.close()
 
+
 class DCPU16Factory(protocol.Factory):
     protocol = DCPU16Protocol
     code = code
@@ -58,6 +63,13 @@ class DCPU16Factory(protocol.Factory):
         return self.protocol(self.code)
 
 
-#TODO: host the files here, too.
-reactor.listenTCP(8080, WebSocketFactory(DCPU16Factory()))
+# listen on port for websocket connections
+reactor.listenTCP(4314, WebSocketFactory(DCPU16Factory()))
+
+# listen on port 1268 for http, serving the directory where sixteen.web is.
+directory = os.path.dirname(sixteen.web.__file__)
+reactor.listenTCP(1268, Site(File(directory)))
+
+print "Point your browser to http://localhost:1268"
+
 reactor.run()

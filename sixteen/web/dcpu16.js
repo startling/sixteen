@@ -45,7 +45,7 @@ window.addEventListener('load', init, false);
 
 
 // initialize a websocket
-socket = new WebSocket("ws://localhost:8080");
+socket = new WebSocket("ws://localhost:4314");
 
 
 socket.onopen = function(msg) {
