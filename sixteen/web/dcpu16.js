@@ -2,6 +2,7 @@
 var canvas = null;
 var context = null;
 var socket = null;
+var focus = true;
 
 // a list that we'll put keypresses in and send to the server.
 var keypresses = []
@@ -37,6 +38,16 @@ function init() {
         }
         keypresses.push(String.fromCharCode(k));
     });
+
+    // add keypress handlers that let us know when we lose or get focus.
+    window.addEventListener("blur", function () {
+        focus = false;
+    }); 
+
+    window.addEventListener("focus", function () {
+        focus = true;
+        cycle();
+    });
 }
 
 
@@ -71,9 +82,10 @@ socket.onmessage = function(msg) {
 
     // and then change all the cells
     data.cells.forEach(draw_cell);
-    
     if (data["errors"].length == 0) {
-        cycle();
+        if (focus) {
+            cycle();
+        };
     } else {
         data["errors"].forEach(error_handler);
     };
