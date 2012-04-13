@@ -26,8 +26,16 @@ function init() {
 
     // add a keypress handler that pushes keypresses to the 
     // place where we keep them.
-    document.addEventListener("keypress", function (key) {
-        keypresses.push(String.fromCharCode(key.charCode));
+    window.addEventListener("keypress", function (key) {
+        if (key.keyCode == 13) {
+            // convert carriage return to newline
+            var k = 10;
+        } else if (key.charCode == 0) {
+            var k = key.keyCode;
+        } else {
+            var k = key.charCode;
+        }
+        keypresses.push(String.fromCharCode(k));
     });
 }
 
