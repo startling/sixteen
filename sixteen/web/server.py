@@ -173,6 +173,7 @@ class DCPU16Protocol(protocol.Protocol):
             "cells": self.letters_changed,
             "characters": self.chars_changed,
             "errors": self.errors,
+            "halt": self.cpu.halt,
         }
         self.transport.write(json.dumps(changes))
         self.letters_changed = []
