@@ -5,6 +5,7 @@
 
 import sys
 import argparse
+from ast import literal_eval
 from twisted.internet import reactor, protocol
 from twisted.words.protocols import irc
 from twisted.python import log
@@ -13,6 +14,7 @@ from twisted.application import internet, service
 from sixteen.assembler import AssemblyParser, LabelError
 from sixteen.parser import ParserError
 from sixteen.dcpu16 import DCPU16
+from sixteen.dis import Disassembler
 from sixteen.utilities import OpcodeError
 
 
@@ -79,6 +81,27 @@ class DCPUBot(irc.IRCClient):
                 self.msg(channel, "%s: opcode error: %s" % (user, k))
             except LabelError as l:
                 self.msg(channel, "%s: label error: %s" % (user, l))
+        elif msg.startswith("<<"):
+            stripped = msg[2:]
+            try:
+                code = []
+                for c in stripped.split():
+                    if c[0] == "0" and c[1] in ("x", "o"):
+                        code.append(literal_eval(c))
+                    else:
+                        code.append(literal_eval("0x" + c))
+                d = Disassembler()
+                d.RAM[:len(code)] = code
+                message = " / ".join(list(a for a, addr in d.dis()))
+                self.msg(channel, "%s: %s" % (user, message))
+            except ValueError:
+                self.msg(channel, "%s: malformed string." % user)
+            except SyntaxError:
+                self.msg(channel, "%s: malformed string." % user)
+            except Exception as e:
+                self.msg(channel, "%s: %s" % (user, e))
+            if any(c > 0xffff for c in code):
+                self.msg(channel, "%s: malformed string." % user)
 
 
 class BotFactory(protocol.ClientFactory):
