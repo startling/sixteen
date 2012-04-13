@@ -1,13 +1,12 @@
 # sixteen
 
-This is a DCPU-16 emulator written in python. After it's complete, I'm going to make sure it's all rpython and write a JIT using pypy. Exciting stuff.
+This is a DCPU-16 emulator written in python. Exciting stuff.
 
 Here's what we've got so far:
 
 ## a virtual machine 
 
-I *think* it's spec-complete. Anyway, it's main use is the debugger, because we don't have any IO methods yet. I'll implement memory-mapping soon, too, but none of the spec uses it yet.
-
+I'm almost certain it's spec-complete. The VM itself isn't terribly interesting, by itself (except when it is), but it has nice bindings. You can subclass it and do just about anything. See sixteen-web, sixteen-debug, and dcpubot, below.
 
 ## a basic debugger
 
@@ -79,40 +78,6 @@ optional arguments:
                 (Default: big-endian).
   --hex         Denote that this file should be parsed as an ASCII hex dump.
                 (Default: binary)
-````
-
-## sixteen-curses
-
-This uses the DCPU16 vm and memory-mapped output with curses. The spec is kind of fuzzy at the moment; colors, for example, were deliberately excluded.
-
-run it like this:
-
-````sh
-sixteen-curses --hex examples/vram.hex
-````
-
-When you're satisfied, `ctrl-c` quits and dumps all of the registers. It takes the `--hex` and `--litle` options, just like everything else, and a bunch of other things besides.
-
-Here's the complete `--help`:
-
-````
-usage: sixteen-curses [-h] [--little] [--hex] [--step] [--quit] [--no-dump]
-                      file
-
-Run a DCPU-16 binary, using curses to display output.
-
-positional arguments:
-  file          The binary file to step through.
-
-optional arguments:
-  -h, --help    show this help message and exit
-  --little, -l  Denote that this file should be parsed as little-endian.
-                (Default: big-endian).
-  --hex         Denote that this file should be parsed as an ASCII hex dump.
-                (Default: binary)
-  --step        Wait for a keypress after every instruction.
-  --quit        Run until you press q.
-  --no-dump     Don't dump the registers afterwards.
 ````
 
 ## an assembler!
