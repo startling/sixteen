@@ -52,8 +52,13 @@ def file_to_ram(f, cpu, bigendian=True, offset=0):
             break
 
 class OpcodeError(Exception):
-    def __init__(self, value):
+    def __init__(self, value, address=None):
         self.value = value
+        self.address = address
 
     def __str__(self):
-        return "%r is an unknown opcode." % self.value
+        if self.address == None:
+            return "'0x%x' is an unknown opcode." % self.value
+        else:
+            return ("0x%x at address 0x%04x is an unknown opcode." %
+                    (self.value, self.address))

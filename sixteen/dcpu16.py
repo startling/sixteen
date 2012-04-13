@@ -75,7 +75,7 @@ class DCPU16(object):
         # if we go over the limit, make it 0
         self.RAM[n] = value
 
-    def parse_instruction(self, word):
+    def parse_instruction(self, word, address=None):
         o, a_code, b_code = as_opcode(word)
         # if this is a special opcode...
         if o == 0x00:
@@ -83,7 +83,7 @@ class DCPU16(object):
             a = self.values[b_code](self)
             name = self.special_opcodes.get(a_code)
             if name == None:
-                raise OpcodeError(o)
+                raise OpcodeError(o, address)
             # return the name and the arguments
             return name, (a,)
         else:
@@ -91,13 +91,14 @@ class DCPU16(object):
             b = self.values[b_code](self)
             name = self.opcodes.get(o)
             if name == None:
-                raise OpcodeError(o)
+                raise OpcodeError(o, address)
             # return the name of the operation and the arguments
             return name, (a, b)
 
     def cycle(self):
         "Run for one cycle and return the operation and its arguments.."
-        op, args = self.parse_instruction(self.get_next())
+        address = self.registers["PC"]
+        op, args = self.parse_instruction(self.get_next(), address)
         getattr(self, op)(*args)
         # return the name of the operation and the arguments
         return op, args
