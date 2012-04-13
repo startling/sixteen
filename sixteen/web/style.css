@@ -3,13 +3,6 @@ body > canvas {
     margin-left: auto;
     margin-right: auto;
 
-    /* In characters, the screen is 32 x 12.
-     * Each character is 4 x 8, so that gives use 128 x 96
-     * At the moment, we're treating each game-pixel as 4 x 4,
-     * so that gives us 512 x 392 "real" height and width. */
-    width: 512px;
-    height: 392px;
-
     /* the display has a 16-pixel border around it, whose color you can set.
      * we'll start it off as black. */
     border: 16px solid #000;
