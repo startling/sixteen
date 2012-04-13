@@ -140,8 +140,7 @@ pip install git+git://github.com/startling/sixteen.git
 
 ## up next:
 
-* a web frontend for local and remote use
 * fix the quirky parts of the parser
-* speculative input
-* a raw terminal mode frontend (because curses sucks)
+* optimize the javascript in sixteen-web; firebug says 40% of the time is spent drawing pixels.
+* write nice editor commands for sixteen-asm, sixteen-dis, and sixteen-web
 * more debugger commands (including error-catching in the debugger)
