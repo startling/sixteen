@@ -99,8 +99,9 @@ class WebCPU(DCPU16):
         > < Rick> if it is, it sets the value to the key and (offset+1)%16
         > < startling> wonderful.
         """
-        if self.RAM[self.key_offset] == 0:
-            self.RAM[self.key_offset] = key
+        location = self.keyring[0] + self.key_offset
+        if self.RAM[location] == 0:
+            self.RAM[location] = key
             self.key_offset = (self.key_offset + 1) % 16
 
     def color(self, bits):
