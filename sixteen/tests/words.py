@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from sixteen.words import as_opcode, from_opcode
+from sixteen.words import as_opcode, from_opcode, bit_iter
 
 
 # a bunch of instructions, seperated into their components
@@ -29,3 +29,15 @@ class TestWords(unittest.TestCase):
             #print "expected: %x %x %x" % (eo, ea, eb)
             #print "got     : %x %x %x" % (o, a, b)
             self.assertEqual((eo, ea, eb), (o, a, b))
+
+
+class TestBitIter(unittest.TestCase):
+    def assertBits(self, given, digits, expected):
+        self.assertEquals(list(bit_iter(given, digits)), expected)
+
+    def test_bit_iter(self):
+        self.assertBits(0b0001, 4, [0, 0, 0, 1])
+        self.assertBits(0b0111, 4, [0, 1, 1, 1])
+        self.assertBits(0b1011, 4, [1, 0, 1, 1])
+        self.assertBits(0b1000, 4, [1, 0, 0, 0])
+        self.assertBits(0b10001000, 8, [1, 0, 0, 0, 1, 0, 0, 0])
