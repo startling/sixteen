@@ -24,10 +24,10 @@ function init() {
     canvas.height = char_height * 12;
     context = canvas.getContext("2d");
 
-    // add a keypress handler that shifts keypresses to the 
+    // add a keypress handler that pushes keypresses to the 
     // place where we keep them.
     document.addEventListener("keypress", function (key) {
-        keypresses.shift(String.fromCharCode(key.charCode));
+        keypresses.push(String.fromCharCode(key.charCode));
     });
 }
 
