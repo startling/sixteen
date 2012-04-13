@@ -156,12 +156,15 @@ class DCPU16Protocol(protocol.Protocol):
         self.cpu.RAM[:len(code)] = code
 
     def dataReceived(self, data):
-        keypresses = json.loads(data)
+        keypresses, count = json.loads(data)
         for k in keypresses:
             self.cpu.keyboard_input(ord(k))
         try:
-            if not self.cpu.is_halting():
-                self.cpu.cycle()
+            for _ in xrange(count):
+                if not self.cpu.is_halting():
+                    self.cpu.cycle()
+                else:
+                    break
         except Exception as e:
             self.errors.append(str(e))
         self.write_changes()
