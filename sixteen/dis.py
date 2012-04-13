@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.dcpu16 import DCPU16
+from sixteen.utilities import OpcodeError
 
 
 class Disassembler(DCPU16):
