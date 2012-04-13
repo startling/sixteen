@@ -6,10 +6,19 @@ var socket = null;
 // characters is an empty object that we'll use to keep track of 
 var characters = {};
 
+// constants for the height and width of pixels and characters
+var pixel_width = 4;
+var pixel_height = 4;
+
+var char_width = pixel_width * 4
+var char_height = pixel_height * 8
+
 
 function init() {
     // on the window's load, get canvas and its 2D context
     canvas = document.getElementsByTagName("canvas")[0];
+    canvas.width = char_width * 32;
+    canvas.height = char_height * 12;
     context = canvas.getContext("2d");
 }
 
@@ -43,6 +52,40 @@ socket.onmessage = function(msg) {
     // characters.
     Object.keys(data["characters"]).forEach(function (key) {
         characters[key] = data["characters"][key];
+    });
+
+    // and then change all the cells
+    data.cells.forEach(draw_cell);
+};
+
+
+function draw_pixel(x, y) {
+    var x_a = pixel_width * x;
+    var y_a = pixel_height * y;
+    context.fillRect(x_a, y_a, pixel_width, pixel_height);
+};
+
+
+function draw_cell(n) {
+    // adjust the coordinates
+    x = char_width * n.x;
+    y = char_height * n.y;
+    // draw the background
+    context.fillStyle = n.background;
+    context.fillRect(x, y, char_width, char_height);
+    // draw the character
+    character = characters[n["char"]];
+    context.fillStyle = n.foreground;
+    var r = 0;
+    character.forEach(function (row) {
+        var column = 0;
+        row.forEach(function (cell) {
+            if (cell == 1) {
+                draw_pixel(column, r);
+            };
+            column++;
+        });
+        r++;
     });
 };
 
