@@ -58,6 +58,11 @@ class WebCPU(DCPU16):
         rows = zip(*columns)
         # and set the chars_changed to the rows
         self.protocol.chars_changed[location] = rows
+        # ugly hack: make the frontend refresh the ones that have been changed
+        # (might be too slow)
+        for addr in (a for a in xrange(*self.vram) if self.RAM[a] == location):
+            self.change_letter(addr, location)
+
 
     def change_background(self, index, value):
         background = self.color(value & 0x0f)
