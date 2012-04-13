@@ -44,7 +44,7 @@ class WebCPU(DCPU16):
             location = ((index - 1) - self.chars[0]) // 2
         # oragnize the bits into columns
         columns = [
-            [x for x in bit_iter(top >> 8, 8)],
+            [x for x in bit_iter(top >> 8, 8)][::-1],
             [x for x in bit_iter(top & 0xff, 8)][::-1],
             [x for x in bit_iter(bottom >> 8, 8)][::-1],
             [x for x in bit_iter(bottom & 0xff, 8)][::-1],
