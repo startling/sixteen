@@ -47,7 +47,7 @@ class WebCPU(DCPU16):
             top = self.RAM[index - 1]
             bottom = value
             location = ((index - 1) - self.chars[0]) // 2
-        # oragnize the bits into columns
+        # organize the bits into columns
         columns = [
             [x for x in bit_iter(top >> 8, 8)][::-1],
             [x for x in bit_iter(top & 0xff, 8)][::-1],
@@ -60,8 +60,9 @@ class WebCPU(DCPU16):
         self.protocol.chars_changed[location] = rows
         # ugly hack: make the frontend refresh the ones that have been changed
         # (might be too slow)
-        for addr in (a for a in xrange(*self.vram) if self.RAM[a] == location):
-            self.change_letter(addr, location)
+        for addr in (a for a in xrange(*self.vram) if (
+            self.RAM[a] & 0b0000000001111111) == location):
+             self.change_letter(addr, self.RAM[addr])
 
 
     def change_background(self, index, value):
