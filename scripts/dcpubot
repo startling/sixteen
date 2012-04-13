@@ -44,9 +44,10 @@ class DCPUBot(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         user = user.split("!", 1)[0]
         # if we get a message that starts with "dcpubot:"...
-        if msg.startswith(self.nickname + ":"):
+        if msg.startswith(self.nickname + ":") or msg.startswith(">>"):
+            stripped = msg.replace(self.nickname + ":", "").replace(">>", "")
             # split the given code at "/"
-            lines = msg.replace(self.nickname + ":", "").split("/")
+            lines = stripped.split("/")
             # initialize an AssemblyParser
             asm = AssemblyParser()
             try:
