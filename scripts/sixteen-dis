@@ -5,7 +5,7 @@
 import sys
 import argparse
 import re
-from sixteen.dcpu16 import DCPU16
+from sixteen.dis import Disassembler
 from sixteen.debugger import Debugger, ColoredDebugger
 from sixteen.utilities import HexRead, file_to_ram, OpcodeError
 
@@ -42,8 +42,8 @@ if args.bin:
 else:
 	f = HexRead(args.file)
 
-# initialize a new CPU
-d = DCPU16()
+# initialize a new (disassembling) CPU
+d = Disassembler()
 
 
 # read the file to the CPU's RAM
@@ -53,17 +53,8 @@ file_to_ram(f, d, args.big_endian)
 f.close
 
 
-# while there are opcodes other than 0x0000...
-while any(d.RAM[d.registers["PC"]:]):
-    address = d.registers["PC"]
-    next_word = d.get_next()
-    try:
-        # parse the opcodes and values out of the next word
-        opcode, values = d.parse_instruction(next_word)
-        # print each opcode and its arguments
-        assembly = "%s %s" % (opcode, ", ".join([v.dis for v in values]))
-    except OpcodeError:
-        assembly = "DAT 0x%04x" % next_word
+for assembly, address in d.dis():
     if args.addresses:
-        assembly = "%-20s ; 0x%04x" % (assembly, address)
-    print assembly
+        print "%-20s ; 0x%04x" % (assembly, address)
+    else:
+        print assembly
