@@ -59,7 +59,7 @@ sixteen-web --hex examples/vram.hex
 
 Point your browser at `http://localhost:1268` and you'll see something like this:
 
-![sixteen-web](https://raw.github.com/startling/sixteen/master/)
+![sixteen-web](https://github.com/startling/sixteen/blob/master/sixteen.png?raw=true)
 
 sixteen-web supports keyboard input, colored output (obviously), and everything else I can think of. It'll also re-read the file everytime you hit refresh, so you don't need to kill the server. 
 
