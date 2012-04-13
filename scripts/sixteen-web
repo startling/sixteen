@@ -32,35 +32,32 @@ parser.add_argument('file',
 
 args = parser.parse_args()
 
-# open the file from the command-line, if it's supposed to be a bin
-if args.bin:
-	f = open(args.file)
-else:
-	f = HexRead(args.file)
-
-
-code = []
-
-while True:
-    word = [ord(c) for c in f.read(2)]
-    if len(word) != 2:
-        break
-    if args.big_endian:
-        top, bottom = word
-    else:
-        bottom, top = word
-    word_int = (top << 8) + bottom
-    code.append(word_int)
-
-f.close()
 
 
 class DCPU16Factory(protocol.Factory):
     protocol = DCPU16Protocol
-    code = code
 
     def buildProtocol(self, addr):
-        return self.protocol(self.code)
+        # open the file from the command-line, if it's supposed to be a bin
+        if args.bin:
+            f = open(args.file)
+        else:
+            f = HexRead(args.file)
+        # read it all to the list `code`.
+        code = []
+        while True:
+            word = [ord(c) for c in f.read(2)]
+            if len(word) != 2:
+                break
+            if args.big_endian:
+                top, bottom = word
+            else:
+                bottom, top = word
+            word_int = (top << 8) + bottom
+            code.append(word_int)
+        # close the file
+        f.close()
+        return self.protocol(code)
 
 
 # listen on port for websocket connections
