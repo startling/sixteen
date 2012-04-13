@@ -1,14 +1,29 @@
-body > canvas {
+.container {
     display: box;
     margin-left: auto;
     margin-right: auto;
-
-    /* the display has a 16-pixel border around it, whose color you can set.
-     * we'll start it off as black. */
-    border: 16px solid #000;
+    
+    border: 1px solid #000000;
 
     box-shadow: 0 0 3px #000;
     -moz-box-shadow: 0 0 3px #000;
+    
+    /* center the canvas. */
+    text-align: center;
+
+    width: 544px;
+    height: 416px;
+
+    /* start the background off as black. */
+    background-color: #000;
+}
+
+canvas {
+    padding: 0;
+    margin: 0;
+    /* the display has a 16-pixel border around it, whose color you can set.
+     * we'll start it off as black. */
+    border: 16px solid #000;
 
     /* start the background off as black. */
     background-color: #000;
