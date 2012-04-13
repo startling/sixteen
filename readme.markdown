@@ -8,6 +8,7 @@ Here's what we've got so far:
 
 I *think* it's spec-complete. Anyway, it's main use is the debugger, because we don't have any IO methods yet. I'll implement memory-mapping soon, too, but none of the spec uses it yet.
 
+
 ## a basic debugger
 
 run it like this:
@@ -46,6 +47,38 @@ IFN A, 0x0010
 A: 0010 C: 0000 B: 0000 I: 0000 J: 0000 O: 0000 PC: 0009 SP: ffff Y: 0000 X: 0000 Z: 0000
 >>>> 
 >> quit
+````
+
+## sixteen-web
+
+sixteen-web is a web frontend for the virtual machine. Run it like this:
+
+````sh
+sixteen-web --hex examples/vram.hex
+````
+
+Point your browser at `http://localhost:1268` and you'll see something like this:
+
+![sixteen-web](https://raw.github.com/startling/sixteen/master/)
+
+sixteen-web supports keyboard input, colored output (obviously), and everything else I can think of. It'll also re-read the file everytime you hit refresh, so you don't need to kill the server. 
+
+Here's the `--help`:
+
+````
+usage: sixteen-web [-h] [--little] [--hex] file
+
+Run a DCPU-16 binary, displaying the output on a local webserver.
+
+positional arguments:
+  file          The binary file to run.
+
+optional arguments:
+  -h, --help    show this help message and exit
+  --little, -l  Denote that this file should be parsed as little-endian.
+                (Default: big-endian).
+  --hex         Denote that this file should be parsed as an ASCII hex dump.
+                (Default: binary)
 ````
 
 ## sixteen-curses
