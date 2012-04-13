@@ -125,6 +125,7 @@ class DCPU16Protocol(protocol.Protocol):
         self.letters_changed = []
         self.chars_changed = {}
         self.change_background = None
+        self.errors = []
         # intialize the cpu
         self.cpu = WebCPU(self)
         # read the code from the factory to the RAM
@@ -134,7 +135,10 @@ class DCPU16Protocol(protocol.Protocol):
         keypresses = json.loads(data)
         for k in keypresses:
             self.cpu.keyboard_input(ord(k))
-        self.cpu.cycle()
+        try:
+            self.cpu.cycle()
+        except Exception as e:
+            self.errors.append(str(e))
         self.write_changes()
 
     def write_changes(self):
@@ -143,8 +147,10 @@ class DCPU16Protocol(protocol.Protocol):
             "background": self.change_background,
             "cells": self.letters_changed,
             "characters": self.chars_changed,
+            "errors": self.errors,
         }
         self.transport.write(json.dumps(changes))
         self.letters_changed = []
         self.chars_changed = {}
         self.change_background = None
+        self.errors = []
