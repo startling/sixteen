@@ -99,7 +99,7 @@ function cycle () {
     setTimeout(function () {
         socket.send(JSON.stringify(keypresses));
         keypresses = [];
-    }, 10);
+    }, .01);
 }
 
 
