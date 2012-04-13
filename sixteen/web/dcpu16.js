@@ -3,6 +3,7 @@ var canvas = null;
 var context = null;
 var socket = null;
 var focus = true;
+var halt = false;
 
 // a list that we'll put keypresses in and send to the server.
 var keypresses = []
@@ -83,10 +84,11 @@ socket.onmessage = function(msg) {
     // and then change all the cells
     data.cells.forEach(draw_cell);
     if (data["errors"].length == 0) {
-        if (focus) {
+        if (focus & !halt) {
             cycle();
         };
     } else {
+        halt = true;
         data["errors"].forEach(error_handler);
     };
 };
@@ -106,6 +108,7 @@ function error_handler (text) {
     div.appendChild(document.createTextNode(text));
     div.classList.add("error");
     div.onclick = function () {
+        halt = false;
         document.body.removeChild(div);
         cycle();
     };
