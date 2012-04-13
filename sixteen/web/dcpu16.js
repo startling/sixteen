@@ -80,6 +80,10 @@ socket.onmessage = function(msg) {
     Object.keys(data["characters"]).forEach(function (key) {
         characters[key] = data["characters"][key];
     });
+    
+    if (data["halt"] == true) {
+        halt = true;
+    };
 
     // and then change all the cells
     data.cells.forEach(draw_cell);
