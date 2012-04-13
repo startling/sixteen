@@ -13,15 +13,15 @@ var characters = {};
 var pixel_width = 4;
 var pixel_height = 4;
 
-var char_width = pixel_width * 4
-var char_height = pixel_height * 8
+var char_width = 4;
+var char_height = 8;
 
 
 function init() {
     // on the window's load, get canvas and its 2D context
     canvas = document.getElementsByTagName("canvas")[0];
-    canvas.width = char_width * 32;
-    canvas.height = char_height * 12;
+    canvas.width = char_width * pixel_width * 32;
+    canvas.height = char_height * pixel_height * 12;
     context = canvas.getContext("2d");
 
     // add a keypress handler that pushes keypresses to the 
@@ -102,11 +102,11 @@ function draw_pixel(x, y) {
 
 function draw_cell(n) {
     // adjust the coordinates
-    var x = char_width * n.x;
-    var y = char_height * n.y;
+    var x = char_width * pixel_width * n.x;
+    var y = char_height * pixel_height * n.y;
     // draw the background
     context.fillStyle = n.background;
-    context.fillRect(x, y, char_width, char_height);
+    context.fillRect(x, y, char_width * pixel_width, char_height * pixel_height);
     // draw the character
     character = characters[n["char"]];
     context.fillStyle = n.foreground;
@@ -115,7 +115,7 @@ function draw_cell(n) {
         var column = 0;
         row.forEach(function (cell) {
             if (cell == 1) {
-                draw_pixel((n.x * pixel_width) + column, (n.y * pixel_height) + r);
+                draw_pixel((n.x * char_width) + column, (n.y * char_height) + r)
             };
             column++;
         });
