@@ -7,7 +7,6 @@ from sixteen.input import InputCPU
 from sixteen.halting import LoopDetecting
 from sixteen.memorymap import MemoryMap
 from sixteen.characters import characters
-from sixteen.words import bit_iter
 
 
 class WebCPU(DCPU16, OutputCPU, InputCPU, LoopDetecting):
@@ -79,28 +78,39 @@ class DCPU16Protocol(protocol.Protocol):
         self.cpu.RAM[:len(code)] = code
 
     def dataReceived(self, data):
+        # get the keypresses and the number of cycles from the frontend
         keypresses, count = json.loads(data)
         for k in keypresses:
             self.cpu.keyboard_input(ord(k))
         try:
+            # cycle as many times as we're supposed to,
             for _ in xrange(count):
+                # ... checking for infinite loops.
                 if not self.cpu.is_looping():
                     self.cpu.cycle()
                 else:
                     break
+        # if we get any errors, let the frontend know.
         except Exception as e:
             self.errors.append(str(e))
+        # and then pass everything to the frontend.
         self.write_changes()
 
     def write_changes(self):
         "Write the changes to the websockets client and reset."
         changes = {
+            # None if there's no new background color, otherwise a color.
             "background": self.change_background,
+            # the cells that have been changed since last time
             "cells": self.letters_changed,
+            # the characters (fonts) that have been changed
             "characters": self.chars_changed,
+            # any errors we've encountered
             "errors": self.errors,
+            # whether the frontend should stop.
             "halt": self.cpu.stop,
         }
+        # reset everything
         self.transport.write(json.dumps(changes))
         self.letters_changed = []
         self.chars_changed = {}
