@@ -65,11 +65,11 @@ class Debugger(object):
 
 	@format_output
 	def dump(self, address):
-		return self.cpu.RAM[int(address, base=16)]
+		return self.cpu.RAM[self.parse_number(address)]
 
 	@format_output
 	def dump_range(self, first, second):
-		return self.cpu.RAM[int(first, base=16):int(second, base=16) + 1]
+		return self.cpu.RAM[self.parse_number(first):self.parse_number(second)+ 1]
 
 	@format_output
 	def registers(self, r=None):
@@ -81,7 +81,7 @@ class Debugger(object):
 	def continue_until(self, pc):
 		"Continue until PC is at the greater than the given address."
 		while True:
-			if self.cpu.registers["PC"] > int(pc, base=16):
+			if self.cpu.registers["PC"] > self.parse_number(pc):
 				break
 			print self.step()
 		return "<<"
@@ -89,14 +89,19 @@ class Debugger(object):
 	def until(self, pc):
 		"Continue until PC is exactly equal to the given address."
 		while True:
-			if self.cpu.registers["PC"] == int(pc, base=16):
+			if self.cpu.registers["PC"] == self.parse_number(pc):
 				break
 			print self.step()
 		return "<<"
 
+	def parse_number(self, n):
+		i = int(n, base=16)
+		# % it, so that we don't under/overflow.
+		return i % len(self.cpu.RAM)
+
 	def dis(self, addr):
 		"Given an address, disassemble the word there."
-		word = self.cpu.RAM[int(addr, base=16)]
+		word = self.cpu.RAM[self.parse_number(addr)]
 		try:
 			# parse the opcodes and values out of the word
 			opcode, values = self.cpu.parse_instruction(word)
@@ -109,7 +114,7 @@ class Debugger(object):
 
 	def jump(self, pc):
 		"Move the PC to a given address."
-		address = int(pc, base=16)
+		address = self.parse_number(pc)
 		before = self.format % self.cpu.registers["PC"]
 		# subtract one, because the CPU preincremements
 		self.cpu.registers["PC"] = address - 1
