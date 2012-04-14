@@ -28,8 +28,8 @@ parser.add_argument('--addresses', '-a', action='store_true',
     help="Add the starting address for each instruction in a comment."
 )
 
-parser.add_argument('file',
-	help="The binary file to step through."
+parser.add_argument('file', nargs="?",
+	help="The file to disassemble (defaults to stdin)."
 )
 
 
@@ -37,10 +37,14 @@ args = parser.parse_args()
 
 
 # open the file from the command-line
-if args.bin:
+if args.bin and args.file:
 	f = open(args.file)
-else:
+elif not args.bin and args.file:
 	f = HexRead(args.file)
+elif args.bin and not args.file:
+    f = sys.stdin
+elif not args.bin and not args.file:
+    f = HexRead.from_file(sys.stdin)
 
 # initialize a new (disassembling) CPU
 d = Disassembler()
