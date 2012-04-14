@@ -21,8 +21,9 @@ You can specify two different options: `--little`, which interprets the binary a
 It'll step through the instructions, printing each one. You can either hit return to continue stepping through, or use one of these commands:
 
 * `r` or `register`: print all of the registers; it can also take a single argument (e.g., `r A`) and print that single register.
-* `d` or `dump` takes a single argument, a four-digit long hex number, and prints the value of the memory at that location.
+* `d` or `dump` takes a single argument, a hex number, and prints the value of the memory at that location.
 * `q` or `quit` ends the debugger.
+* `s` or `dis` takes a single argument (an address) and disassembles the code there.
 * `dr` or `dumprange`, which takes to address and dumps them and everything between them.
 * `c` or `continue` takes an address and continues until the program counter is greater than that address.
 * `u` or `until` takes an address and continues until the program counter is exactly equal to that address. Note that this is liable to spin forever, if you pick an address that's in the middle of an instruction or that doesn't get pointed to ever.
