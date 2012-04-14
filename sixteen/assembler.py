@@ -261,11 +261,9 @@ def add_labels(self, tree):
         # second pass -- replace all instances of that label with the node's
         # location.
         for node in tree:
-            try:
-                index = node.index(l)
-                node[index] = location
-            except ValueError:
-                pass
+            for n, word in enumerate(node):
+                if word == l:
+                    node[n] = location
     return tree
 
 
