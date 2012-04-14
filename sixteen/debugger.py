@@ -30,6 +30,8 @@ class Debugger(object):
 			"u": self.until,
 			"jump": self.jump,
 			"j": self.jump,
+			"dis": self.dis,
+			"s": self.dis,
 		}
 
 	def format_output(fn):
@@ -91,6 +93,19 @@ class Debugger(object):
 				break
 			print self.step()
 		return "<<"
+
+	def dis(self, addr):
+		"Given an address, disassemble the word there."
+		word = self.cpu.RAM[int(addr, base=16)]
+		try:
+			# parse the opcodes and values out of the word
+			opcode, values = self.cpu.parse_instruction(word)
+			# print each opcode and its arguments
+			assembly = "%s %s" % (opcode, ", ".join([v.dis for v in values]))
+		# if there's an OpcodeError, it's a DAT instruction.
+		except OpcodeError:
+			assembly = "DAT 0x%04x" % word
+		return assembly
 
 	def jump(self, pc):
 		"Move the PC to a given address."
