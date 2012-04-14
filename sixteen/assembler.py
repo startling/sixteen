@@ -45,7 +45,7 @@ def register_plus_next_word(self, num, reg):
         code = 0x10 + self.registers.index(reg.upper())
         return code, self.literal(num, both=False)
     except ValueError:
-        Defer()
+        raise Defer()
 
 
 @ValueParser.pattern(r"^\[SP\+\+\]|POP|pop|\[sp\+\+\]$")
