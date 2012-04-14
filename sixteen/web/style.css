@@ -8,7 +8,6 @@
     box-shadow: 0 0 3px #000;
     -moz-box-shadow: 0 0 3px #000;
     -webkit-box-shadow: 0 0 3px #000;
-    
 
     box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -16,12 +15,12 @@
 
     /* center the canvas. */
     text-align: center;
-
-    width: 545px;
+    
+    width: 546px;   
 }
 
 .container {
-    height: 416px;
+    height: 418px;
 
     /* start the background off as black. */
     background-color: #000;
