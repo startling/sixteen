@@ -246,6 +246,11 @@ class TestParseInstructions(unittest.TestCase):
         instruction = self.parser.parse("set A, 0x30")
         self.assertEquals(instruction, [0x7c01, 0x0030])
 
+    def test_tricky_labels(self):
+        instruction = self.parser.parse_tree([":set set set set"])
+        # should be the same as set 0, 0.
+        self.assertEquals(instruction, [0x7df1, 0, 0])
+
     def test_parse_text_with_labels(self):
         lines = """
                 SET A, 0x30        ; 
