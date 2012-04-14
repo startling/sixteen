@@ -4,11 +4,13 @@
 import readline
 from functools import wraps
 from sixteen.words import as_opcode
+from sixteen.utilities import OpcodeError
 
 
 class Debugger(object):
 	outer_prompt = ">> "
 	inner_prompt = ">>>> "
+	error = "Error: "
 	format = "%04x"
 	quit = ("q", "quit")
 
@@ -47,14 +49,17 @@ class Debugger(object):
 		return formatted
 
 	def step(self):
-		op, args = self.cpu.cycle()
-		if len(args) == 1:
-			(a,) = args
-			return "%s %s" % (op, a.dis)
-		elif len(args) == 2:
-			a, b = args
-			return "%s %s, %s" % (op, a.dis, b.dis)
-		#TODO: make this show hex values, too.
+		try:
+			op, args = self.cpu.cycle()
+			if len(args) == 1:
+				(a,) = args
+				return "%s %s" % (op, a.dis)
+			elif len(args) == 2:
+				a, b = args
+				return "%s %s, %s" % (op, a.dis, b.dis)
+			#TODO: make this show hex values, too.
+		except OpcodeError as o:
+			return self.error + str(o)
 
 	@format_output
 	def dump(self, address):
@@ -133,3 +138,4 @@ class ColoredDebugger(Debugger):
 	"A subclass of Debugger with colored prompts."
 	outer_prompt = "\x1b[32m>>\x1b[39m "
 	inner_prompt = "\x1b[36m>>>>\x1b[39m "
+	error = "\x1b[31mError:\x1b[39m "
