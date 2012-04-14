@@ -4,12 +4,13 @@ from txws import WebSocketFactory
 from sixteen.dcpu16 import DCPU16
 from sixteen.output import OutputCPU
 from sixteen.input import InputCPU
+from sixteen.halting import LoopDetecting
 from sixteen.memorymap import MemoryMap
 from sixteen.characters import characters
 from sixteen.words import bit_iter
 
 
-class WebCPU(DCPU16, OutputCPU, InputCPU):
+class WebCPU(DCPU16, OutputCPU, InputCPU, LoopDetecting):
     def __init__(self, protocol):
         "Given a twisted protocol, initialize a WebCPU."
         self.protocol = protocol
@@ -17,8 +18,8 @@ class WebCPU(DCPU16, OutputCPU, InputCPU):
         self.registers = self._registers.copy()
         # initialize the keypointer offset
         self.key_offset = 0
-        # this gets turned into True if we suspect the program is halting.
-        self.halt = False
+        # this gets turned into True if we suspect the program is looping.
+        self.stop = False
         self.RAM = MemoryMap(self.cells, [
             (self.vram, self.change_letter),
             (self.background, self.change_background),
@@ -64,21 +65,6 @@ class WebCPU(DCPU16, OutputCPU, InputCPU):
             "background": "#%02x%02x%02x" % background,
         })
 
-    def is_halting(self):
-        if self.halt:
-            return True
-        else:
-            # if it's sub pc, 1, it's a halt...
-            if self.RAM[self.registers["PC"]] == 0x85c3:
-                self.halt = True
-            else:
-                # if it's something like :loop set pc, loop, it's a halt
-                first = self.RAM[self.registers["PC"]]
-                second = self.RAM[self.registers["PC"] + 1]
-                if first == 0x7dc1 and second == self.registers["PC"]:
-                    self.halt = True
-            return self.halt
-
 
 class DCPU16Protocol(protocol.Protocol):
     def __init__(self, code):
@@ -98,7 +84,7 @@ class DCPU16Protocol(protocol.Protocol):
             self.cpu.keyboard_input(ord(k))
         try:
             for _ in xrange(count):
-                if not self.cpu.is_halting():
+                if not self.cpu.is_looping():
                     self.cpu.cycle()
                 else:
                     break
@@ -113,7 +99,7 @@ class DCPU16Protocol(protocol.Protocol):
             "cells": self.letters_changed,
             "characters": self.chars_changed,
             "errors": self.errors,
-            "halt": self.cpu.halt,
+            "halt": self.cpu.stop,
         }
         self.transport.write(json.dumps(changes))
         self.letters_changed = []
