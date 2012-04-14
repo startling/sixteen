@@ -5,6 +5,13 @@ class HexRead(object):
     "A file-like object for reading hex dumps with possible whitespace."
     def __init__(self, path, mode="r"):
         self._fd = open(path, mode)
+    
+    @classmethod
+    def from_file(cls, fd):
+        "Construct a hex reader from an already-open file."
+        h = object.__new__(cls)
+        h._fd = fd
+        return h
 
     def read(self, n):
         chars = []
