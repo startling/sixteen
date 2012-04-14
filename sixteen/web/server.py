@@ -3,15 +3,13 @@ from twisted.internet import protocol, reactor
 from txws import WebSocketFactory
 from sixteen.dcpu16 import DCPU16
 from sixteen.output import OutputCPU
+from sixteen.input import InputCPU
 from sixteen.memorymap import MemoryMap
 from sixteen.characters import characters
 from sixteen.words import bit_iter
 
 
-class WebCPU(DCPU16, OutputCPU):
-    # 16 char keyboard ring buffer at 0x9000 - 0x900f
-    keyring = (0x9000, 0x900f)
-
+class WebCPU(DCPU16, OutputCPU, InputCPU):
     def __init__(self, protocol):
         "Given a twisted protocol, initialize a WebCPU."
         self.protocol = protocol
@@ -65,22 +63,6 @@ class WebCPU(DCPU16, OutputCPU):
             "foreground": "#%02x%02x%02x" % foreground,
             "background": "#%02x%02x%02x" % background,
         })
-
-    def keyboard_input(self, key):
-        """ Thanks, Rick.
-        > < startling> so how does input work? writes to the first location
-        >     between 0x9000 - 0x900f that's not zero?
-        > < Rick> virtualkeyboard has an internal offset that starts at 0
-        > < Rick> it checks if [0x9000+offset] is zero
-        > < Rick> if it's not
-        > < Rick> it drops input
-        > < Rick> if it is, it sets the value to the key and (offset+1)%16
-        > < startling> wonderful.
-        """
-        location = self.keyring[0] + self.key_offset
-        if self.RAM[location] == 0:
-            self.RAM[location] = key
-            self.key_offset = (self.key_offset + 1) % 16
 
     def is_halting(self):
         if self.halt:
