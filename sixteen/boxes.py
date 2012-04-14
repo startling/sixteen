@@ -86,7 +86,7 @@ class Register(object):
                 s.key -= len(cpu.RAM)
 
         return type("[%s + next word]" % self.name, (Box,),
-                {"__init__": r_init})
+                {"__init__": r_init, "consumes": 1})
 
 
 class NextWord(Box):
