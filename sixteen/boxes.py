@@ -25,6 +25,11 @@ class Box(object):
     """
     consumes = 0
 
+    def __str__(self):
+        return self.dis
+
+    __repr__ = __str__
+
     def get(self):
         """'get' is called to retrieve the contained value. Nothing
         destructive should happen here. Everything that gets the next word etc
@@ -123,13 +128,15 @@ class NextWordAsPointer(Box):
         self.dis = "[0x%04x]" % next_word
 
 
+
 def ShortLiteral(n):
     "0x20-0x3f: literal value 0x00-0x1f (literal)"
     class LiteralN(Box):
         def __init__(self, cpu):
             self.value = n
             self.dis = "0x%04x" % n
-        
+
+
         def get(self):
             return self.value
 
@@ -155,6 +162,7 @@ class PUSH(Box):
         if cpu.registers["SP"] < 0:
             cpu.registers["SP"] = len(cpu.RAM) - 1
         self.key = cpu.registers["SP"]
+
 
 
 class POP(Box):
