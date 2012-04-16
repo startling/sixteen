@@ -151,6 +151,6 @@ pip install git+git://github.com/startling/sixteen.git
 ## up next:
 
 * fix the quirky parts of the parser
-* optimize the javascript in sixteen-web; firebug says 40% of the time is spent drawing pixels.
+* optimize sixteen-web, frontend and backend.
+* rewrite the debugger and make a more useful disassembler.
 * write nice editor commands for sixteen-asm, sixteen-dis, and sixteen-web
-* more debugger commands (including error-catching in the debugger)
