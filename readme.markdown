@@ -63,6 +63,15 @@ Point your browser at `http://localhost:1268` and you'll see something like this
 
 sixteen-web supports keyboard input, colored output (obviously), and everything else I can think of. It'll also re-read the file everytime you hit refresh, so you don't need to kill the server. 
 
+Some notes regarding performance:
+
+* Under Cpython and Firefox, the backend is the limiting factor -- Firefox's CPU usage hovers around 20%, as does the backend (depending on the number of cycles per draw in sixteen/web/dcpu16.js), but things are kind of slow.
+* All of sixteen runs under Pypy, and in that case the frontend is what limits us. I get less than 10% usage for Pypy and ~60% from firefox.
+* There's some primitive loop detection going on that can detect infinite loops of the kind that are used where a halt would be, so CPU usage goes down once a program reaches that point.
+* The web frontend stops asking for the backend to cycle when it loses focus, so it won't spin in the background. This is nice because it leaves the browser an illusion of responsiveness.
+
+Notice that the backend hasn't been optimized very much -- it's on the to-do list. If you're good at javascript, I'd love for you to check out sixteen/web/dcpu16.js for glaring inefficiencies, too -- javascript isn't my native language.
+
 Here's the `--help`:
 
 ````
