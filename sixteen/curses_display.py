@@ -50,6 +50,8 @@ class TerminalCPU(DCPU16):
     # speculative: height, width of the display
     height, width = (12, 32)
 
+    input_buffer = []
+
     def __init__(self, c):
         """Given a curses window, initialize a cpu with memory-mapped output to
         that window.
@@ -58,6 +60,28 @@ class TerminalCPU(DCPU16):
         self.RAM = MemoryMap(self.cells, [(self.vram, self.curses_write)])
         # copy my own `registers` dict.
         self.registers = self._registers.copy()
+
+        # Prepare the input pointer.
+        self.RAM[0x9010] = 0x9000
+
+
+    def receive_input(self, ch):
+        """
+        Handle some input from the terminal.
+        """
+
+        self.input_buffer.append(ch)
+        index = 0
+        pointer = self.RAM[0x9010]
+        while not self.RAM[pointer]:
+            self.RAM[pointer] = self.input_buffer[index]
+            index += 1
+            pointer += 1
+            if pointer <= 0x9010:
+                pointer = 0x9000
+        self.RAM[0x9010] = pointer
+        self.input_buffer = self.input_buffer[index:]
+
 
     def curses_write(self, position, value):
         "This gets called whenever a cell within the vram is changed."

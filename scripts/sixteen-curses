@@ -48,23 +48,28 @@ else:
 
 try:
     with Curses() as c:
-        if args.quit:
-            c.nodelay(1)
+        c.nodelay(1)
         # initialize a CPU
         t = TerminalCPU(c)
         # read the file to its RAM
         file_to_ram(f, t)
         while True:
+            ch = c.getch()
+            # wait for input after, if we're supposed to.
+            if args.step:
+                if ch == -1:
+                    continue
+            if args.quit:
+                # get (non-blocking) keypress, check if it's "q"
+                if chr(ch) == "q":
+                    break
+
+            # If a character was received, relay it to the CPU.
+            if ch != -1:
+                t.receive_input(ch)
+
             try:
                 t.cycle()
-                # wait for input after, if we're supposed to.
-                if args.step:
-                    c.getch()
-                if args.quit:
-                    # get (non-blocking) keypress, check if it's "q"
-                    key = c.getch()
-                    if key != -1 and chr(key) == "q":
-                        break
             # break if we get an OpcodeError, probably 0x0000
             except OpcodeError:
                 break
