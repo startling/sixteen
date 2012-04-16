@@ -66,6 +66,8 @@ class WebCPU(DCPU16, OutputCPU, InputCPU, LoopDetecting):
 
 
 class DCPU16Protocol(protocol.Protocol):
+    cycle_counter = 0
+
     def __init__(self, code):
         # and the letters_changed list
         self.letters_changed = {}
@@ -77,6 +79,18 @@ class DCPU16Protocol(protocol.Protocol):
         # read the code from the factory to the RAM
         self.cpu.RAM[:len(code)] = code
 
+    def dump_cpu(self, op, args):
+        if self.cpu.cycles >= self.cycle_counter:
+            self.cycle_counter += 100
+            print "---- " * 11
+            print "A    B    C    I    J    X    Y    Z    SP   PC   O"
+            print "---- " * 11
+        rs = self.cpu.registers
+        rs["dis"] = str("%s %s" % (op, args))
+        s = ("%(A)04x %(B)04x %(C)04x %(I)04x %(J)04x %(X)04x %(Y)04x %(Z)04x"
+                " %(SP)04x %(PC)04x %(O)04x: %(dis)s") % rs
+        print s
+
     def dataReceived(self, data):
         # get the keypresses and the number of cycles from the frontend
         keypresses, count = json.loads(data)
@@ -87,7 +101,8 @@ class DCPU16Protocol(protocol.Protocol):
             for _ in xrange(count):
                 # ... checking for infinite loops.
                 if not self.cpu.is_looping():
-                    self.cpu.cycle()
+                    op, args = self.cpu.cycle()
+                    self.dump_cpu(op, args)
                 else:
                     break
         # if we get any errors, let the frontend know.

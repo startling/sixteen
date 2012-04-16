@@ -10,6 +10,9 @@ class DCPU16(object):
     # DCPU16 has 0x10000 cells
     cells = 0x10000
 
+    # Number of cycles for which this CPU has run.
+    cycles = 0
+
     opcodes = {
         0x00: "SPEC",
         0x01: "SET", 0x02: "ADD", 0x03: "SUB", 0x04: "MUL", 0x05: "DIV",
@@ -97,6 +100,8 @@ class DCPU16(object):
 
     def cycle(self):
         "Run for one cycle and return the operation and its arguments.."
+        self.cycles += 1
+
         address = self.registers["PC"]
         op, args = self.parse_instruction(self.get_next(), address)
         getattr(self, op)(*args)
