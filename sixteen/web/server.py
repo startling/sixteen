@@ -57,18 +57,18 @@ class WebCPU(DCPU16, OutputCPU, InputCPU, LoopDetecting):
         "This is called whenever a cell of vram is changed."
         # get the data from sixteen.output.OutputCPU.letter
         x, y, foreground, background, blink, char = self.letter(index, value)
-        self.protocol.letters_changed.append({
+        self.protocol.letters_changed[(x, y)] = {
             "x": x, "y": y, "char": char, "blink": blink,
             # format the background and foreground tuples as html/css colors.
             "foreground": "#%02x%02x%02x" % foreground,
             "background": "#%02x%02x%02x" % background,
-        })
+        }
 
 
 class DCPU16Protocol(protocol.Protocol):
     def __init__(self, code):
         # and the letters_changed list
-        self.letters_changed = []
+        self.letters_changed = {}
         self.chars_changed = {}
         self.change_background = None
         self.errors = []
@@ -102,7 +102,7 @@ class DCPU16Protocol(protocol.Protocol):
             # None if there's no new background color, otherwise a color.
             "background": self.change_background,
             # the cells that have been changed since last time
-            "cells": self.letters_changed,
+            "cells": self.letters_changed.values(),
             # the characters (fonts) that have been changed
             "characters": self.chars_changed,
             # any errors we've encountered
@@ -112,7 +112,7 @@ class DCPU16Protocol(protocol.Protocol):
         }
         # reset everything
         self.transport.write(json.dumps(changes))
-        self.letters_changed = []
+        self.letters_changed = {}
         self.chars_changed = {}
         self.change_background = None
         self.errors = []
