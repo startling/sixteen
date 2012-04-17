@@ -5,10 +5,6 @@ class InputCPU(object):
     # 16 char keyboard ring buffer at 0x9000 - 0x900f
     keyring = (0x9000, 0x900f)
 
-    # initialize the keypointer offset
-    # this should be done in any subclass' __init__!
-    key_offset = 0
-
     def keyboard_input(self, key):
         """ Given the ascii code for the key pressed, put it into memory.
 
@@ -21,7 +17,13 @@ class InputCPU(object):
         > < Rick> if it is, it sets the value to the key and (offset+1)%16
         > < startling> wonderful.
         """
-        location = self.keyring[0] + self.key_offset
-        if self.RAM[location] == 0:
-            self.RAM[location] = key
-            self.key_offset = (self.key_offset + 1) % 16
+        pointer = self.RAM[0x9010]
+        if not 0x9000 <= pointer < 0x9010:
+            pointer = 0x9000
+        n = pointer + 1
+        if n >= 0x9010:
+            n = 0x9000
+        if self.RAM[n] == 0:
+            self.RAM[n] = key
+            pointer = n
+        self.RAM[0x9010] = pointer

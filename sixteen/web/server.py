@@ -15,8 +15,6 @@ class WebCPU(DCPU16, OutputCPU, InputCPU, LoopDetecting):
         self.protocol = protocol
         # copy my own `registers` dict.
         self.registers = self._registers.copy()
-        # initialize the keypointer offset
-        self.key_offset = 0
         # this gets turned into True if we suspect the program is looping.
         self.stop = False
         self.RAM = MemoryMap(self.cells, [
@@ -26,6 +24,9 @@ class WebCPU(DCPU16, OutputCPU, InputCPU, LoopDetecting):
         ])
         # read the default characters to the RAM
         self.RAM[self.chars[0]:] = characters
+
+        # And set the input pointer.
+        self.RAM[0x9010] = 0x9000
 
     def change_character(self, index, value):
         # return the whole character because half-characters are a pain.
