@@ -7,14 +7,16 @@ from sixteen.words import as_opcode, from_opcode, bit_iter
 # a bunch of instructions, seperated into their components
 instructions = {
     # word -> opcode, a, b
+    # new words: aaaaaabbbbbooooo
+    # that is, o ^ a << 10 ^ b << 5
     # set A to the next word
-    0x7c01: (0x01, 0x00, 0x1f),
-    # ifn A, 0x10 (short form, 0x30) 
-    0xc00d: (0x0d, 0x00, 0x30),
-    # set I to 10 (short form, 0x2a)
-    0xa861: (0x01, 0x06, 0x2a),
-    # shl x, 4 (short form 0x24)
-    0x9037: (0x07, 0x03, 0x24),
+    0x03e1: (0x01, 0x00, 0x1f),
+    # ifn A, pc (0x1b)
+    0x0373: (0x13, 0x00, 0x1b),
+    # set I to the next word as pointer (1e)
+    0x1bc1: (0x01, 0x06, 0x1e),
+    # shl x, a (short form 0x21)
+    0x0c0e: (0x0e, 0x03, 0x00),
 }
 
 
