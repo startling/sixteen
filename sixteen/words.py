@@ -23,29 +23,33 @@ def from_hex(word):
 def as_opcode(word):
     """Interpret this word as an opcode. from the docs:
 
-    'a basic instruction has the format: bbbbbbaaaaaaoooo'
+    > In bits (in LSB-0 format), a basic instruction has the format:
+    > aaaaaabbbbbooooo.
 
     This method returns three integers: o, a, and b.
     """
     # mask away everything but the opcode
-    o = word & 0b0000000000001111
+    o = word & 0b0000000000011111
     # shift away the opcode
-    a_and_b = word >> 4
-    # mask away b to get a
-    a = a_and_b & 0b000000111111
-    # shift away a to get b
-    b = a_and_b >> 6
+    a_and_b = word >> 5
+    # mask away a to get b
+    b = a_and_b & 0b000000011111
+    # shift away b to get a
+    a = a_and_b >> 5
     return o, a, b
 
 
 def from_opcode(o, a, b):
     """Given o, a, and b as integers, return an integer such that its binary
-    representation looks like 'bbbbbbaaaaaaoooo'.
+    representation looks like 'aaaaaabbbbbooooo'.
     """
+    # raise an error if we get a `b` that would take more than five bits.
+    if b > 31:
+        raise ValueError("`b` can only be five bits long, got {0:b}.".format(b))
     # o is the least significant, so it doesn't get shifted at all
-    # a gets shifted left by four, because o is four bits long.
-    # b gets shifted left by ten, because o is four bits and a is six.
-    return o ^ (a << 4) ^ (b << 10)
+    # b gets shifted left by five, because o is five bits long.
+    # a gets shifted left by ten, because o is five bits and a is five.
+    return o ^ (a << 10) ^ (b << 5)
 
 
 def bit_iter(bits, n):
