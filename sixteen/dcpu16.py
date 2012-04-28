@@ -13,6 +13,22 @@ def basic_opcode(fn):
         return fn(self, a_value, b_value)
     return opcode_wrapper
 
+
+def set_value(fn):
+    """A decorator simplifying basic operations that set their `a` value and
+    possibly EX. Each should return a tuple of their value and, optionally,
+    the value for EX.
+    """
+    @wraps(fn)
+    def set_wrapper(self, a, b):
+        t = fn(self, a, b)
+        update_registers, update_ram = a.set(t[0])
+        if len(t) == 2:
+            update_registers.update({"EX": t[1]})
+        return update_registers, update_ram
+    return set_wrapper
+
+
 def special_opcode(fn):
     @wraps(fn)
     def opcode_wrapper(self, ram_iter, a):
@@ -117,27 +133,16 @@ class DCPU16(object):
         return a.set(b.get())
 
     @basic_opcode
+    @set_value
     def add(self, a, b):
-        #TODO: nice, cohesive way to handle over/underflow for methods.
-        v = a.get() + b.get()
-        update_registers, update_ram = a.set(v)
-        # if the added value is greater than the limit, set EX to 1
-        if v >= self.cells - 1:
-            update_registers.update({"EX": 0x0001})
-        else:
-            update_registers.update({"EX": 0x0000})
-        return update_registers, update_ram
+        div, result = divmod(a.get() + b.get(), self.cells)
+        return result, int(div > 0)
 
     @basic_opcode
+    @set_value
     def sub(self, a, b):
-        v = a.get() - b.get()
-        update_registers, update_ram = a.set(v)
-        # if the resulting value is negative, set EX to 0xffff
-        if v < 0:
-            update_registers.update({"EX": 0xffff})
-        else:
-            update_registers.update({"EX": 0x0000})
-        return update_registers, update_ram
+        div, result = divmod(a.get() - b.get(), self.cells)
+        return result, div < 0 and 0xffff
 
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
