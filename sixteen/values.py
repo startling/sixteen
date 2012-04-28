@@ -76,3 +76,12 @@ class RegisterPointer(Register):
 
     def set(self, value):
         return {}, {self.registers[self.name]: value}
+
+
+class RegisterPlusNextWord(Register, Consumes):
+    "The value of a register and the next word as a pointer."
+    def get(self):
+        return self.ram[self.registers[self.name] + self.value]
+
+    def set(self, value):
+        return {}, {self.registers[self.name] + self.value: value}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.values import NextWord, NextWordPointer, RegisterValue, \
-    RegisterPointer
+    RegisterPointer, RegisterPlusNextWord
 from sixteen.bits import as_instruction
 from functools import wraps
 
@@ -79,6 +79,7 @@ class DCPU16(object):
     for n, name in enumerate(["A", "B", "C", "X", "Y", "Z", "I", "J"]):
         values[n] = RegisterValue.named(name)
         values[n + 0x08] = RegisterPointer.named(name)
+        values[n + 0x10] = RegisterPlusNextWord.named(name)
 
     def cycle(self):
         "Run for one instruction, returning the executed instruction."
