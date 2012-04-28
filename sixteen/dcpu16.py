@@ -13,6 +13,13 @@ def basic_opcode(fn):
         return fn(self, a_value, b_value)
     return opcode_wrapper
 
+def special_opcode(fn):
+    @wraps(fn)
+    def opcode_wrapper(self, ram_iter, a):
+        a_value = self.values[a](self.registers, self.ram, ram_iter)
+        return fn(self, a_value)
+    return opcode_wrapper
+
 
 class DCPU16(object):
     # DCPU16 has 0x10000 cells
@@ -116,3 +123,15 @@ class DCPU16(object):
     @basic_opcode
     def sub(self, a, b):
         return a.set(a.get() - b.get())
+
+    # a dict of nonbasic opcode numbers to mnemonics
+    special_operations = {
+        0x01: "jsr", 0x07: "hcf", 0x08: "int", 0x09: "iag", 0x0a: "ias",
+        0x10: "hwn", 0x11: "hwq", 0x12: "hwi",
+    }
+
+    def special(self, ram_iter, o, a):
+        "Pass special opcodes to their methods."
+        mnemonic = self.special_operations.get(o)
+        method = getattr(self, mnemonic)
+        return method(ram_iter, a)
