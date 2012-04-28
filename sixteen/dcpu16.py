@@ -121,7 +121,7 @@ class DCPU16(object):
     # a dictionary of opcode numbers to mnemonics
     operations = {
         0x00: "special", 0x01: "set", 0x02: "add", 0x03: "sub", 0x04: "mul",
-        0x05: "mli", 0x06: "div", 0x07: "dvi", 0x08: "mod", 0x09: "and",
+        0x05: "mli", 0x06: "div", 0x07: "dvi", 0x08: "mod", 0x09: "AND",
         0x0a: "bor", 0x0b: "xor", 0x0c: "shr", 0x0d: "asr", 0x0e: "shl",
         0x0f: "sti", 0x10: "ifb", 0x11: "ifc", 0x12: "ife", 0x13: "ifn",
         0x14: "ifg", 0x15: "ifa", 0x16: "ifl", 0x17: "ifu",
@@ -166,7 +166,7 @@ class DCPU16(object):
 
     @basic_opcode
     @set_value
-    def and(self, b, a):
+    def AND(self, b, a):
         return b & a,
 
     @basic_opcode
