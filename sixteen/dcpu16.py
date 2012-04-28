@@ -62,19 +62,23 @@ class DCPU16(object):
         method = getattr(self, mnemonic)
         # run the method and decide what changes to do.
         register_changes, ram_changes = method(ram, a, b)
-        #TODO: separate these into different methods.
         # change all the registers
         for k, v in register_changes.iteritems():
-            # use modulus to take overflow into account
-            self.registers[k] = v % self.cells
+            self.update_register(k, v)
         # change all the RAM
         for k, v in ram_changes.iteritems():
-            # modulus again
-            self.ram[k % self.cells] = v % self.cells 
+            self.update_ram(k, v)
         # increment the pc by len(consumed)
         self.registers["PC"] = (self.registers["PC"] + len(consumed)) % self.cells
         return consumed
 
+    def update_register(self, name, value):
+        # use modulus to take overflow and underflow into account
+        self.registers[name] = value % self.cells
+
+    def update_ram(self, addr, value):
+        # use modulus to take overflow and underflow into account
+        self.ram[addr % self.cells] = value % self.cells
 
     def ram_iter(self):
         """Return an iterator over this cpu's RAM and a list that will be updated
