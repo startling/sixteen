@@ -20,7 +20,7 @@ def from_hex(word):
     return int(word, base=16)
 
 
-def as_opcode(word):
+def as_instruction(word):
     """Interpret this word as an opcode. from the docs:
 
     > In bits (in LSB-0 format), a basic instruction has the format:
@@ -39,7 +39,7 @@ def as_opcode(word):
     return o, a, b
 
 
-def from_opcode(o, a, b):
+def from_instruction(o, a, b):
     """Given o, a, and b as integers, return an integer such that its binary
     representation looks like 'aaaaaabbbbbooooo'.
     """

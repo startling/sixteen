@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.values import NextWord, NextWordPointer
-from sixteen.words import as_opcode
+from sixteen.words import as_instruction
 from functools import wraps
 
 
@@ -79,7 +79,7 @@ class DCPU16(object):
         "Run for one instruction, returning the executed instruction."
         ram, consumed = self.ram_iter()
         # unpack the opcode, a, and b
-        op, a, b = as_opcode(next(ram))
+        op, a, b = as_instruction(next(ram))
         # get the mnemonic and the method corresponding to it.
         mnemonic = self.operations.get(op)
         method = getattr(self, mnemonic)

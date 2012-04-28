@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from sixteen.words import as_opcode, from_opcode, bit_iter
+from sixteen.words import as_instruction, from_instruction, bit_iter
 
 
 # a bunch of instructions, seperated into their components
@@ -20,14 +20,14 @@ instructions = {
 }
 
 
-class TestWords(unittest.TestCase):
-    def test_from_opcode(self):
+class TestBits(unittest.TestCase):
+    def test_from_instruction(self):
         for code, (eo, ea, eb) in instructions.items():
-            self.assertEquals(from_opcode(eo, ea, eb), code)
+            self.assertEquals(from_instruction(eo, ea, eb), code)
 
     def test_instructions(self):
         for code, (eo, ea, eb) in instructions.items():
-            o, a, b = as_opcode(code)
+            o, a, b = as_instruction(code)
             #print "expected: %x %x %x" % (eo, ea, eb)
             #print "got     : %x %x %x" % (o, a, b)
             self.assertEqual((eo, ea, eb), (o, a, b))
