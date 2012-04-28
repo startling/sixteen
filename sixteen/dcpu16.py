@@ -38,6 +38,21 @@ class DCPU16(object):
         "Run for one instruction, returning the executed instruction."
         pass
 
+    def ram_iter(self):
+        """Return an iterator over this cpu's RAM and a list that will be updated
+        whenever a value is drawn.
+        """
+        consumed = []
+        def i():
+            place = self.ram["pc"]
+            while True:
+                consumed.append(self.ram[place])
+                yield self.ram[place]
+                # increment the place counter, handling overflow if applicable.
+                place += 1
+                place %= self.cells
+        return i(), consumed
+
     # a dictionary of opcode numbers to mnemonics
     operations = {
         0x00: "special", 0x01: "set", 0x02: "add", 0x03: "sub", 0x04: "mul",
