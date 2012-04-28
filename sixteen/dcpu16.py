@@ -144,6 +144,12 @@ class DCPU16(object):
         div, result = divmod(a.get() - b.get(), self.cells)
         return result, div < 0 and 0xffff
 
+    @basic_opcode
+    @set_value
+    def mul(self, a, b):
+        div, result = divmod(a.get() * b.get(), self.cells)
+        return result, div
+
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
         0x01: "jsr", 0x07: "hcf", 0x08: "int", 0x09: "iag", 0x0a: "ias",
