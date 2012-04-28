@@ -150,3 +150,14 @@ class TestBor(BaseDCPU16Test, unittest.TestCase):
             0x7bea, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 1)
+
+
+class TestXor(BaseDCPU16Test, unittest.TestCase):
+    def test_xor(self):
+        self.run_instructions([
+            # set ram addres 0xbeef to 1
+            0x7be1, 0xbeef, 1,
+            # ^ 2
+            0x7beb, 0xbeef, 1,
+        ])
+        self.assertRAM(0xbeef, 0)
