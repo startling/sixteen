@@ -159,6 +159,26 @@ class DCPU16(object):
         else:
             return b // a, ((b << 16) // a) & 0xffff
 
+    @basic_opcode
+    @set_value
+    def mod(self, b, a):
+        return b % a,
+
+    @basic_opcode
+    @set_value
+    def and(self, b, a):
+        return b & a,
+
+    @basic_opcode
+    @set_value
+    def bor(self, b, a):
+        return b | a,
+    
+    @basic_opcode
+    @set_value
+    def xor(self, b, a):
+        return b ^ a,
+
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
         0x01: "jsr", 0x07: "hcf", 0x08: "int", 0x09: "iag", 0x0a: "ias",
