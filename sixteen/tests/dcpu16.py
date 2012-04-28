@@ -94,3 +94,26 @@ class TestMul(BaseDCPU16Test, unittest.TestCase):
         self.assertRAM(0x1337, 0xe000)
         # calculate the overflow as per the spec: ((b*a)>>16)&0xffff
         self.assertRegister("EX", ((0xf000 * 2) >> 16) & 0xffff)
+
+
+class TestDiv(BaseDCPU16Test, unittest.TestCase):
+    def test_div_pointer_literal(self):
+        self.run_instructions([
+            # set ram addres 0x1337 to 80
+            0x7be1, 0x1337, 80,
+            # divide 80 by 2
+            0x7be6, 0x1337, 2,
+        ])
+        self.assertRAM(0x1337, 40)
+        self.assertRegister("EX", 0x0)
+
+    def test_div_underflow(self):
+        self.run_instructions([
+            # set ram addres 0x1337 to 1
+            0x7be1, 0x1337, 0x1,
+            # divide 0xf000 by 100
+            0x7be6, 0x1337, 100,
+        ])
+        self.assertRAM(0x1337, 0)
+        # calculate the overflow as per the spec: ((b<<16)/a)&0xffff)
+        self.assertRegister("EX", ((100 << 16) // 1) & 0xffff)

@@ -151,6 +151,14 @@ class DCPU16(object):
         overflow, result = divmod(a * b, self.cells)
         return result, overflow
 
+    @basic_opcode
+    @set_value
+    def div(self, a, b):
+        if b == 0:
+            return 0, 0
+        else:
+            return a // b, ((b << 16) // a) & 0xffff
+
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
         0x01: "jsr", 0x07: "hcf", 0x08: "int", 0x09: "iag", 0x0a: "ias",
