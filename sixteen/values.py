@@ -1,185 +1,42 @@
 # -*- coding: utf-8 -*-
 
-from functools import wraps
 
-
-class Box(object):
-    """A base class that defines the Box interface with some sane defaults.
-    Everything that will be used as a box *needs* these three methods: "get",
-    "set", and, of course, "__init__".
-
-    Each Box's __init__ takes two arguments -- "self", of course, and "cpu",
-    which is probably an instance of sixteen.dcpu16.DCPU16. The default thing
-    to do is to save "key"and "container" attributes, which are used to look up
-    or set things in "get" and "set".
-
-    Each Box should have a "consumes" class attribute, too, which is how many
-    words that kind of value consumes. It's alright to leave unset, though; the
-    default is 0.
-
-    And then there's the "dis" attribute that should be a human-readable string
-    ("disassembled") for this value.
-
-    This class (it *is* a base class) doesn't define "__init__", so you'll need
-    to subclass and define it yourself.
-    """
-    consumes = 0
-
-    def __str__(self):
-        return self.dis
-
-    __repr__ = __str__
-
-    def get(self):
-        """'get' is called to retrieve the contained value. Nothing
-        destructive should happen here. Everything that gets the next word etc
-        should happen in __init__.
+class Value(object):
+    def __init__(self, registers, cpu, iterator):
+        """Values get initialized with three things: 
+         * a dictionary of the cpu's registers
+         * a list of the values in the cpu's ram
+         * an iterator over the ram
+        
+        It shouldn't touch any of these except, optionally, the iterator. NO
+        SIDE EFFECTS!! The cpu will see what's been done to the iterator and
+        then decide what to do.
         """
-        return self.container[self.key]
+        self.registers = registers
+        self.cpu = cpu
+        self.iterator = iterator
 
     def set(self, value):
-        "This is what gets called when something tries to change this value."
-        self.container[self.key] = value
-
-
-def consume(fn):
-    @wraps(fn)
-    def initialize(self, cpu):
-        fn(self, cpu, cpu.get_next())
-    return initialize
-
-
-class Register(object):
-    """This class abstracts away much of the work for registers. It isn't a Box
-    subclass itself, but it defines three methods that construct and return
-    such classes. 
-    """
-    def __init__(self, name):
-        "Given the name of this register, initialize a Register."
-        self.name = name
-
-    def as_value(self):
-        "Return a Box that gets and sets the value of this register."
-        def value_init(s, cpu):
-            s.container = cpu.registers
-
-        value = type(self.name, (Box,),
-                {"__init__": value_init, "dis": self.name})
-        value.key = self.name
-        return value
-
-    def as_pointer(self):
-        "Return a Box that gets and sets the value this register points to."
-        def pointer_init(s, cpu):
-            s.container = cpu.RAM
-            s.key = cpu.registers[self.name]
-
-        return type("[%s]" % self.name, (Box,),
-            {"__init__": pointer_init, "dis": "[%s]" % self.name})
-
-    def and_next_word(self):
-        """Return a box that gets and sets the register the sum of this
-        register and the next word points to.
+        """This should return a dictionary to update the registers with and a
+        dictionary to update the RAM with.
         """
-        @consume
-        def r_init(s, cpu, next_word):
-            s.container = cpu.RAM
-            s.key = cpu.registers[self.name] + next_word
-            s.dis = "[0x%04x + %s]" % (next_word, self.name)
-            # handle overflow
-            if s.key >= len(cpu.RAM):
-                s.key -= len(cpu.RAM)
+        return {}, {}
 
-        return type("[%s + next word]" % self.name, (Box,),
-                {"__init__": r_init, "consumes": 1})
-
-
-class NextWord(Box):
-    "0x1f: next word (literal)"
-    consumes = 1
-
-    @consume
-    def __init__(self, cpu, next_word):
-        self.value = next_word
-        self.dis = "0x%04x" % next_word
-    
     def get(self):
-        return self.value
+        "This should return whatever value that should be gotten."
+        raise NotImplementedError()
+
+
+class NextWord(Value):
+    def get(self):
+        return next(self.iterator)
+    
+    # setting to next word literals is silently ignored.
+
+
+class NextWordPointer(Value):
+    def get(self):
+        return self.ram[next(self.iterator)]
 
     def set(self, value):
-        """"So say the docs:
-        'If any instruction tries to assign a literal value, the assignment fails
-        silently. Other than that, the instruction behaves as normal.'
-        """
-        # AMBIGUITY: does that apply to next word literals, or just short form
-        # literals?
-        pass
-    
-
-class NextWordAsPointer(Box):
-    "0x1e: [next word]"
-    consumes = 1
-
-    @consume
-    def __init__(self, cpu, next_word):
-        "Get and set to and from the address stored in the next word."
-        self.container = cpu.RAM
-        self.key = next_word
-        self.dis = "[0x%04x]" % next_word
-
-
-
-def ShortLiteral(n):
-    "0x20-0x3f: literal value 0x00-0x1f (literal)"
-    class LiteralN(Box):
-        def __init__(self, cpu):
-            self.value = n
-            self.dis = "0x%04x" % n
-
-
-        def get(self):
-            return self.value
-
-        def set(self, value):
-            """"So say the docs:
-            'If any instruction tries to assign a literal value, the assignment fails
-            silently. Other than that, the instruction behaves as normal.'
-            """
-            pass
-
-    return LiteralN
-
-
-class PUSH(Box):
-    "0x1a: PUSH / [--SP]"
-    dis = "PUSH"
-
-    def __init__(self, cpu):
-        "Decrement the counter and point to the address in SP."
-        self.container = cpu.RAM
-        cpu.registers["SP"] -= 1
-        # handle underflow
-        if cpu.registers["SP"] < 0:
-            cpu.registers["SP"] = len(cpu.RAM) - 1
-        self.key = cpu.registers["SP"]
-
-
-
-class POP(Box):
-    "0x18: POP / [SP++]"
-    dis = "POP"
-
-    def __init__(self, cpu):
-        "Save the value at the pointer for later and increment the counter."
-        self.container = cpu.RAM
-        self.key = cpu.registers["SP"]
-        self.value = self.container[self.key]
-        cpu.registers["SP"] += 1
-        # handle overflow
-        if cpu.registers["SP"] > len(cpu.RAM) - 1:
-            cpu.registers["SP"] = 0x0000
-        # AMBIGUITY: does SET POP, A set to the place where the popped value
-        # came from, or the new place where SP points?
-    
-    def get(self):
-        return self.value
+        return {}, {next(self.iterator): value}
