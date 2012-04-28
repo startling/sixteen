@@ -67,3 +67,12 @@ class RegisterValue(Register):
 
     def set(self, value):
         return {self.name: value}, {}
+
+
+class RegisterPointer(Register):
+    "A register's value as a pointer."
+    def get(self):
+        return self.ram[self.registers[self.name]]
+
+    def set(self, value):
+        return {}, {self.registers[self.name]: value}
