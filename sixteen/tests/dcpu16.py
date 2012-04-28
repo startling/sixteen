@@ -40,6 +40,16 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
         self.assertRegister("A", 0xbeef)
         self.assertRegister("X", 0x1337)
 
+    def test_set_from_register(self):
+        self.run_instructions([
+            # set a, 0xbeef
+            0x03e1, 0xbeef,
+            # set x, a
+            0x0c01
+        ])
+        self.assertRegister("A", 0xbeef)
+        self.assertRegister("X", 0xbeef)
+
 
 class TestAdd(BaseDCPU16Test, unittest.TestCase):
     def test_add_pointer_literal(self):
