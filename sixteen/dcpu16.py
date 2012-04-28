@@ -1,5 +1,18 @@
 # -*- coding: utf-8 -*-
 
+from sixteen.values import NextWord, NextWordPointer
+from sixteen.words import as_opcode
+from functools import wraps
+
+
+def basic_opcode(fn):
+    @wraps(fn)
+    def opcode_wrapper(self, ram_iter, a, b):
+        a_value = self.values[a](self.registers, self.ram, ram_iter)
+        b_value = self.values[b](self.registers, self.ram, ram_iter)
+        return fn(self, a_value, b_value)
+    return opcode_wrapper
+
 
 class DCPU16(object):
     # DCPU16 has 0x10000 cells
@@ -34,9 +47,34 @@ class DCPU16(object):
         "A function that sets the RAM of this CPU to its initial values."
         self.ram = [0x0000] * self.cells
 
+    values = {
+        0x1e: NextWordPointer,
+        0x1f: NextWordLiteral,
+    }
+
     def cycle(self):
         "Run for one instruction, returning the executed instruction."
-        pass
+        ram, consumed = self.ram_iter()
+        # unpack the opcode, a, and b
+        op, a, b = as_opcode(next(ram))
+        # get the mnemonic and the method corresponding to it.
+        mnemonic = self.operations.get(op)
+        method = getattr(self, mnemonic)
+        # run the method and decide what changes to do.
+        register_changes, ram_changes = method(ram, a, b)
+        #TODO: separate these into different methods.
+        # change all the registers
+        for k, v in register_changes.iteritems():
+            # use modulus to take overflow into account
+            self.registers[k] = v % self.cells
+        # change all the RAM
+        for k, v in ram_changes.iteritems():
+            # modulus again
+            self.ram[k % self.cells] = v % self.cells 
+        # increment the pc by len(consumed)
+        self.registers["PC"] = (self.registers["PC"] + len(consumed)) % self.cells
+        return consumed
+
 
     def ram_iter(self):
         """Return an iterator over this cpu's RAM and a list that will be updated
@@ -62,3 +100,15 @@ class DCPU16(object):
         0x14: "ifg", 0x15: "ifa", 0x16: "ifl", 0x17: "ifu",
         0x1a: "adx", 0x1b: "sbx",
     }
+
+    @basic_opcode
+    def set(self, a, b):
+        return a.set(b.get())
+
+    @basic_opcode
+    def add(self, a, b):
+        return a.set(a.get() + b.get())
+
+    @basic_opcode
+    def sub(self, a, b):
+        return a.set(a.get() - b.get())
