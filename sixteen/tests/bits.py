@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from sixteen.words import as_instruction, from_instruction, bit_iter
+from sixteen.bits import as_instruction, from_instruction, bit_iter
 
 
 # a bunch of instructions, seperated into their components

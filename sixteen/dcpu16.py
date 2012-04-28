@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.values import NextWord, NextWordPointer
-from sixteen.words import as_instruction
+from sixteen.bits import as_instruction
 from functools import wraps
 
 
