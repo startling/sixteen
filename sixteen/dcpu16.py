@@ -7,7 +7,7 @@ from functools import wraps
 
 def basic_opcode(fn):
     @wraps(fn)
-    def opcode_wrapper(self, ram_iter, a, b):
+    def opcode_wrapper(self, ram_iter, b, a):
         a_value = self.values[a](self.registers, self.ram, ram_iter)
         b_value = self.values[b](self.registers, self.ram, ram_iter)
         return fn(self, a_value, b_value)
@@ -20,9 +20,9 @@ def set_value(fn):
     the value for EX.
     """
     @wraps(fn)
-    def set_wrapper(self, a, b):
-        t = fn(self, a.get(), b.get())
-        update_registers, update_ram = a.set(t[0])
+    def set_wrapper(self, b, a):
+        t = fn(self, b.get(), a.get())
+        update_registers, update_ram = b.set(t[0])
         if len(t) == 2:
             update_registers.update({"EX": t[1]})
         return update_registers, update_ram
@@ -84,7 +84,7 @@ class DCPU16(object):
         mnemonic = self.operations.get(op)
         method = getattr(self, mnemonic)
         # run the method and decide what changes to do.
-        register_changes, ram_changes = method(ram, a, b)
+        register_changes, ram_changes = method(ram, b, a)
         # change all the registers
         for k, v in register_changes.iteritems():
             self.update_register(k, v)
@@ -130,34 +130,34 @@ class DCPU16(object):
 
     @basic_opcode
     @set_value
-    def set(self, a, b):
-        return b,
+    def set(self, b, a):
+        return a,
 
     @basic_opcode
     @set_value
-    def add(self, a, b):
-        overflow, result = divmod(a + b, self.cells)
+    def add(self, b, a):
+        overflow, result = divmod(b + a, self.cells)
         return result, int(overflow > 0)
 
     @basic_opcode
     @set_value
-    def sub(self, a, b):
-        overflow, result = divmod(a - b, self.cells)
+    def sub(self, b, a):
+        overflow, result = divmod(b - a, self.cells)
         return result, overflow < 0 and 0xffff
 
     @basic_opcode
     @set_value
-    def mul(self, a, b):
-        overflow, result = divmod(a * b, self.cells)
+    def mul(self, b, a):
+        overflow, result = divmod(b * a, self.cells)
         return result, overflow
 
     @basic_opcode
     @set_value
-    def div(self, a, b):
+    def div(self, b, a):
         if b == 0:
             return 0, 0
         else:
-            return a // b, ((b << 16) // a) & 0xffff
+            return b // a, ((b << 16) // a) & 0xffff
 
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
