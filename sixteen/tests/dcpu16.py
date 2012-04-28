@@ -116,4 +116,4 @@ class TestDiv(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRAM(0x1337, 0)
         # calculate the overflow as per the spec: ((b<<16)/a)&0xffff)
-        self.assertRegister("EX", ((100 << 16) // 1) & 0xffff)
+        self.assertRegister("EX", ((1 << 16) // 100) & 0xffff)
