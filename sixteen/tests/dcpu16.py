@@ -40,3 +40,14 @@ class TestAdd(BaseDCPU16Test, unittest.TestCase):
             0x7be2, 0x1337, 0x1000
         ])
         self.assertRAM(0x1337, 0xbeef + 0x1000)
+
+
+class TestSub(BaseDCPU16Test, unittest.TestCase):
+    def test_sub_pointer_literal(self):
+        self.run_instructions([
+            # set ram addres 0x1337 to 0xbeef
+            0x7be1, 0x1337, 0xbeef,
+            # sub 0x1000 from 0xbeef
+            0x7be3, 0x1337, 0x1000
+        ])
+        self.assertRAM(0x1337, 0xbeef - 0x1000)
