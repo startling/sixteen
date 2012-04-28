@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from functools import wraps
+
 
 class Value(object):
     def __init__(self, registers, cpu, iterator):
@@ -27,16 +29,23 @@ class Value(object):
         raise NotImplementedError()
 
 
-class NextWord(Value):
+class Consumes(Value):
+    "A type of value that consumes a value from RAM on initialization."
+    def __init__(self, registers, cpu, iterator):
+        Value.__init__(self, registers, cpu, iterator)
+        self.value = next(iterator)
+
+
+class NextWord(Consumes):
     def get(self):
-        return next(self.iterator)
+        return self.value
     
     # setting to next word literals is silently ignored.
 
 
-class NextWordPointer(Value):
+class NextWordPointer(Consumes):
     def get(self):
-        return self.ram[next(self.iterator)]
+        return self.ram[self.value]
 
     def set(self, value):
-        return {}, {next(self.iterator): value}
+        return {}, {self.value: value}
