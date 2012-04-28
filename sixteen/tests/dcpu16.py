@@ -49,6 +49,7 @@ class TestAdd(BaseDCPU16Test, unittest.TestCase):
             0x7be2, 0x1337, 0x1000
         ])
         self.assertRAM(0x1337, 0x0fff)
+        self.assertRegister("EX", 0x1)
 
 
 class TestSub(BaseDCPU16Test, unittest.TestCase):
@@ -67,3 +68,4 @@ class TestSub(BaseDCPU16Test, unittest.TestCase):
             0x7be3, 0x1337, 0x0001
         ])
         self.assertRAM(0x1337, 0xffff)
+        self.assertRegister("EX", 0xffff)
