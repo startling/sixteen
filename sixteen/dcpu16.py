@@ -124,6 +124,8 @@ class DCPU16(object):
         # if the added value is greater than the limit, set EX to 1
         if v >= self.cells - 1:
             update_registers.update({"EX": 0x0001})
+        else:
+            update_registers.update({"EX": 0x0000})
         return update_registers, update_ram
 
     @basic_opcode
@@ -133,6 +135,8 @@ class DCPU16(object):
         # if the resulting value is negative, set EX to 0xffff
         if v < 0:
             update_registers.update({"EX": 0xffff})
+        else:
+            update_registers.update({"EX": 0x0000})
         return update_registers, update_ram
 
     # a dict of nonbasic opcode numbers to mnemonics
