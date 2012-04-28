@@ -40,6 +40,7 @@ class TestAdd(BaseDCPU16Test, unittest.TestCase):
             0x7be2, 0x1337, 0x1000
         ])
         self.assertRAM(0x1337, 0xbeef + 0x1000)
+        self.assertRegister("EX", 0x0)
 
     def test_add_overflow(self):
         self.run_instructions([
@@ -61,6 +62,7 @@ class TestSub(BaseDCPU16Test, unittest.TestCase):
             0x7be3, 0x1337, 0x1000
         ])
         self.assertRAM(0x1337, 0xbeef - 0x1000)
+        self.assertRegister("EX", 0x0)
 
     def test_sub_underflow(self):
         self.run_instructions([
