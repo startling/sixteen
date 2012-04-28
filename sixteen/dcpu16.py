@@ -13,11 +13,15 @@ class DCPU16(object):
         "PC", "SP", "EX", "IA"
     ]
 
-    def __init__(self):
+    def __init__(self, hardware=None):
         # make a dictionary of all the registers of this class, initializing
         # them all to 0x0000.
         self.registers = dict((r, 0x0000) for r in self._registers)
-
+        # initialize the hardware list
+        self.hardware = hardware or []
+        # initialize the RAM
+        self.ram_init()
+        
     def cycle(self):
         "Run for one instruction, returning the executed instruction."
         pass
@@ -29,3 +33,7 @@ class DCPU16(object):
             raise AttributeError(name)
         else:
             return r
+
+    def ram_init(self):
+        "A function that sets the RAM of this CPU to its initial values."
+        self.ram = [0x0000] * self.cells
