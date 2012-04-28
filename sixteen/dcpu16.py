@@ -129,8 +129,9 @@ class DCPU16(object):
     }
 
     @basic_opcode
+    @set_value
     def set(self, a, b):
-        return a.set(b.get())
+        return b.get(),
 
     @basic_opcode
     @set_value
