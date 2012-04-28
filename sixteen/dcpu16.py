@@ -21,7 +21,7 @@ def set_value(fn):
     """
     @wraps(fn)
     def set_wrapper(self, a, b):
-        t = fn(self, a, b)
+        t = fn(self, a.get(), b.get())
         update_registers, update_ram = a.set(t[0])
         if len(t) == 2:
             update_registers.update({"EX": t[1]})
@@ -131,24 +131,24 @@ class DCPU16(object):
     @basic_opcode
     @set_value
     def set(self, a, b):
-        return b.get(),
+        return b,
 
     @basic_opcode
     @set_value
     def add(self, a, b):
-        overflow, result = divmod(a.get() + b.get(), self.cells)
+        overflow, result = divmod(a + b, self.cells)
         return result, int(overflow > 0)
 
     @basic_opcode
     @set_value
     def sub(self, a, b):
-        overflow, result = divmod(a.get() - b.get(), self.cells)
+        overflow, result = divmod(a - b, self.cells)
         return result, overflow < 0 and 0xffff
 
     @basic_opcode
     @set_value
     def mul(self, a, b):
-        overflow, result = divmod(a.get() * b.get(), self.cells)
+        overflow, result = divmod(a * b, self.cells)
         return result, overflow
 
     # a dict of nonbasic opcode numbers to mnemonics
