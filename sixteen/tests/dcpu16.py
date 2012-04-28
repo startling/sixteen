@@ -117,3 +117,14 @@ class TestDiv(BaseDCPU16Test, unittest.TestCase):
         self.assertRAM(0x1337, 0)
         # calculate the overflow as per the spec: ((b<<16)/a)&0xffff)
         self.assertRegister("EX", ((1 << 16) // 100) & 0xffff)
+
+
+class TestAnd(BaseDCPU16Test, unittest.TestCase):
+    def test_and_pointer_literal(self):
+        self.run_instructions([
+            # set ram addres 0xbeef to 1
+            0x7be1, 0xbeef, 1,
+            # AND it by 1
+            0x7be9, 0xbeef, 1,
+        ])
+        self.assertRAM(0xbeef, 1)
