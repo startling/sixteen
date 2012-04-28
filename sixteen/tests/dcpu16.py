@@ -128,3 +128,14 @@ class TestAnd(BaseDCPU16Test, unittest.TestCase):
             0x7be9, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 1)
+
+
+class TestMod(BaseDCPU16Test, unittest.TestCase):
+    def test_mod(self):
+        self.run_instructions([
+            # set ram addres 0xbeef to 7
+            0x7be1, 0xbeef, 7,
+            # % 2
+            0x7be8, 0xbeef, 2,
+        ])
+        self.assertRAM(0xbeef, 1)
