@@ -4,7 +4,7 @@ from functools import wraps
 
 
 class Value(object):
-    def __init__(self, registers, cpu, iterator):
+    def __init__(self, registers, ram, iterator):
         """Values get initialized with three things: 
          * a dictionary of the cpu's registers
          * a list of the values in the cpu's ram
@@ -15,7 +15,7 @@ class Value(object):
         then decide what to do.
         """
         self.registers = registers
-        self.cpu = cpu
+        self.ram = ram
         self.iterator = iterator
 
     def set(self, value):
