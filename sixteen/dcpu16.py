@@ -49,7 +49,7 @@ class DCPU16(object):
 
     values = {
         0x1e: NextWordPointer,
-        0x1f: NextWordLiteral,
+        0x1f: NextWord,
     }
 
     def cycle(self):
@@ -82,7 +82,7 @@ class DCPU16(object):
         """
         consumed = []
         def i():
-            place = self.ram["pc"]
+            place = self.registers["PC"]
             while True:
                 consumed.append(self.ram[place])
                 yield self.ram[place]
