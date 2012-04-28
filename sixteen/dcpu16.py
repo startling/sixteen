@@ -136,20 +136,20 @@ class DCPU16(object):
     @basic_opcode
     @set_value
     def add(self, a, b):
-        div, result = divmod(a.get() + b.get(), self.cells)
-        return result, int(div > 0)
+        overflow, result = divmod(a.get() + b.get(), self.cells)
+        return result, int(overflow > 0)
 
     @basic_opcode
     @set_value
     def sub(self, a, b):
-        div, result = divmod(a.get() - b.get(), self.cells)
-        return result, div < 0 and 0xffff
+        overflow, result = divmod(a.get() - b.get(), self.cells)
+        return result, overflow < 0 and 0xffff
 
     @basic_opcode
     @set_value
     def mul(self, a, b):
-        div, result = divmod(a.get() * b.get(), self.cells)
-        return result, div
+        overflow, result = divmod(a.get() * b.get(), self.cells)
+        return result, overflow
 
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
