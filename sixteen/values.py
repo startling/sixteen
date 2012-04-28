@@ -49,3 +49,21 @@ class NextWordPointer(Consumes):
 
     def set(self, value):
         return {}, {self.value: value}
+
+
+class Register(Value):
+    """A base class for register values. Create a new class for a register with
+    `Myclass.named("PC")`, substituting the name of the register in.
+    """
+    @classmethod
+    def named(cls, name):
+        return type(name, (cls,), {"name": name})
+
+
+class RegisterValue(Register):
+    "A register's value."
+    def get(self):
+        return self.registers[self.name]
+
+    def set(self, value):
+        return {self.name: value}, {}
