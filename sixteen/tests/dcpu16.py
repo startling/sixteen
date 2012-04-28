@@ -59,6 +59,17 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRAM(0xbeef, 0xdead)
 
+    def test_set_from_register_pointer(self):
+        self.run_instructions([
+            # set a, 0xbeef
+            0x03e1, 0xbeef,
+            # set ram addres 0xbeef to 0x6666
+            0x7be1, 0xbeef, 0x6666,
+            # set 0xdead, [a]
+            0x7901, 0xdead
+        ])
+        self.assertRAM(0xdead, 0x6666)
+
 
 class TestAdd(BaseDCPU16Test, unittest.TestCase):
     def test_add_pointer_literal(self):
