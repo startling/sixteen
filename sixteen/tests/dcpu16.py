@@ -29,3 +29,14 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
             0x7be1, 0x1337, 0xbeef
         ])
         self.assertRAM(0x1337, 0xbeef)
+
+
+class TestAdd(BaseDCPU16Test, unittest.TestCase):
+    def test_add_pointer_literal(self):
+        self.run_instructions([
+            # set ram addres 0x1337 to 0xbeef
+            0x7be1, 0x1337, 0xbeef,
+            # add 0x1000 to 0xbeef
+            0x7be2, 0x1337, 0x1000
+        ])
+        self.assertRAM(0x1337, 0xbeef + 0x1000)
