@@ -71,3 +71,26 @@ class TestSub(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRAM(0x1337, 0xffff)
         self.assertRegister("EX", 0xffff)
+
+
+class TestMul(BaseDCPU16Test, unittest.TestCase):
+    def test_mul_pointer_literal(self):
+        self.run_instructions([
+            # set ram addres 0x1337 to 80
+            0x7be1, 0x1337, 80,
+            # mul 80 by 2
+            0x7be4, 0x1337, 2,
+        ])
+        self.assertRAM(0x1337, 160)
+        self.assertRegister("EX", 0x0)
+
+    def test_mul_pointer_literal(self):
+        self.run_instructions([
+            # set ram addres 0x1337 to 0xf000
+            0x7be1, 0x1337, 0xf000,
+            # mul 0xf000 by 2
+            0x7be4, 0x1337, 2,
+        ])
+        self.assertRAM(0x1337, 0xe000)
+        # calculate the overflow as per the spec: ((b*a)>>16)&0xffff
+        self.assertRegister("EX", ((0xf000 * 2) >> 16) & 0xffff)
