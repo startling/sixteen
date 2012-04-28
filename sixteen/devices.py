@@ -32,3 +32,28 @@ class Hardware(object):
         pass
 
     #TODO: actually handle events?
+
+
+class Keyboard(Hardware):
+    """
+    Name: Generic Keyboard (compatible)
+    ID: 0x30cf7406
+    Version: 1
+    """
+    name = "Generic Keyboard (compatible)"
+    identifier = 0x30cf7406
+    version = 1
+
+    def __init__(self):
+        self.mode = 0
+        self.interrupt = False
+        self.message = None
+    
+    def configure(self, registers):
+        self.mode = registers["A"]
+        if registers["A"] == 3:
+            if registers["B"] == 0:
+                self.interrupt = False
+            else:
+                self.interrupt = True
+                self.message = registers["B"]
