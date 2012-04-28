@@ -70,6 +70,27 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRAM(0xdead, 0x6666)
 
+    def test_set_to_register_plus_next_word(self):
+        self.run_instructions([
+            # set a, 0xdead
+            0x03e1, 0xdead,
+            # set ram address 0xdeae to 0x6666
+            0x7be1, 0xdeae, 0x6666,
+            # set b, [a + 1]
+            0x0601, 1
+        ])
+
+    def test_set_from_register_plus_next_word(self):
+        self.run_instructions([
+            # set a, 0xdead
+            0x03e1, 0xdead,
+            # set ram address 0xdeae to 0x6666
+            0x7be1, 0xdeae, 0x6666,
+            # set b, [a + 1]
+            0x0601, 1
+        ])
+        self.assertRegister("B", 0x6666)
+
 
 class TestAdd(BaseDCPU16Test, unittest.TestCase):
     def test_add_pointer_literal(self):
