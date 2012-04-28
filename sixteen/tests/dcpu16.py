@@ -15,8 +15,17 @@ class BaseDCPU16Test(object):
             consumed = self.cpu.cycle()
             count += len(consumed)
 
-    def assert_register(self, name, value):
+    def assertRegister(self, name, value):
         self.assertEquals(self.cpu.registers[name], value)
 
-    def assert_RAM(self, addr, value):
+    def assertRAM(self, addr, value):
         self.assertEquals(self.cpu.ram[addr], value)
+
+
+class TestSet(BaseDCPU16Test, unittest.TestCase):
+    def test_set_ram_pointer(self):
+        self.run_instructions([
+            # set ram addres 0x1337 to 0xbeef
+            0x7be1, 0x1337, 0xbeef
+        ])
+        self.assertRAM(0x1337, 0xbeef)
