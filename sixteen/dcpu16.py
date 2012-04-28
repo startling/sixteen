@@ -118,11 +118,22 @@ class DCPU16(object):
 
     @basic_opcode
     def add(self, a, b):
-        return a.set(a.get() + b.get())
+        #TODO: nice, cohesive way to handle over/underflow for methods.
+        v = a.get() + b.get()
+        update_registers, update_ram = a.set(v)
+        # if the added value is greater than the limit, set EX to 1
+        if v >= self.cells - 1:
+            update_registers.update({"EX": 0x0001})
+        return update_registers, update_ram
 
     @basic_opcode
     def sub(self, a, b):
-        return a.set(a.get() - b.get())
+        v = a.get() - b.get()
+        update_registers, update_ram = a.set(v)
+        # if the resulting value is negative, set EX to 0xffff
+        if v < 0:
+            update_registers.update({"EX": 0xffff})
+        return update_registers, update_ram
 
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
