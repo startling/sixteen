@@ -41,6 +41,15 @@ class TestAdd(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRAM(0x1337, 0xbeef + 0x1000)
 
+    def test_add_overflow(self):
+        self.run_instructions([
+            # set ram addres 0x1337 to 0xffff
+            0x7be1, 0x1337, 0xffff,
+            # add 0x1000 to 0xffff
+            0x7be2, 0x1337, 0x1000
+        ])
+        self.assertRAM(0x1337, 0x0fff)
+
 
 class TestSub(BaseDCPU16Test, unittest.TestCase):
     def test_sub_pointer_literal(self):
@@ -51,3 +60,10 @@ class TestSub(BaseDCPU16Test, unittest.TestCase):
             0x7be3, 0x1337, 0x1000
         ])
         self.assertRAM(0x1337, 0xbeef - 0x1000)
+
+    def test_sub_underflow(self):
+        self.run_instructions([
+            # sub 1 from 0
+            0x7be3, 0x1337, 0x0001
+        ])
+        self.assertRAM(0x1337, 0xffff)
