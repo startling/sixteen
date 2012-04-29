@@ -260,3 +260,25 @@ class TestXor(BaseDCPU16Test, unittest.TestCase):
             0x7fcc, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 0)
+
+
+class TestShr(BaseDCPU16Test, unittest.TestCase):
+    def test_shr(self):
+        self.run_instructions([
+            # set ram address 0xbeef to 1
+            0x7fc1, 0xbeef, 0b100,
+            # >> 2
+            0x7fcd, 0xbeef, 2,
+        ])
+        self.assertRAM(0xbeef, 0b1)
+
+    def test_shr_underflow(self):
+        self.run_instructions([
+            # set ram address 0xbeef to 1
+            0x7fc1, 0xbeef, 0b100,
+            # >> 2
+            0x7fcd, 0xbeef, 3,
+        ])
+        self.assertRAM(0xbeef, 0)
+        # overflow is: ((b<<16)>>a)&0xffff)
+        self.assertRegister("EX", ((0b100 << 16) >> 3) & 0xffff)
