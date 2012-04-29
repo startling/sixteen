@@ -72,6 +72,14 @@ class DCPU16(object):
         self.ram = [0x0000] * self.cells
 
     values = {
+        # PEEK is just [SP]
+        0x19: RegisterPointer.named("SP"),
+        # [SP + next word] / PICK
+        0x1a: RegisterPlusNextWord.named("SP"),
+        # SP, PC, and EX as registers
+        0x1b: RegisterValue.named("SP"), 0x1c: RegisterValue.named("PC"),
+        0x1d: RegisterValue.named("EX"),
+        # next word pointers and literals
         0x1e: NextWordPointer,
         0x1f: NextWord,
     }
