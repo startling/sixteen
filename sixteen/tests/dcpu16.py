@@ -91,6 +91,31 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRegister("B", 0x6666)
 
+    def test_get_pc(self):
+        self.run_instructions([
+            # set a, a (no-op)
+            0x0001,
+            # set a, PC  
+            0x0381,
+        ])
+        self.assertRegister("A", 1)
+
+    def test_get_sp(self):
+        self.run_instructions([
+            # set a, SP
+            0x0361,
+        ])
+        self.assertRegister("A", 0)
+
+    def test_get_ex(self):
+        self.run_instructions([
+            # add two literals together, for EX
+            0x7fe2, 0xffff, 0xffff,
+            # set a, EX
+            0x03a1
+        ])
+        self.assertRegister("A", 1)
+
 
 class TestAdd(BaseDCPU16Test, unittest.TestCase):
     def test_add_pointer_literal(self):
