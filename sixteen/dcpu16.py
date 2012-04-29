@@ -8,7 +8,7 @@ from functools import wraps
 
 def basic_opcode(fn):
     @wraps(fn)
-    def opcode_wrapper(self, ram_iter, b, a):
+    def opcode_wrapper(self, consumed, ram_iter, b, a):
         a_value = self.values[a](self.registers, self.ram, ram_iter)
         b_value = self.values[b](self.registers, self.ram, ram_iter)
         return fn(self, a_value, b_value)
@@ -35,13 +35,22 @@ def conditional(fn):
     function should just return a boolean of whether to continue or to skip.
     """
     @wraps(fn)
-    def conditional_wrapper(self, b, a):
+    def conditional_wrapper(self, consumed, ram_iter, b_value, a_value):
+        # initialize the values
+        a = self.values[a_value](self.registers, self.ram, ram_iter)
+        b = self.values[b_value](self.registers, self.ram, ram_iter)
         if fn(self, b.get(), a.get()):
-            consumed, _, _ = self.get_instruction()
-            pc = (self.registers["PC"] + len(consumed)) % self.cells
-            return {"PC": pc}, {}
-        else:
+            # if the predicate returns True, we continue as usuaul
             return {}, {}
+        else:
+            # otherwise, figure out where the next instruction will be
+            next_instruction = self.registers["PC"] + len(consumed)
+            # run it to decide what words it consumes
+            next_consumed, _, _ = self.get_instruction(next_instruction)
+            # and then skip ahead past it.
+            pc = (next_instruction + len(next_consumed)) % self.cells
+            return {"PC": pc}, {}
+    return conditional_wrapper
 
 
 def special_opcode(fn):
@@ -107,15 +116,15 @@ class DCPU16(object):
     for n in xrange(1, 31):
         values[0x21 + n] = Literal(n)
 
-    def get_instruction(self):
-        ram, consumed = self.ram_iter()
+    def get_instruction(self, location=None):
+        ram, consumed = self.ram_iter(location)
         # unpack the opcode, a, and b
         op, a, b = as_instruction(next(ram))
         # get the mnemonic and the method corresponding to it.
         mnemonic = self.operations.get(op)
         method = getattr(self, mnemonic)
         # run the method and decide what changes to do.
-        register_changes, ram_changes = method(ram, b, a)
+        register_changes, ram_changes = method(consumed, ram, b, a)
         return consumed, register_changes, ram_changes
         
 
@@ -140,13 +149,13 @@ class DCPU16(object):
         # use modulus to take overflow and underflow into account
         self.ram[addr % self.cells] = value % self.cells
 
-    def ram_iter(self):
+    def ram_iter(self, location=None):
         """Return an iterator over this cpu's RAM and a list that will be updated
         whenever a value is drawn.
         """
         consumed = []
         def i():
-            place = self.registers["PC"]
+            place = location or self.registers["PC"]
             while True:
                 consumed.append(self.ram[place])
                 yield self.ram[place]
@@ -227,13 +236,37 @@ class DCPU16(object):
         overflow, result = divmod(b << a, self.cells)
         return result, overflow
 
+    @conditional
+    def ifb(self, b, a):
+        return (b & a) != 0
+
+    @conditional
+    def ifc(self, b, a):
+        return (b & a) == 0
+
+    @conditional
+    def ife(self, b, a):
+        return b == a
+
+    @conditional
+    def ifn(self, b, a):
+        return b != a
+
+    @conditional
+    def ifg(self, b, a):
+        return b > a
+
+    @conditional
+    def ifl(self, b, a):
+        return b < a
+
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
         0x01: "jsr", 0x08: "int", 0x09: "iag", 0x0a: "ias", 0x10: "hwn",
         0x11: "hwq", 0x12: "hwi",
     }
 
-    def special(self, ram_iter, o, a):
+    def special(self, consumed, ram_iter, o, a):
         "Pass special opcodes to their methods."
         mnemonic = self.special_operations.get(o)
         method = getattr(self, mnemonic)
