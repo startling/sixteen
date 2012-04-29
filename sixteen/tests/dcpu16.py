@@ -200,9 +200,19 @@ class TestMli(BaseDCPU16Test, unittest.TestCase):
             # set ram address 0x1337 to 80
             0x7fc1, 0x1337, 80,
             # mul 80 by 2
-            0x7fc4, 0x1337, from_signed(-2),
+            0x7fc5, 0x1337, from_signed(-2),
         ])
         self.assertRAM(0x1337, from_signed(-160))
+
+    def test_mli_both_negative(self):
+        self.run_instructions([
+            # set ram address 0x1337 to 80
+            0x7fc1, 0x1337, from_signed(-10),
+            # mul 80 by 2
+            0x7fc5, 0x1337, from_signed(-10),
+        ])
+        self.assertRAM(0x1337, 100)
+        self.assertRegister("EX", 0x0)
 
 
 class TestDiv(BaseDCPU16Test, unittest.TestCase):
