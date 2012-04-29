@@ -10,27 +10,27 @@ instructions = {
     # new words: aaaaaabbbbbooooo
     # that is, o ^ a << 10 ^ b << 5
     # set A to the next word
-    0x03e1: (0x01, 0x00, 0x1f),
-    # ifn A, pc (0x1b)
-    0x0373: (0x13, 0x00, 0x1b),
+    0x7c01: (0x01, 0x00, 0x1f),
+    # ifn A, pc (0x1c)
+    0x7013: (0x13, 0x00, 0x1c),
     # set I to the next word as pointer (1e)
-    0x1bc1: (0x01, 0x06, 0x1e),
-    # shl x, a (short form 0x21)
-    0x0c0e: (0x0e, 0x03, 0x00),
+    0x78c1: (0x01, 0x06, 0x1e),
+    # set a, 1 (short form 0x22)
+    0x8801: (0x1, 0x0, 0x22)
 }
 
 
 class TestBits(unittest.TestCase):
     def test_from_instruction(self):
-        for code, (eo, ea, eb) in instructions.items():
-            self.assertEquals(from_instruction(eo, ea, eb), code)
+        for code, (eo, eb, ea) in instructions.items():
+            self.assertEquals(from_instruction(eo, eb, ea), code)
 
     def test_instructions(self):
-        for code, (eo, ea, eb) in instructions.items():
-            o, a, b = as_instruction(code)
+        for code, (eo, eb, ea) in instructions.items():
+            o, b, a = as_instruction(code)
             #print "expected: %x %x %x" % (eo, ea, eb)
             #print "got     : %x %x %x" % (o, a, b)
-            self.assertEqual((eo, ea, eb), (o, a, b))
+            self.assertEqual((eo, eb, ea), (o, b, a))
 
 
 class TestBitIter(unittest.TestCase):

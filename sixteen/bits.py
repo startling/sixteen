@@ -36,20 +36,20 @@ def as_instruction(word):
     b = a_and_b & 0b000000011111
     # shift away b to get a
     a = a_and_b >> 5
-    return o, a, b
+    return o, b, a
 
 
-def from_instruction(o, a, b):
-    """Given o, a, and b as integers, return an integer such that its binary
+def from_instruction(o, b, a):
+    """Given o, b, and a as integers, return an integer such that its binary
     representation looks like 'aaaaaabbbbbooooo'.
     """
     # raise an error if we get a `b` that would take more than five bits.
     if b > 31:
-        raise ValueError("`b` can only be five bits long, got {0:b}.".format(b))
+        raise ValueError("`b` can only be five bits long, got {0:b}.".format(a))
     # o is the least significant, so it doesn't get shifted at all
     # b gets shifted left by five, because o is five bits long.
     # a gets shifted left by ten, because o is five bits and a is five.
-    return o ^ (a << 10) ^ (b << 5)
+    return o ^ (b << 5) ^ (a << 10)
 
 
 def bit_iter(bits, n):
@@ -63,3 +63,9 @@ def bit_iter(bits, n):
         yield 0
     for x in xrange(length -1, -1, -1):
         yield 1 & (bits >> x)
+
+
+def as_signed(i):
+    """Interpret this integer as a signed integer with the first bit being the
+    sign.
+    """
