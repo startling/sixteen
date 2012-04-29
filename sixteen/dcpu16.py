@@ -139,11 +139,11 @@ class DCPU16(object):
     # a dictionary of opcode numbers to mnemonics
     operations = {
         0x00: "special", 0x01: "set", 0x02: "add", 0x03: "sub", 0x04: "mul",
-        0x05: "mli", 0x06: "div", 0x07: "dvi", 0x08: "mod", 0x09: "AND",
-        0x0a: "bor", 0x0b: "xor", 0x0c: "shr", 0x0d: "asr", 0x0e: "shl",
-        0x0f: "sti", 0x10: "ifb", 0x11: "ifc", 0x12: "ife", 0x13: "ifn",
-        0x14: "ifg", 0x15: "ifa", 0x16: "ifl", 0x17: "ifu",
-        0x1a: "adx", 0x1b: "sbx",
+        0x05: "mli", 0x06: "div", 0x07: "dvi", 0x08: "mod", 0x09: "mdi",
+        0x0a: "AND", 0x0b: "bor", 0x0c: "xor", 0x0d: "shr", 0x0e: "asr",
+        0x0f: "shl", 0x10: "ifb", 0x11: "ifc", 0x12: "ife", 0x13: "ifn",
+        0x14: "ifg", 0x15: "ifa", 0x16: "ifl", 0x17: "ifu", 0x1a: "adx",
+        0x1b: "sbx", 0x1e: "sti", 0x1e: "std"
     }
 
     @basic_opcode
@@ -199,8 +199,8 @@ class DCPU16(object):
 
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
-        0x01: "jsr", 0x07: "hcf", 0x08: "int", 0x09: "iag", 0x0a: "ias",
-        0x10: "hwn", 0x11: "hwq", 0x12: "hwi",
+        0x01: "jsr", 0x08: "int", 0x09: "iag", 0x0a: "ias", 0x10: "hwn",
+        0x11: "hwq", 0x12: "hwi",
     }
 
     def special(self, ram_iter, o, a):
