@@ -57,7 +57,6 @@ def bit_iter(bits, n):
     return ((bits >> i) & 1 for i in xrange(n - 1, -1, -1))
 
 
-def as_signed(i):
-    """Interpret this integer as a signed integer with the first bit being the
-    sign.
-    """
+def invert(i, n):
+    "Calculate the inverse of an n-bit long integer, i."
+    return i ^ (2 ** n - 1)

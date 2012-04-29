@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from sixteen.bits import as_instruction, from_instruction, bit_iter
+from sixteen.bits import as_instruction, from_instruction, bit_iter, invert
 
 
 # a bunch of instructions, seperated into their components
@@ -43,3 +43,14 @@ class TestBitIter(unittest.TestCase):
         self.assertBits(0b1011, 4, [1, 0, 1, 1])
         self.assertBits(0b1000, 4, [1, 0, 0, 0])
         self.assertBits(0b10001000, 8, [1, 0, 0, 0, 1, 0, 0, 0])
+
+
+class TestInvert(unittest.TestCase):
+    def assertInverse(self, a, b, n):
+        self.assertEqual(invert(a, n), b)
+        self.assertEqual(a, invert(b, n))
+
+    def test_invert(self):
+        self.assertInverse(0b101, 0b010, 3)
+        self.assertInverse(0b1101, 0b010, 4)
+        self.assertInverse(0b101, 0b010, 3)
