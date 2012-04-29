@@ -193,6 +193,24 @@ class TestMul(BaseDCPU16Test, unittest.TestCase):
         # calculate the overflow as per the spec: ((b*a)>>16)&0xffff
         self.assertRegister("EX", ((0xf000 * 2) >> 16) & 0xffff)
 
+    def test_mul_both_negative_pointer(self):
+        self.run_instructions([
+            # set ram address 0x1337 to 80
+            0x7fc1, 0x1337, from_signed(-10),
+            # mul 80 by 2
+            0x7fc2, 0x1337, from_signed(-10),
+        ])
+        self.assertRAM(0x1337, 100)
+        self.assertRegister("EX", 0xffec)
+
+    def test_mul_both_negative(self):
+        self.run_instructions([
+            # set a, -10 / mul a, -10
+            0x7c01, from_signed(-10), 0x7c04, from_signed(-10)
+        ])
+        self.assertRegister("A", 100)
+        self.assertRegister("EX", 0xffec)
+
 
 class TestMli(BaseDCPU16Test, unittest.TestCase):
     def test_mli(self):
