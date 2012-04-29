@@ -20,6 +20,7 @@ def set_value(fn):
     possibly EX. Each should return a tuple of their value and, optionally,
     the value for EX.
     """
+    @basic_opcode
     @wraps(fn)
     def set_wrapper(self, b, a):
         t = fn(self, b.get(), a.get())
@@ -174,30 +175,25 @@ class DCPU16(object):
         0x1b: "sbx", 0x1e: "sti", 0x1e: "std"
     }
 
-    @basic_opcode
     @set_value
     def set(self, b, a):
         return a,
 
-    @basic_opcode
     @set_value
     def add(self, b, a):
         overflow, result = divmod(b + a, self.cells)
         return result, int(overflow > 0)
 
-    @basic_opcode
     @set_value
     def sub(self, b, a):
         overflow, result = divmod(b - a, self.cells)
         return result, overflow < 0 and 0xffff
 
-    @basic_opcode
     @set_value
     def mul(self, b, a):
         overflow, result = divmod(b * a, self.cells)
         return result, overflow
 
-    @basic_opcode
     @set_value
     def div(self, b, a):
         if b == 0:
@@ -205,32 +201,26 @@ class DCPU16(object):
         else:
             return b // a, ((b << 16) // a) & 0xffff
 
-    @basic_opcode
     @set_value
     def mod(self, b, a):
         return b % a,
 
-    @basic_opcode
     @set_value
     def AND(self, b, a):
         return b & a,
 
-    @basic_opcode
     @set_value
     def bor(self, b, a):
         return b | a,
     
-    @basic_opcode
     @set_value
     def xor(self, b, a):
         return b ^ a,
 
-    @basic_opcode
     @set_value
     def shr(self, b, a):
         return b >> a, ((b << 16) >> a) & 0xffff
 
-    @basic_opcode
     @set_value
     def shl(self, b, a):
         overflow, result = divmod(b << a, self.cells)
