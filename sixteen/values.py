@@ -85,3 +85,9 @@ class RegisterPlusNextWord(Register, Consumes):
 
     def set(self, value):
         return {}, {self.registers[self.name] + self.value: value}
+
+
+def Literal(n):
+    return type(hex(n), (Value,), {
+        "get": lambda self: n,
+    })
