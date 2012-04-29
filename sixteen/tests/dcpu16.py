@@ -422,3 +422,29 @@ class TestSbx(BaseDCPU16Test, unittest.TestCase):
             0x041b
         ])
         self.assertRegister("A", 11)
+
+
+class TestSti(BaseDCPU16Test, unittest.TestCase):
+    def test_sti(self):
+        self.run_instructions([
+            # set b, 10
+            0x7c21, 10,
+            # sti a, b
+            0x041e
+        ])
+        self.assertRegister("A", 10)
+        self.assertRegister("I", 1)
+        self.assertRegister("J", 1)
+
+
+class TestStd(BaseDCPU16Test, unittest.TestCase):
+    def test_sti(self):
+        self.run_instructions([
+            # set b, 10
+            0x7c21, 10,
+            # sti a, b
+            0x041f
+        ])
+        self.assertRegister("A", 10)
+        self.assertRegister("I", 0xffff)
+        self.assertRegister("J", 0xffff)

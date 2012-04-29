@@ -172,7 +172,7 @@ class DCPU16(object):
         0x0a: "AND", 0x0b: "bor", 0x0c: "xor", 0x0d: "shr", 0x0e: "asr",
         0x0f: "shl", 0x10: "ifb", 0x11: "ifc", 0x12: "ife", 0x13: "ifn",
         0x14: "ifg", 0x15: "ifa", 0x16: "ifl", 0x17: "ifu", 0x1a: "adx",
-        0x1b: "sbx", 0x1e: "sti", 0x1e: "std"
+        0x1b: "sbx", 0x1e: "sti", 0x1f: "std"
     }
 
     @set_value
@@ -259,6 +259,24 @@ class DCPU16(object):
     def sbx(self, b, a):
         overflow, result = divmod(b - a + self.registers["EX"], self.cells)
         return result, overflow and 0xffff
+
+    @basic_opcode
+    def sti(self, b, a):
+        change_registers, change_ram = b.set(a.get())
+        # don't clobber changes to I and J
+        new_i = (change_registers.get("I") or self.registers["I"]) + 1
+        new_j = (change_registers.get("J") or self.registers["J"]) + 1
+        change_registers.update({"I": new_i, "J": new_j})
+        return change_registers, change_ram
+
+    @basic_opcode
+    def std(self, b, a):
+        change_registers, change_ram = b.set(a.get())
+        # don't clobber changes to I and J
+        new_i = (change_registers.get("I") or self.registers["I"]) - 1
+        new_j = (change_registers.get("J") or self.registers["J"]) - 1
+        change_registers.update({"I": new_i, "J": new_j})
+        return change_registers, change_ram
 
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
