@@ -10,10 +10,8 @@ class BaseDCPU16Test(object):
 
     def run_instructions(self, words):
         self.cpu.ram[:len(words)] = list(words)
-        count = 0
-        while count < len(words):
-            consumed = self.cpu.cycle()
-            count += len(consumed)
+        while self.cpu.registers["PC"] < len(words):
+            self.cpu.cycle()
 
     def assertRegister(self, name, value):
         self.assertEquals(self.cpu.registers[name], value)
@@ -304,3 +302,19 @@ class TestShl(BaseDCPU16Test, unittest.TestCase):
         self.assertRAM(0xbeef, 0)
         # overflow is: ((b<<a)>>16)&0xffff)
         self.assertRegister("EX", ((0b1000000000000000 << 1) >> 16) & 0xffff)
+
+
+class TestConditionals(BaseDCPU16Test, unittest.TestCase):
+    def test_ifb(self):
+        self.run_instructions([
+            # if (0b1 & 0b1) != 0 (True)
+            0x7ff0, 0b1, 0b1,
+            # set a to 0xdead (this should get evaluated)
+            0x7c01, 0xbeef,
+            # if (0b0 & 0b0) != 0 (False)
+            0x7ff0, 0b0, 0b0,
+            # set b to 0xbeef (this *shouldn't* get evaluated)
+            0x7c21, 0xdead
+        ])
+        self.assertRegister("A", 0xbeef)
+        self.assertRegister("B", 0x0)
