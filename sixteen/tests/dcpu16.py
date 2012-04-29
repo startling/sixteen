@@ -309,12 +309,86 @@ class TestConditionals(BaseDCPU16Test, unittest.TestCase):
         self.run_instructions([
             # if (0b1 & 0b1) != 0 (True)
             0x7ff0, 0b1, 0b1,
-            # set a to 0xdead (this should get evaluated)
+            # set a to 0xbeef (this should get evaluated)
             0x7c01, 0xbeef,
             # if (0b0 & 0b0) != 0 (False)
             0x7ff0, 0b0, 0b0,
-            # set b to 0xbeef (this *shouldn't* get evaluated)
+            # set b to 0xdead (this *shouldn't* get evaluated)
             0x7c21, 0xdead
         ])
         self.assertRegister("A", 0xbeef)
         self.assertRegister("B", 0x0)
+
+    def test_ifc(self):
+        self.run_instructions([
+            # if (0b1 & 0b1) == 0 (False)
+            0x7ff1, 0b1, 0b1,
+            # set a to 0xdead (this shouldn't get evaluated)
+            0x7c01, 0xdead,
+            # if (0b0 & 0b0) == 0 (True)
+            0x7ff1, 0b0, 0b0,
+            # set b to 0xbeef (this *should* get evaluated)
+            0x7c21, 0xbeef
+        ])
+        self.assertRegister("A", 0x0)
+        self.assertRegister("B", 0xbeef)
+
+    def test_ife(self):
+        self.run_instructions([
+            # if 0xcafe == 0xcafe (True)
+            0x7ff2, 0xcafe, 0xcafe,
+            # set a to 0xbeef (this should get evaluated)
+            0x7c01, 0xbeef,
+            # if 0x1337 == 0xdead (False)
+            0x7ff2, 0xdead, 0x1337,
+            # set b to 0xdead (this shouldn't get evaluated)
+            0x7c21, 0xdead
+        ])
+        self.assertRegister("A", 0xbeef)
+        self.assertRegister("B", 0x0)
+
+    def test_ifn(self):
+        self.run_instructions([
+            # if 0x1337 != 0xdead (True)
+            0x7ff3, 0x1337, 0xdead,
+            # set a to 0xbeef (this should get evaluated)
+            0x7c01, 0xbeef,
+            # if 0xcafe != 0xcafe (False)
+            0x7ff3, 0xcafe, 0xcafe,
+            # set b to 0xdead (this shouldn't get evaluated)
+            0x7c21, 0xdead
+        ])
+        self.assertRegister("A", 0xbeef)
+        self.assertRegister("B", 0x0)
+
+
+    def test_ifg(self):
+        self.run_instructions([
+            # if 0xcafe > 0x1000 (True)
+            # notice that these words are backwards, because a gets evaluated
+            # first yet is the second operand.
+            0x7ff4, 0x1000, 0xcafe,
+            # set a to 0xbeef (this should get evaluated)
+            0x7c01, 0xbeef,
+            # if 0x1337 > 0x7331 (False)
+            0x7ff4, 0x7331, 0x1337,
+            # set b to 0xdead (this shouldn't get evaluated)
+            0x7c21, 0xdead
+        ])
+        self.assertRegister("A", 0xbeef)
+        self.assertRegister("B", 0x0)
+
+    def test_ifl(self):
+        self.run_instructions([
+            # if 0xcafe < 0x1000 (False)
+            # these are backwards too.
+            0x7ff6, 0x1000, 0xcafe,
+            # set a to 0xdead (this shouldn't get evaluated)
+            0x7c01, 0xdead,
+            # if 0x1337 > 0x7331 (False)
+            0x7ff6, 0x7331, 0x1337,
+            # set b to 0xbeef (this should get evaluated)
+            0x7c21, 0xbeef
+        ])
+        self.assertRegister("A", 0x0)
+        self.assertRegister("B", 0xbeef)
