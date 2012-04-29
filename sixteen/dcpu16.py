@@ -30,6 +30,20 @@ def set_value(fn):
     return set_wrapper
 
 
+def conditional(fn):
+    """A decorator for wrapping conditional basic operations. The decorated
+    function should just return a boolean of whether to continue or to skip.
+    """
+    @wraps(fn)
+    def conditional_wrapper(self, b, a):
+        if fn(self, b.get(), a.get()):
+            consumed, _, _ = self.get_instruction()
+            pc = (self.registers["PC"] + len(consumed)) % self.cells
+            return {"PC": pc}, {}
+        else:
+            return {}, {}
+
+
 def special_opcode(fn):
     @wraps(fn)
     def opcode_wrapper(self, ram_iter, a):
@@ -93,8 +107,7 @@ class DCPU16(object):
     for n in xrange(1, 31):
         values[0x21 + n] = Literal(n)
 
-    def cycle(self):
-        "Run for one instruction, returning the executed instruction."
+    def get_instruction(self):
         ram, consumed = self.ram_iter()
         # unpack the opcode, a, and b
         op, a, b = as_instruction(next(ram))
@@ -103,6 +116,12 @@ class DCPU16(object):
         method = getattr(self, mnemonic)
         # run the method and decide what changes to do.
         register_changes, ram_changes = method(ram, b, a)
+        return consumed, register_changes, ram_changes
+        
+
+    def cycle(self):
+        "Run for one instruction, returning the executed instruction."
+        consumed, register_changes, ram_changes = self.get_instruction()
         # change all the registers
         for k, v in register_changes.iteritems():
             self.update_register(k, v)
