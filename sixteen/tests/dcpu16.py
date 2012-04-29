@@ -392,3 +392,33 @@ class TestConditionals(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRegister("A", 0x0)
         self.assertRegister("B", 0xbeef)
+
+
+class TestAdx(BaseDCPU16Test, unittest.TestCase):
+    def test_adx(self):
+        self.run_instructions([
+            # set a, 20
+            0x7c01, 20,
+            # set b, 10
+            0x7c21, 10,
+            # add 0xffff, 0xffff (for EX):
+            0x7fe2, 0xffff, 0xffff,
+            # adx a, b
+            0x041a
+        ])
+        self.assertRegister("A", 31)
+
+
+class TestSbx(BaseDCPU16Test, unittest.TestCase):
+    def test_Sbx(self):
+        self.run_instructions([
+            # set a, 20
+            0x7c01, 20,
+            # set b, 10
+            0x7c21, 10,
+            # add 0xffff, 0xffff (for EX):
+            0x7fe2, 0xffff, 0xffff,
+            # sbx a, b
+            0x041b
+        ])
+        self.assertRegister("A", 11)
