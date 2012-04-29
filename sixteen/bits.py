@@ -60,3 +60,13 @@ def bit_iter(bits, n):
 def invert(i, n):
     "Calculate the inverse of an n-bit long integer, i."
     return i ^ (2 ** n - 1)
+
+
+def as_signed(i):
+    "Interpret this integer as signed (two's complement)."
+    return -(invert(i, 16) + 1) if i >> 15 else i
+
+
+def from_signed(i):
+    "Turn this signed integer into a two's complement (unsigned) integer."
+    return i if i >= 0 else invert(abs(i), 16) + 1

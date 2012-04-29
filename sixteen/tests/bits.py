@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from sixteen.bits import as_instruction, from_instruction, bit_iter, invert
+from sixteen.bits import as_instruction, from_instruction, bit_iter, as_signed, \
+    from_signed, invert
 
 
 # a bunch of instructions, seperated into their components
@@ -54,3 +55,22 @@ class TestInvert(unittest.TestCase):
         self.assertInverse(0b101, 0b010, 3)
         self.assertInverse(0b1101, 0b010, 4)
         self.assertInverse(0b101, 0b010, 3)
+
+
+class TestSigned(unittest.TestCase):
+    values = [
+        (0, 0),
+        (-1, 0xffff),
+        (-0b101, 0xfffb),
+        (-0b111, 0xfff9),
+        (0b101, 0b101),
+        (0b111, 0b111)
+    ]
+
+    def test_as_signed(self):
+        for v, u in self.values:
+            self.assertEqual(v, as_signed(u))
+
+    def test_from_signed(self):
+        for v, u in self.values:
+            self.assertEqual(from_signed(v), u)
