@@ -25,17 +25,17 @@ class BaseDCPU16Test(object):
 class TestSet(BaseDCPU16Test, unittest.TestCase):
     def test_set_ram_pointer(self):
         self.run_instructions([
-            # set ram addres 0x1337 to 0xbeef
-            0x7be1, 0x1337, 0xbeef
+            # set ram address 0x1337 to 0xbeef
+            0x7fc1, 0x1337, 0xbeef
         ])
         self.assertRAM(0x1337, 0xbeef)
 
     def test_set_register(self):
         self.run_instructions([
             # set a, 0xbeef
-            0x03e1, 0xbeef,
+            0x7c01, 0xbeef,
             # set x, 0x1337
-            0x0fe1, 0x1337,
+            0x7c61, 0x1337,
         ])
         self.assertRegister("A", 0xbeef)
         self.assertRegister("X", 0x1337)
@@ -43,9 +43,9 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
     def test_set_from_register(self):
         self.run_instructions([
             # set a, 0xbeef
-            0x03e1, 0xbeef,
+            0x7c01, 0xbeef,
             # set x, a
-            0x0c01
+            0x0061
         ])
         self.assertRegister("A", 0xbeef)
         self.assertRegister("X", 0xbeef)
@@ -53,41 +53,44 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
     def test_set_to_register_pointer(self):
         self.run_instructions([
             # set a, 0xbeef
-            0x03e1, 0xbeef,
+            0x7c01, 0xbeef,
             # set [a], 0xdead
-            0x23e1, 0xdead
+            0x7d01, 0xdead
         ])
         self.assertRAM(0xbeef, 0xdead)
 
     def test_set_from_register_pointer(self):
         self.run_instructions([
             # set a, 0xbeef
-            0x03e1, 0xbeef,
-            # set ram addres 0xbeef to 0x6666
-            0x7be1, 0xbeef, 0x6666,
+            0x7c01, 0xbeef,
+            # set ram address 0xbeef to 0x6666
+            0x7fc1, 0xbeef, 0x6666,
             # set 0xdead, [a]
-            0x7901, 0xdead
+            0x23c1, 0xdead
         ])
         self.assertRAM(0xdead, 0x6666)
 
     def test_set_to_register_plus_next_word(self):
         self.run_instructions([
             # set a, 0xdead
-            0x03e1, 0xdead,
+            0x7c01, 0xdead,
             # set ram address 0xdeae to 0x6666
-            0x7be1, 0xdeae, 0x6666,
+            0x7fc1, 0xdeae, 0x6666,
             # set b, [a + 1]
-            0x0601, 1
+            0x4021, 1,
+            # set [a + 1], 0x1337
+            0x7e01, 0x0001, 0x1337
         ])
+        self.assertRAM(0xdeae, 0x1337)
 
     def test_set_from_register_plus_next_word(self):
         self.run_instructions([
             # set a, 0xdead
-            0x03e1, 0xdead,
+            0x7c01, 0xdead,
             # set ram address 0xdeae to 0x6666
-            0x7be1, 0xdeae, 0x6666,
+            0x7fc1, 0xdeae, 0x6666,
             # set b, [a + 1]
-            0x0601, 1
+            0x4021, 1
         ])
         self.assertRegister("B", 0x6666)
 
@@ -96,14 +99,14 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
             # set a, a (no-op)
             0x0001,
             # set a, PC  
-            0x0381,
+            0x7001,
         ])
         self.assertRegister("A", 1)
 
     def test_get_sp(self):
         self.run_instructions([
             # set a, SP
-            0x0361,
+            0x6c01,
         ])
         self.assertRegister("A", 0)
 
@@ -112,7 +115,7 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
             # add two literals together, for EX
             0x7fe2, 0xffff, 0xffff,
             # set a, EX
-            0x03a1
+            0x7401
         ])
         self.assertRegister("A", 1)
 
@@ -120,20 +123,20 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
 class TestAdd(BaseDCPU16Test, unittest.TestCase):
     def test_add_pointer_literal(self):
         self.run_instructions([
-            # set ram addres 0x1337 to 0xbeef
-            0x7be1, 0x1337, 0xbeef,
+            # set ram address 0x1337 to 0xbeef
+            0x7fc1, 0x1337, 0xbeef,
             # add 0x1000 to 0xbeef
-            0x7be2, 0x1337, 0x1000
+            0x7fc2, 0x1337, 0x1000
         ])
         self.assertRAM(0x1337, 0xbeef + 0x1000)
         self.assertRegister("EX", 0x0)
 
     def test_add_overflow(self):
         self.run_instructions([
-            # set ram addres 0x1337 to 0xffff
-            0x7be1, 0x1337, 0xffff,
+            # set ram address 0x1337 to 0xffff
+            0x7fc1, 0x1337, 0xffff,
             # add 0x1000 to 0xffff
-            0x7be2, 0x1337, 0x1000
+            0x7fc2, 0x1337, 0x1000
         ])
         self.assertRAM(0x1337, 0x0fff)
         self.assertRegister("EX", 0x1)
@@ -142,10 +145,10 @@ class TestAdd(BaseDCPU16Test, unittest.TestCase):
 class TestSub(BaseDCPU16Test, unittest.TestCase):
     def test_sub_pointer_literal(self):
         self.run_instructions([
-            # set ram addres 0x1337 to 0xbeef
-            0x7be1, 0x1337, 0xbeef,
+            # set ram address 0x1337 to 0xbeef
+            0x7fc1, 0x1337, 0xbeef,
             # sub 0x1000 from 0xbeef
-            0x7be3, 0x1337, 0x1000
+            0x7fc3, 0x1337, 0x1000
         ])
         self.assertRAM(0x1337, 0xbeef - 0x1000)
         self.assertRegister("EX", 0x0)
@@ -153,7 +156,7 @@ class TestSub(BaseDCPU16Test, unittest.TestCase):
     def test_sub_underflow(self):
         self.run_instructions([
             # sub 1 from 0
-            0x7be3, 0x1337, 0x0001
+            0x7fc3, 0x1337, 0x0001
         ])
         self.assertRAM(0x1337, 0xffff)
         self.assertRegister("EX", 0xffff)
@@ -162,20 +165,20 @@ class TestSub(BaseDCPU16Test, unittest.TestCase):
 class TestMul(BaseDCPU16Test, unittest.TestCase):
     def test_mul_pointer_literal(self):
         self.run_instructions([
-            # set ram addres 0x1337 to 80
-            0x7be1, 0x1337, 80,
+            # set ram address 0x1337 to 80
+            0x7fc1, 0x1337, 80,
             # mul 80 by 2
-            0x7be4, 0x1337, 2,
+            0x7fc4, 0x1337, 2,
         ])
         self.assertRAM(0x1337, 160)
         self.assertRegister("EX", 0x0)
 
     def test_mul_pointer_literal(self):
         self.run_instructions([
-            # set ram addres 0x1337 to 0xf000
-            0x7be1, 0x1337, 0xf000,
+            # set ram address 0x1337 to 0xf000
+            0x7fc1, 0x1337, 0xf000,
             # mul 0xf000 by 2
-            0x7be4, 0x1337, 2,
+            0x7fc4, 0x1337, 2,
         ])
         self.assertRAM(0x1337, 0xe000)
         # calculate the overflow as per the spec: ((b*a)>>16)&0xffff
@@ -185,20 +188,20 @@ class TestMul(BaseDCPU16Test, unittest.TestCase):
 class TestDiv(BaseDCPU16Test, unittest.TestCase):
     def test_div_pointer_literal(self):
         self.run_instructions([
-            # set ram addres 0x1337 to 80
-            0x7be1, 0x1337, 80,
+            # set ram address 0x1337 to 80
+            0x7fc1, 0x1337, 80,
             # divide 80 by 2
-            0x7be6, 0x1337, 2,
+            0x7fc6, 0x1337, 2,
         ])
         self.assertRAM(0x1337, 40)
         self.assertRegister("EX", 0x0)
 
     def test_div_underflow(self):
         self.run_instructions([
-            # set ram addres 0x1337 to 1
-            0x7be1, 0x1337, 0x1,
+            # set ram address 0x1337 to 1
+            0x7fc1, 0x1337, 0x1,
             # divide 0xf000 by 100
-            0x7be6, 0x1337, 100,
+            0x7fc6, 0x1337, 100,
         ])
         self.assertRAM(0x1337, 0)
         # calculate the overflow as per the spec: ((b<<16)/a)&0xffff)
@@ -208,10 +211,10 @@ class TestDiv(BaseDCPU16Test, unittest.TestCase):
 class TestAnd(BaseDCPU16Test, unittest.TestCase):
     def test_and_pointer_literal(self):
         self.run_instructions([
-            # set ram addres 0xbeef to 1
-            0x7be1, 0xbeef, 1,
+            # set ram address 0xbeef to 1
+            0x7fc1, 0xbeef, 1,
             # AND it by 1
-            0x7be9, 0xbeef, 1,
+            0x7fc9, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 1)
 
@@ -219,10 +222,10 @@ class TestAnd(BaseDCPU16Test, unittest.TestCase):
 class TestMod(BaseDCPU16Test, unittest.TestCase):
     def test_mod(self):
         self.run_instructions([
-            # set ram addres 0xbeef to 7
-            0x7be1, 0xbeef, 7,
+            # set ram address 0xbeef to 7
+            0x7fc1, 0xbeef, 7,
             # % 2
-            0x7be8, 0xbeef, 2,
+            0x7fc8, 0xbeef, 2,
         ])
         self.assertRAM(0xbeef, 1)
 
@@ -230,10 +233,10 @@ class TestMod(BaseDCPU16Test, unittest.TestCase):
 class TestBor(BaseDCPU16Test, unittest.TestCase):
     def test_bor(self):
         self.run_instructions([
-            # set ram addres 0xbeef to 0
-            0x7be1, 0xbeef, 0,
+            # set ram address 0xbeef to 0
+            0x7fc1, 0xbeef, 0,
             # | 1
-            0x7bea, 0xbeef, 1,
+            0x7fca, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 1)
 
@@ -241,9 +244,9 @@ class TestBor(BaseDCPU16Test, unittest.TestCase):
 class TestXor(BaseDCPU16Test, unittest.TestCase):
     def test_xor(self):
         self.run_instructions([
-            # set ram addres 0xbeef to 1
-            0x7be1, 0xbeef, 1,
+            # set ram address 0xbeef to 1
+            0x7fc1, 0xbeef, 1,
             # ^ 2
-            0x7beb, 0xbeef, 1,
+            0x7fcb, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 0)
