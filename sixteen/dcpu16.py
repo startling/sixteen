@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.values import NextWord, NextWordPointer, RegisterValue, \
-    RegisterPointer, RegisterPlusNextWord
+    RegisterPointer, RegisterPlusNextWord, Literal
 from sixteen.bits import as_instruction
 from functools import wraps
 
@@ -88,6 +88,10 @@ class DCPU16(object):
         values[n] = RegisterValue.named(name)
         values[n + 0x08] = RegisterPointer.named(name)
         values[n + 0x10] = RegisterPlusNextWord.named(name)
+    # set all of the short literals
+    values[0x20] = Literal(0xffff)
+    for n in xrange(1, 31):
+        values[0x21 + n] = Literal(n)
 
     def cycle(self):
         "Run for one instruction, returning the executed instruction."
