@@ -250,6 +250,16 @@ class DCPU16(object):
     def ifl(self, b, a):
         return b < a
 
+    @set_value
+    def adx(self, b, a):
+        overflow, result = divmod(b + a + self.registers["EX"], self.cells)
+        return result, int(overflow > 0)
+
+    @set_value
+    def sbx(self, b, a):
+        overflow, result = divmod(b - a + self.registers["EX"], self.cells)
+        return result, overflow and 0xffff
+
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
         0x01: "jsr", 0x08: "int", 0x09: "iag", 0x0a: "ias", 0x10: "hwn",
