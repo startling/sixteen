@@ -2,6 +2,7 @@
 
 import unittest
 from sixteen.dcpu16 import DCPU16
+from sixteen.bits import as_signed, from_signed
 
 
 class BaseDCPU16Test(object):
@@ -191,6 +192,17 @@ class TestMul(BaseDCPU16Test, unittest.TestCase):
         self.assertRAM(0x1337, 0xe000)
         # calculate the overflow as per the spec: ((b*a)>>16)&0xffff
         self.assertRegister("EX", ((0xf000 * 2) >> 16) & 0xffff)
+
+
+class TestMli(BaseDCPU16Test, unittest.TestCase):
+    def test_mli(self):
+        self.run_instructions([
+            # set ram address 0x1337 to 80
+            0x7fc1, 0x1337, 80,
+            # mul 80 by 2
+            0x7fc4, 0x1337, from_signed(-2),
+        ])
+        self.assertRAM(0x1337, from_signed(-160))
 
 
 class TestDiv(BaseDCPU16Test, unittest.TestCase):

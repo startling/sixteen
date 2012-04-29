@@ -2,7 +2,7 @@
 
 from sixteen.values import NextWord, NextWordPointer, RegisterValue, \
     RegisterPointer, RegisterPlusNextWord, Literal
-from sixteen.bits import as_instruction
+from sixteen.bits import as_instruction, as_signed, from_signed
 from functools import wraps
 
 
@@ -13,6 +13,20 @@ def basic_opcode(fn):
         b_value = self.values[b](self.registers, self.ram, ram_iter)
         return fn(self, a_value, b_value)
     return opcode_wrapper
+
+
+def signed(fn):
+    """A decorator for basic operations that casts the arguments to signed
+    (two's complement) integers and casts the single returned value back to
+    unsigned.
+    """
+    @set_value
+    @wraps(fn)
+    def signed_wrapper(self, b_unsigned, a_unsigned):
+        b = as_signed(b_unsigned)
+        a = as_signed(a_unsigned)
+        return from_signed(fn(self, b, a))
+    return signed_wrapper
 
 
 def set_value(fn):
@@ -193,6 +207,10 @@ class DCPU16(object):
     def mul(self, b, a):
         overflow, result = divmod(b * a, self.cells)
         return result, overflow
+
+    @signed
+    def mli(self, b, a):
+        return b * a,
 
     @set_value
     def div(self, b, a):
