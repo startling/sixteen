@@ -198,7 +198,7 @@ class TestMul(BaseDCPU16Test, unittest.TestCase):
             # set ram address 0x1337 to 80
             0x7fc1, 0x1337, from_signed(-10),
             # mul 80 by 2
-            0x7fc2, 0x1337, from_signed(-10),
+            0x7fc4, 0x1337, from_signed(-10)
         ])
         self.assertRAM(0x1337, 100)
         self.assertRegister("EX", 0xffec)
