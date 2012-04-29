@@ -214,7 +214,7 @@ class TestAnd(BaseDCPU16Test, unittest.TestCase):
             # set ram address 0xbeef to 1
             0x7fc1, 0xbeef, 1,
             # AND it by 1
-            0x7fc9, 0xbeef, 1,
+            0x7fca, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 1)
 
@@ -236,7 +236,7 @@ class TestBor(BaseDCPU16Test, unittest.TestCase):
             # set ram address 0xbeef to 0
             0x7fc1, 0xbeef, 0,
             # | 1
-            0x7fca, 0xbeef, 1,
+            0x7fcb, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 1)
 
@@ -247,6 +247,6 @@ class TestXor(BaseDCPU16Test, unittest.TestCase):
             # set ram address 0xbeef to 1
             0x7fc1, 0xbeef, 1,
             # ^ 2
-            0x7fcb, 0xbeef, 1,
+            0x7fcc, 0xbeef, 1,
         ])
         self.assertRAM(0xbeef, 0)
