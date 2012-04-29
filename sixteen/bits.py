@@ -54,15 +54,7 @@ def from_instruction(o, b, a):
 
 def bit_iter(bits, n):
     "Iterate over the bits of an integer, padding it to `n` digits."
-    if bits == 0:
-        length = 0
-    else:
-        length = int(1 + log(bits, 2))
-    difference = n - length
-    for _ in xrange(difference):
-        yield 0
-    for x in xrange(length -1, -1, -1):
-        yield 1 & (bits >> x)
+    return ((bits >> i) & 1 for i in xrange(n - 1, -1, -1))
 
 
 def as_signed(i):
