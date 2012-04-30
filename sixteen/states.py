@@ -36,11 +36,13 @@ class State(object):
 
     def pop(self):
         "Pop from the cpu's stack."
-        value = self.ram[self.resgisters["SP"]]
+        value = self.ram[self.registers["SP"]]
         self.registers["SP"] += 1
+        self.registers["SP"] %= 0x10000
         return value
 
     def push(self, value):
         "Push to the cpu's stack."
         self.registers["SP"] -= 1
+        self.registers["SP"] %= 0x10000
         self.ram[self.registers["SP"]] = value

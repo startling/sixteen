@@ -118,12 +118,21 @@ def POPorPUSH(state, is_a):
 class POP(Register):
     def __init__(self, *args):
         Register.__init__(self, *args)
-        self.value = state.pop()
+        self.value = self.state.pop()
 
     def get(self):
         return self.value
 
 
 class PUSH(Register):
+    def __init__(self, *args):
+        Register.__init__(self, *args)
+        self.state.registers["SP"] -= 1
+        self.state.registers["SP"] %= 0x10000
+        self.location = self.state.registers["SP"]
+
+    def get(self):
+        return self.state.ram[self.location]
+
     def set(self, value):
-        self.state.push(value)
+        self.state.ram[self.location] = value
