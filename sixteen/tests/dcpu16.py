@@ -143,6 +143,19 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
         self.assertRegister("A", 0xbeef)
         self.assertRegister("B", 0xdead)
 
+    def test_pop_push_evaluation_order(self):
+        self.run_instructions([
+            # push 0x30
+            0x7f01, 0x0030,
+            # push 0x20
+            0x7f01, 0x0020,
+            # add peek, pop
+            0x6322,
+            # set a, pop
+            0x6001       
+        ])
+        self.assertRegister("A", 0x50)
+
 
 class TestAdd(BaseDCPU16Test, unittest.TestCase):
     def test_add_pointer_literal(self):
