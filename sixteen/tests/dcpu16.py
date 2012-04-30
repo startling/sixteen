@@ -221,6 +221,7 @@ class TestMli(BaseDCPU16Test, unittest.TestCase):
             0x7fc5, from_signed(-2), 0x1337
         ])
         self.assertRAM(0x1337, from_signed(-160))
+        self.assertRegister("EX", 0)
 
     def test_mli_both_negative(self):
         self.run_instructions([
