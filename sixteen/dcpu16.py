@@ -25,7 +25,13 @@ def signed(fn):
     def signed_wrapper(self, b_unsigned, a_unsigned):
         b = as_signed(b_unsigned)
         a = as_signed(a_unsigned)
-        return from_signed(fn(self, b, a))
+        value = from_signed(fn(self, b, a))
+        # handle overflow for signed values
+        overflow, result = divmod(value, self.cells)
+        # NOTE: this clears overflow for all signed operations.
+        # this may be wrong; I don't care right now.
+        return value, overflow
+
     return signed_wrapper
 
 
@@ -210,7 +216,7 @@ class DCPU16(object):
 
     @signed
     def mli(self, b, a):
-        return b * a,
+        return b * a
 
     @set_value
     def div(self, b, a):
