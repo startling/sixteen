@@ -214,7 +214,7 @@ class DCPU16(object):
 
     @set_value
     def div(self, b, a):
-        if b == 0:
+        if a == 0:
             return 0, 0
         else:
             return b // a, ((b << 16) // a) & 0xffff
