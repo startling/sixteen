@@ -3,6 +3,29 @@
 from functools import wraps
 
 
+class DeltaDict(object):
+    """A dictionary-like object that's initialized with another dictionary.
+    Setting to it, though, doesn't mutate the original; instead, those changes
+    get put into a new dictionary.
+    """
+    def __init__(self, original):
+        self._original = original
+        self.changes = {}
+
+    def __setitem__(self, key, value):
+        "Always set to the new dict."
+        self.changes[key] = value
+
+    def __getitem__(self, key):
+        """Try getting from the new dict; if that fails, try to get it from the
+        original.
+        """
+        return self.changes.get(key) or self.original[key]
+
+    def __iter__(self):
+        return iter(self.changes)
+
+
 class Value(object):
     def __init__(self, registers, ram, iterator):
         """Values get initialized with three things: 
