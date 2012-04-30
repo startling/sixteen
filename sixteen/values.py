@@ -4,13 +4,15 @@ from functools import wraps
 
 
 class Value(object):
-    def __init__(self, state):
+    def __init__(self, state, is_a):
         """Values get initialized with a state object, whose attributes it can
         safely modify.
         """
         self.state = state
         self.registers = state.registers
         self.ram = state.ram
+        self.is_a = is_a
+        self.is_b = not is_a
 
     def set(self, value):
         """This should update self.registers or self.ram."""
@@ -23,8 +25,8 @@ class Value(object):
 
 class Consumes(Value):
     "A type of value that consumes a value from RAM on initialization."
-    def __init__(self, state):
-        Value.__init__(self, state)
+    def __init__(self, state, is_a):
+        Value.__init__(self, state, is_a)
         self.value = next(state.ram_iter)
 
 
@@ -104,3 +106,24 @@ def Literal(n):
         "get": lambda self: n,
         "dis": "0x%04x" % n
     })
+
+
+def POPorPUSH(state, is_a):
+    if is_a:
+        return POP(state, is_a)
+    else:
+        return PUSH(state, is_a)
+
+
+class POP(Register):
+    def __init__(self, *args):
+        Register.__init__(self, *args)
+        self.value = state.pop()
+
+    def get(self):
+        return self.value
+
+
+class PUSH(Register):
+    def set(self, value):
+        self.state.push(value)

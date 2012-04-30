@@ -10,8 +10,8 @@ from functools import wraps
 def basic_opcode(fn):
     @wraps(fn)
     def opcode_wrapper(self, state, b, a):
-        a_value = self.values[a](state)
-        b_value = self.values[b](state)
+        a_value = self.values[a](state, True)
+        b_value = self.values[b](state, False)
         return fn(self, state, b_value, a_value)
     return opcode_wrapper
 
@@ -58,8 +58,8 @@ def conditional(fn):
     @wraps(fn)
     def conditional_wrapper(self, state, b, a):
         # initialize the values
-        a_value = self.values[a](state)
-        b_value = self.values[b](state)
+        a_value = self.values[a](state, True)
+        b_value = self.values[b](state, False)
         if fn(self, b_value.get(), a_value.get()):
             # if the predicate returns True, we continue as usuaul
             return
@@ -86,7 +86,7 @@ def signed_conditional(fn):
 def special_opcode(fn):
     @wraps(fn)
     def opcode_wrapper(self, state, a):
-        a_value = self.values[a](state)
+        a_value = self.values[a](state, True)
         return fn(self, state, a_value)
     return opcode_wrapper
 
