@@ -74,6 +74,14 @@ def conditional(fn):
     return conditional_wrapper
 
 
+def signed_conditional(fn):
+    @conditional
+    @wraps(fn)
+    def signed_conditional_wrapper(self, b, a):
+        return fn(self, as_signed(b), as_signed(a))
+    return signed_conditional_wrapper
+
+
 def special_opcode(fn):
     @wraps(fn)
     def opcode_wrapper(self, ram_iter, a):
@@ -274,8 +282,16 @@ class DCPU16(object):
     def ifg(self, b, a):
         return b > a
 
+    @signed_conditional
+    def ifa(self, b, a):
+        return b > a
+
     @conditional
     def ifl(self, b, a):
+        return b < a
+
+    @signed_conditional
+    def ifu(self, b, a):
         return b < a
 
     @set_value
