@@ -345,6 +345,16 @@ class TestShr(BaseDCPU16Test, unittest.TestCase):
         self.assertRegister("EX", ((0b100 << 16) >> 3) & 0xffff)
 
 
+class TestAsr(BaseDCPU16Test, unittest.TestCase):
+    def test_asr(self):
+        self.run_instructions([
+            # set a, -1 / asr a, 3
+            0x7c01, from_signed(-1), 0x900e
+        ])
+        self.assertRegister("A", from_signed(-1))
+        self.assertRegister("EX", 0)
+
+
 class TestShl(BaseDCPU16Test, unittest.TestCase):
     def test_shl(self):
         self.run_instructions([

@@ -257,6 +257,10 @@ class DCPU16(object):
     def shr(self, b, a):
         return b >> a, ((b << 16) >> a) & 0xffff
 
+    @signed
+    def asr(self, b, a):
+        return b >> a
+
     @set_value
     def shl(self, b, a):
         overflow, result = divmod(b << a, self.cells)
