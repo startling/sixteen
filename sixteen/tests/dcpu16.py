@@ -301,6 +301,18 @@ class TestMod(BaseDCPU16Test, unittest.TestCase):
         self.assertRAM(0xbeef, 1)
 
 
+class TestMdi(BaseDCPU16Test, unittest.TestCase):
+    def test_mdi(self):
+        self.run_instructions([
+            # set a to 7
+            0x7c01, from_signed(-7),
+            # % 16
+            0x7c09, 16
+        ])
+        # this is actually remainder...
+        self.assertRegister("A", from_signed(-7))
+
+
 class TestBor(BaseDCPU16Test, unittest.TestCase):
     def test_bor(self):
         self.run_instructions([

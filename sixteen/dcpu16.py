@@ -241,6 +241,12 @@ class DCPU16(object):
     def mod(self, b, a):
         return b % a,
 
+    @signed
+    def mdi(self, b, a):
+        # if notch changes it to true modulus, it'll be
+        # > return b % a
+        return b % a - a
+
     @set_value
     def AND(self, b, a):
         return b & a,
