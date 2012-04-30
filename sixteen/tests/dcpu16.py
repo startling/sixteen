@@ -256,6 +256,28 @@ class TestDiv(BaseDCPU16Test, unittest.TestCase):
         # calculate the overflow as per the spec: ((b<<16)/a)&0xffff)
         self.assertRegister("EX", ((1 << 16) // 100) & 0xffff)
 
+    def test_div_negative(self):
+        self.run_instructions([
+            # set a to -80
+            0x7c01, from_signed(-80),
+            # divide -80 by -40
+            0x7c06, from_signed(-40),
+        ])
+        self.assertRegister("A", 0)
+        self.assertRegister("EX", 0xffd7)
+
+
+class TestDvi(BaseDCPU16Test, unittest.TestCase):
+    def test_dvi(self):
+        self.run_instructions([
+            # set a to -80
+            0x7c01, from_signed(-80),
+            # divide -80 by -40
+            0x7c07, from_signed(-40),
+        ])
+        self.assertRegister("A", 2)
+        self.assertRegister("EX", 0)
+
 
 class TestAnd(BaseDCPU16Test, unittest.TestCase):
     def test_and_pointer_literal(self):
