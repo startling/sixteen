@@ -441,6 +441,21 @@ class TestConditionals(BaseDCPU16Test, unittest.TestCase):
         self.assertRegister("A", 0xbeef)
         self.assertRegister("B", 0x0)
 
+    def test_ifa(self):
+        self.run_instructions([
+            # if 0 > -1 (True)
+            # these are backwards too.
+            0x7ff5, from_signed(-1), 0,
+            # set a to 0xbeef (this should get evaluated)
+            0x7c01, 0xbeef,
+            # if -1 > 0 (False)
+            0x7ff5, 0, from_signed(-1),
+            # set b to 0xdead (this shouldn't get evaluated)
+            0x7c21, 0xdead
+        ])
+        self.assertRegister("A", 0xbeef)
+        self.assertRegister("B", 0x0)
+
     def test_ifl(self):
         self.run_instructions([
             # if 0xcafe < 0x1000 (False)
@@ -455,6 +470,21 @@ class TestConditionals(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRegister("A", 0x0)
         self.assertRegister("B", 0xbeef)
+
+    def test_ifu(self):
+        self.run_instructions([
+            # if -1 < 0 (True)
+            # these are backwards too.
+            0x7ff7, 0, from_signed(-1),
+            # set a to 0xbeef (this should get evaluated)
+            0x7c01, 0xbeef,
+            # if 0 < -1 (False)
+            0x7ff7, from_signed(-1), 0,
+            # set b to 0xdead (this shouldn't get evaluated)
+            0x7c21, 0xdead
+        ])
+        self.assertRegister("A", 0xbeef)
+        self.assertRegister("B", 0x0)
 
 
 class TestAdx(BaseDCPU16Test, unittest.TestCase):
