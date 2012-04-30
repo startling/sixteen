@@ -225,6 +225,10 @@ class DCPU16(object):
         else:
             return b // a, ((b << 16) // a) & 0xffff
 
+    @signed
+    def dvi(self, b, a):
+        return b // a
+
     @set_value
     def mod(self, b, a):
         return b % a,
