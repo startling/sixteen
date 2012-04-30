@@ -341,6 +341,11 @@ class DCPU16(object):
         return method(state, a)
 
     @special_opcode
+    def jsr(self, state, a):
+        state.push(state.registers["PC"])
+        state.registers["PC"] = a.get()
+
+    @special_opcode
     def iag(self, state, a):
         a.set(self.registers["IA"])
 
