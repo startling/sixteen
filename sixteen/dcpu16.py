@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.values import NextWord, NextWordPointer, RegisterValue, \
-    RegisterPointer, RegisterPlusNextWord, Literal
+    RegisterPointer, RegisterPlusNextWord, Literal, DeltaDict
 from sixteen.bits import as_instruction, as_signed, from_signed
 from functools import wraps
 
 
 def basic_opcode(fn):
     @wraps(fn)
-    def opcode_wrapper(self, consumed, ram_iter, b, a):
-        a_value = self.values[a](self.registers, self.ram, ram_iter)
-        b_value = self.values[b](self.registers, self.ram, ram_iter)
-        return fn(self, b_value, a_value)
+    def opcode_wrapper(self, state, b, a):
+        a_value = self.values[a](state)
+        b_value = self.values[b](state)
+        return fn(self, state, b_value, a_value)
     return opcode_wrapper
 
 
@@ -42,12 +42,11 @@ def set_value(fn):
     """
     @basic_opcode
     @wraps(fn)
-    def set_wrapper(self, b, a):
+    def set_wrapper(self, state, b, a):
         t = fn(self, b.get(), a.get())
-        update_registers, update_ram = b.set(t[0])
+        b.set(t[0])
         if len(t) == 2:
-            update_registers.update({"EX": t[1]})
-        return update_registers, update_ram
+            state.registers["EX"] = t[1]
     return set_wrapper
 
 
@@ -56,22 +55,22 @@ def conditional(fn):
     function should just return a boolean of whether to continue or to skip.
     """
     @wraps(fn)
-    def conditional_wrapper(self, consumed, ram_iter, b_value, a_value):
+    def conditional_wrapper(self, state, b, a):
         # initialize the values
-        a = self.values[a_value](self.registers, self.ram, ram_iter)
-        b = self.values[b_value](self.registers, self.ram, ram_iter)
-        if fn(self, b.get(), a.get()):
+        a_value = self.values[a](state)
+        b_value = self.values[b](state)
+        if fn(self, b_value.get(), a_value.get()):
             # if the predicate returns True, we continue as usuaul
-            return {}, {}
+            return
         else:
             #TODO: chained conditionals
             # otherwise, figure out where the next instruction will be
-            next_instruction = self.registers["PC"] + len(consumed)
+            next_instruction = state.registers["PC"] + len(state.consumed)
             # run it to decide what words it consumes
-            next_consumed, _, _ = self.get_instruction(next_instruction)
+            next_consumed = self.get_instruction(next_instruction).consumed
             # and then skip ahead past it.
             pc = (next_instruction + len(next_consumed)) % self.cells
-            return {"PC": pc}, {}
+            state.registers["PC"] = pc 
     return conditional_wrapper
 
 
@@ -85,9 +84,9 @@ def signed_conditional(fn):
 
 def special_opcode(fn):
     @wraps(fn)
-    def opcode_wrapper(self, ram_iter, a):
-        a_value = self.values[a](self.registers, self.ram, ram_iter)
-        return fn(self, a_value)
+    def opcode_wrapper(self, state, a):
+        a_value = self.values[a](state)
+        return fn(self, state, a_value)
     return opcode_wrapper
 
 
@@ -147,29 +146,30 @@ class DCPU16(object):
         values[0x21 + n] = Literal(n)
 
     def get_instruction(self, location=None):
-        ram, consumed = self.ram_iter(location)
+        state = State(self, location)
         # unpack the opcode, a, and b
-        op, b, a = as_instruction(next(ram))
+        op, b, a = as_instruction(next(state.ram_iter))
         # get the mnemonic and the method corresponding to it.
         mnemonic = self.operations.get(op)
         method = getattr(self, mnemonic)
         # run the method and decide what changes to do.
-        register_changes, ram_changes = method(consumed, ram, b, a)
-        return consumed, register_changes, ram_changes
+        method(state, b, a)
+        return state
         
 
     def cycle(self):
         "Run for one instruction, returning the executed instruction."
-        consumed, register_changes, ram_changes = self.get_instruction()
+        state = self.get_instruction()
         # change all the registers
-        for k, v in register_changes.iteritems():
+        for k, v in state.registers.iteritems():
             self.update_register(k, v)
         # change all the RAM
-        for k, v in ram_changes.iteritems():
+        for k, v in state.ram.iteritems():
             self.update_ram(k, v)
         # increment the pc by len(consumed)
-        self.registers["PC"] = (self.registers["PC"] + len(consumed)) % self.cells
-        return consumed
+        self.registers["PC"] = ((self.registers["PC"] + len(state.consumed))
+            % self.cells)
+        return state.consumed
 
     def update_register(self, name, value):
         # use modulus to take overflow and underflow into account
@@ -316,22 +316,16 @@ class DCPU16(object):
         return result, overflow and 0xffff
 
     @basic_opcode
-    def sti(self, b, a):
-        change_registers, change_ram = b.set(a.get())
-        # don't clobber changes to I and J
-        new_i = (change_registers.get("I") or self.registers["I"]) + 1
-        new_j = (change_registers.get("J") or self.registers["J"]) + 1
-        change_registers.update({"I": new_i, "J": new_j})
-        return change_registers, change_ram
+    def sti(self, state, b, a):
+        b.set(a.get())
+        state.registers["I"] += 1
+        state.registers["J"] += 1
 
     @basic_opcode
-    def std(self, b, a):
-        change_registers, change_ram = b.set(a.get())
-        # don't clobber changes to I and J
-        new_i = (change_registers.get("I") or self.registers["I"]) - 1
-        new_j = (change_registers.get("J") or self.registers["J"]) - 1
-        change_registers.update({"I": new_i, "J": new_j})
-        return change_registers, change_ram
+    def std(self, state, b, a):
+        b.set(a.get())
+        state.registers["I"] -= 1
+        state.registers["J"] -= 1
 
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
@@ -339,16 +333,24 @@ class DCPU16(object):
         0x11: "hwq", 0x12: "hwi",
     }
 
-    def special(self, consumed, ram_iter, o, a):
+    def special(self, state, o, a):
         "Pass special opcodes to their methods."
         mnemonic = self.special_operations.get(o)
         method = getattr(self, mnemonic)
-        return method(ram_iter, a)
+        return method(state, a)
 
     @special_opcode
-    def iag(self, a):
-        return a.set(self.registers["IA"])
+    def iag(self, state, a):
+        a.set(self.registers["IA"])
 
     @special_opcode
-    def ias(self, a):
-        return {"IA": a.get()}, {}
+    def ias(self, state, a):
+        state.registers["IA"] = a.get()
+
+
+class State(object):
+    "Create a mutable state of a given cpu without mutating the CPU itself."
+    def __init__(self, cpu, location=None):
+        self.ram_iter, self.consumed = cpu.ram_iter(location)
+        self.registers = DeltaDict(cpu.registers)
+        self.ram = DeltaDict(dict(enumerate(cpu.ram)))
