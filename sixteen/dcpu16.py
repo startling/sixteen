@@ -149,7 +149,6 @@ class DCPU16(object):
     for n in xrange(1, 31):
         values[0x21 + n] = Literal(n)
 
-
     def get_instruction(self, location=None):
         state = State(self, location)
         # unpack the opcode, a, and b
@@ -160,7 +159,6 @@ class DCPU16(object):
         # run the method and decide what changes to do.
         method(state, b, a)
         return state
-        
 
     def cycle(self):
         "Run for one instruction, returning the executed instruction."
@@ -183,21 +181,6 @@ class DCPU16(object):
     def update_ram(self, addr, value):
         # use modulus to take overflow and underflow into account
         self.ram[addr % self.cells] = value % self.cells
-
-    def ram_iter(self, location=None):
-        """Return an iterator over this cpu's RAM and a list that will be updated
-        whenever a value is drawn.
-        """
-        consumed = []
-        def i():
-            place = location or self.registers["PC"]
-            while True:
-                consumed.append(self.ram[place])
-                yield self.ram[place]
-                # increment the place counter, handling overflow if applicable.
-                place += 1
-                place %= self.cells
-        return i(), consumed
 
     # a dictionary of opcode numbers to mnemonics
     operations = {

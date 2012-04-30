@@ -30,7 +30,9 @@ class DeltaDict(object):
 class State(object):
     "Create a mutable state of a given cpu without mutating the CPU itself."
     def __init__(self, cpu, location=None):
-        self.ram_iter, self.consumed = cpu.ram_iter(location)
+        self.consumed = []
+        self.cells = cpu.cells
+        self.ram_iter = self.ram_iterator(location)
         self.registers = DeltaDict(cpu.registers)
         self.ram = DeltaDict(dict(enumerate(cpu.ram)))
 
@@ -46,3 +48,15 @@ class State(object):
         self.registers["SP"] -= 1
         self.registers["SP"] %= 0x10000
         self.ram[self.registers["SP"]] = value
+
+    def ram_iterator(self, location):
+        """Return an iterator over this cpu's RAM and a list that will be updated
+        whenever a value is drawn.
+        """
+        place = location or self.registers["PC"]
+        while True:
+            self.consumed.append(self.ram[place])
+            yield self.ram[place]
+            # increment the place counter, handling overflow if applicable.
+            place += 1
+            place %= self.cells
