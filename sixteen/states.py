@@ -32,8 +32,10 @@ class State(object):
     def __init__(self, cpu, location=None):
         self.consumed = []
         self.cells = cpu.cells
-        self.ram_iter = self.ram_iterator(location)
         self.registers = DeltaDict(cpu.registers)
+        if location:
+            self.registers["PC"] = location
+        self.ram_iter = self.ram_iterator()
         self.ram = DeltaDict(dict(enumerate(cpu.ram)))
 
     def pop(self):
@@ -49,14 +51,13 @@ class State(object):
         self.registers["SP"] %= 0x10000
         self.ram[self.registers["SP"]] = value
 
-    def ram_iterator(self, location):
+    def ram_iterator(self):
         """Return an iterator over this cpu's RAM and a list that will be updated
         whenever a value is drawn.
         """
-        place = location or self.registers["PC"]
         while True:
-            self.consumed.append(self.ram[place])
-            yield self.ram[place]
-            # increment the place counter, handling overflow if applicable.
-            place += 1
-            place %= self.cells
+            value = self.ram[self.registers["PC"]]
+            self.consumed.append(value)
+            self.registers["PC"] += 1
+            self.registers["PC"] %= self.cells
+            yield value

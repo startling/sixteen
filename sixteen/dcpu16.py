@@ -65,13 +65,10 @@ def conditional(fn):
             return
         else:
             #TODO: chained conditionals
-            # otherwise, figure out where the next instruction will be
-            next_instruction = state.registers["PC"] + len(state.consumed)
-            # run it to decide what words it consumes
-            next_consumed = self.get_instruction(next_instruction).consumed
-            # and then skip ahead past it.
-            pc = (next_instruction + len(next_consumed)) % self.cells
-            state.registers["PC"] = pc 
+            # run the next instruction so we can see how much it consumes
+            skip_state = self.get_instruction(state.registers["PC"])
+            # skip ahead to where that instruction stopped
+            state.registers["PC"] = skip_state.registers["PC"]
     return conditional_wrapper
 
 
@@ -169,9 +166,6 @@ class DCPU16(object):
         # change all the RAM
         for k, v in state.ram.iteritems():
             self.update_ram(k, v)
-        # increment the pc by len(consumed)
-        self.registers["PC"] = ((self.registers["PC"] + len(state.consumed))
-            % self.cells)
         return state.consumed
 
     def update_register(self, name, value):
