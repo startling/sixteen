@@ -33,3 +33,14 @@ class State(object):
         self.ram_iter, self.consumed = cpu.ram_iter(location)
         self.registers = DeltaDict(cpu.registers)
         self.ram = DeltaDict(dict(enumerate(cpu.ram)))
+
+    def pop(self):
+        "Pop from the cpu's stack."
+        value = self.ram[self.resgisters["SP"]]
+        self.registers["SP"] += 1
+        return value
+
+    def push(self, value):
+        "Push to the cpu's stack."
+        self.registers["SP"] -= 1
+        self.ram[self.registers["SP"]] = value
