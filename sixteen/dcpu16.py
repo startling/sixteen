@@ -64,6 +64,7 @@ def conditional(fn):
             # if the predicate returns True, we continue as usuaul
             return {}, {}
         else:
+            #TODO: chained conditionals
             # otherwise, figure out where the next instruction will be
             next_instruction = self.registers["PC"] + len(consumed)
             # run it to decide what words it consumes
@@ -343,3 +344,11 @@ class DCPU16(object):
         mnemonic = self.special_operations.get(o)
         method = getattr(self, mnemonic)
         return method(ram_iter, a)
+
+    @special_opcode
+    def iag(self, a):
+        return a.set(self.registers["IA"])
+
+    @special_opcode
+    def ias(self, a):
+        return {"IA": a.get()}, {}

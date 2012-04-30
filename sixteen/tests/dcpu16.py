@@ -563,3 +563,28 @@ class TestStd(BaseDCPU16Test, unittest.TestCase):
         self.assertRegister("A", 10)
         self.assertRegister("I", 0xffff)
         self.assertRegister("J", 0xffff)
+
+
+class TestIagAndIas(BaseDCPU16Test, unittest.TestCase):
+    def test_iag(self):
+        self.run_instructions([
+            # iag A
+            0x0120  
+        ])
+        self.assertRegister("A", 0)
+
+    def test_ias(self):
+        self.run_instructions([
+            # ias 0xbeef
+            0x7d40, 0xbeef,
+        ])
+        self.assertRegister("IA", 0xbeef)
+
+    def test_both(self):
+        self.run_instructions([
+            # ias 0xbeef
+            0x7d40, 0xbeef,
+            # iag A
+            0x0120 
+        ])
+        self.assertRegister("A", 0xbeef)
