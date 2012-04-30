@@ -11,7 +11,7 @@ def basic_opcode(fn):
     def opcode_wrapper(self, consumed, ram_iter, b, a):
         a_value = self.values[a](self.registers, self.ram, ram_iter)
         b_value = self.values[b](self.registers, self.ram, ram_iter)
-        return fn(self, a_value, b_value)
+        return fn(self, b_value, a_value)
     return opcode_wrapper
 
 
@@ -134,7 +134,7 @@ class DCPU16(object):
     def get_instruction(self, location=None):
         ram, consumed = self.ram_iter(location)
         # unpack the opcode, a, and b
-        op, a, b = as_instruction(next(ram))
+        op, b, a = as_instruction(next(ram))
         # get the mnemonic and the method corresponding to it.
         mnemonic = self.operations.get(op)
         method = getattr(self, mnemonic)
