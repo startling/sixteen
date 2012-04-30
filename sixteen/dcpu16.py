@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.values import NextWord, NextWordPointer, RegisterValue, \
-    RegisterPointer, RegisterPlusNextWord, Literal, DeltaDict
+    RegisterPointer, RegisterPlusNextWord, Literal
+from sixteen.states import State
 from sixteen.bits import as_instruction, as_signed, from_signed
 from functools import wraps
 
@@ -346,11 +347,3 @@ class DCPU16(object):
     @special_opcode
     def ias(self, state, a):
         state.registers["IA"] = a.get()
-
-
-class State(object):
-    "Create a mutable state of a given cpu without mutating the CPU itself."
-    def __init__(self, cpu, location=None):
-        self.ram_iter, self.consumed = cpu.ram_iter(location)
-        self.registers = DeltaDict(cpu.registers)
-        self.ram = DeltaDict(dict(enumerate(cpu.ram)))
