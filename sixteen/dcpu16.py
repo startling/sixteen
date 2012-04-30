@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sixteen.values import NextWord, NextWordPointer, RegisterValue, \
-    RegisterPointer, RegisterPlusNextWord, Literal
+    RegisterPointer, RegisterPlusNextWord, Literal, POPorPUSH
 from sixteen.states import State
 from sixteen.bits import as_instruction, as_signed, from_signed
 from functools import wraps
@@ -125,6 +125,8 @@ class DCPU16(object):
         self.ram = [0x0000] * self.cells
 
     values = {
+        # POP/PUSH 
+        0x18: POPorPUSH,
         # PEEK is just [SP]
         0x19: RegisterPointer.named("SP"),
         # [SP + next word] / PICK
@@ -136,6 +138,7 @@ class DCPU16(object):
         0x1e: NextWordPointer,
         0x1f: NextWord,
     }
+
     # set all the ordinary register values
     for n, name in enumerate(["A", "B", "C", "X", "Y", "Z", "I", "J"]):
         values[n] = RegisterValue.named(name)
@@ -145,6 +148,7 @@ class DCPU16(object):
     values[0x20] = Literal(0xffff)
     for n in xrange(1, 31):
         values[0x21 + n] = Literal(n)
+
 
     def get_instruction(self, location=None):
         state = State(self, location)
