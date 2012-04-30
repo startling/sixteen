@@ -42,6 +42,10 @@ class NextWord(Consumes):
     
     # setting to next word literals is silently ignored.
 
+    @property
+    def dis(self):
+        return "0x%04x" % self.value
+
 
 class NextWordPointer(Consumes):
     def get(self):
@@ -49,6 +53,10 @@ class NextWordPointer(Consumes):
 
     def set(self, value):
         return {}, {self.value: value}
+
+    @property
+    def dis(self):
+        return "[0x%04x]" % self.value
 
 
 class Register(Value):
@@ -68,6 +76,10 @@ class RegisterValue(Register):
     def set(self, value):
         return {self.name: value}, {}
 
+    @property
+    def dis(self):
+        return self.name
+
 
 class RegisterPointer(Register):
     "A register's value as a pointer."
@@ -76,6 +88,10 @@ class RegisterPointer(Register):
 
     def set(self, value):
         return {}, {self.registers[self.name]: value}
+
+    @property
+    def dis(self):
+        return "[%s]" % self.name
 
 
 class RegisterPlusNextWord(Register, Consumes):
@@ -86,8 +102,13 @@ class RegisterPlusNextWord(Register, Consumes):
     def set(self, value):
         return {}, {self.registers[self.name] + self.value: value}
 
+    @property
+    def dis(self):
+        return "[%s + 0x%04x]" % (self.name, self.value)
+
 
 def Literal(n):
     return type(hex(n), (Value,), {
         "get": lambda self: n,
+        "dis": "0x%04x" % n
     })
