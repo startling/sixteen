@@ -129,6 +129,21 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
         self.assertRegister("B", 1)
 
 
+    def test_set_pop_push(self):
+        self.run_instructions([
+            # set push, 0xdead
+            0x7f01, 0xdead,
+            # set push, 0xbeef
+            0x7f01, 0xbeef,
+            # set a, pop
+            0x6001,
+            # set b, pop
+            0x6021
+        ])
+        self.assertRegister("A", 0xbeef)
+        self.assertRegister("B", 0xdead)
+
+
 class TestAdd(BaseDCPU16Test, unittest.TestCase):
     def test_add_pointer_literal(self):
         self.run_instructions([
