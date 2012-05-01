@@ -130,6 +130,16 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
         ])
         self.assertRegister("A", 1)
 
+    def test_set_ex(self):
+        self.run_instructions([
+            # set ex, 7
+            0xa3a1,
+            # add ex, ex
+            0x77a2
+        ])
+        # thanks, rmmh/scaevolus
+        self.assertRegister("EX", 14)
+
     def test_set_from_literal(self):
         self.run_instructions([
             # set a, -1 (short literal: 0x20)
