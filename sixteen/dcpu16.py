@@ -347,3 +347,21 @@ class DCPU16(object):
     @special_opcode
     def hwn(self, state, a):
         a.set(len(self.hardware) % self.cells)
+
+    @special_opcode
+    def hwq(self, state, a_value):
+        """ From the docs:
+        > sets A, B, C, X, Y registers to information about hardware a
+        > A+(B<<16) is a 32 bit word identifying the hardware id C is the
+        > hardware version X+(Y<<16) is a 32 bit word identifying the
+        > manufacturer
+        """
+        a = a_value.get()
+        if a < len(self.devices):
+            device = self.hardware[a]
+            id_top, id_bottom = divmod(device.identifier, self.cells)
+            state.registers["B"] = id_top
+            state.registers["A"] = id_bottom
+            m_top, m_bottom = divmod(device.manufacturer, self.cells)
+            state.registers["Y"] = m_top
+            state.registers["X"] = m_bottom
