@@ -333,3 +333,17 @@ class DCPU16(object):
     @special_opcode
     def ias(self, state, a):
         state.registers["IA"] = a.get()
+
+    @special_opcode
+    def int(self, state, a):
+        "Triggers software interrupt with message A."
+        state.interrupt(a.get())
+
+    @special_opcode
+    def rfi(self, state, a):
+        state.registers["A"] = state.pop()
+        state.registers["PC"] = state.pop()
+
+    @special_opcode
+    def hwn(self, state, a):
+        a.set(len(self.hardware) % self.cells)
