@@ -45,9 +45,9 @@ def set_value(fn):
     @wraps(fn)
     def set_wrapper(self, state, b, a):
         t = fn(self, b.get(), a.get())
-        b.set(t[0])
         if len(t) == 2:
             state.registers["EX"] = t[1]
+        b.set(t[0])
     return set_wrapper
 
 
@@ -166,6 +166,8 @@ class DCPU16(object):
         # change all the RAM
         for k, v in state.ram.iteritems():
             self.update_ram(k, v)
+        #TODO: hand interrupts to devices
+        #TODO: run each device's .cycle
         return state.consumed
 
     def update_register(self, name, value):
