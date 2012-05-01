@@ -100,7 +100,19 @@ class TestSet(BaseDCPU16Test, unittest.TestCase):
             # set a, PC  
             0x7001,
         ])
-        self.assertRegister("A", 1)
+        self.assertRegister("A", 2)
+
+    def test_set_pc(self):
+        self.run_instructions([
+            # set pc, 4
+            0x7f81, 4,
+            # set a, 0xdead (this should be skipped)
+            0x7c01, 0xdead,
+            # set b, 0xbeef (this should be evaluated)
+            0x7c21, 0xbeef
+        ])
+        self.assertRegister("A", 0)
+        self.assertRegister("B", 0xbeef)
 
     def test_get_sp(self):
         self.run_instructions([
@@ -616,3 +628,20 @@ class TestIagAndIas(BaseDCPU16Test, unittest.TestCase):
             0x0120 
         ])
         self.assertRegister("A", 0xbeef)
+
+
+class TestJsr(BaseDCPU16Test, unittest.TestCase):
+    def test_jsr(self):
+        self.run_instructions([
+            # set a, 10
+            0x7c01, 10,
+            # jsr x
+            0x7c20, 6,
+            # set pc, 0xfff0
+            0x7f81, 0xfff0,
+            # x: add a, 40
+            0x7c02, 40,
+            # set pc, pop
+            0x6381
+        ])
+        self.assertRegister("A", 50)
