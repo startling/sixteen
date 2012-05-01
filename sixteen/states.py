@@ -61,3 +61,16 @@ class State(object):
             self.registers["PC"] += 1
             self.registers["PC"] %= self.cells
             yield value
+
+    def interrupt(self, message):
+        """From the docs:
+        > When IA is set to something other than 0, interrupts triggered on the
+        > DCPU-16 will turn on interrupt queueing, push PC to the stack,
+        > followed by pushing A to the stack, then set the PC to IA, and A to
+        > the interrupt message.
+        """
+        if self.registers["IA"] != 0:
+            self.push(self.registers["PC"])
+            self.push(self.registers["A"])
+            self.registers["A"] = message
+            self.registers["PC"] = self.registers["IA"]
