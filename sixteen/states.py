@@ -32,6 +32,7 @@ class State(object):
     def __init__(self, cpu, location=None):
         self.consumed = []
         self.cells = cpu.cells
+        self.interrupts = []
         self.registers = DeltaDict(cpu.registers)
         if location:
             self.registers["PC"] = location

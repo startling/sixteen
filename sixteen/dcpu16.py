@@ -365,3 +365,9 @@ class DCPU16(object):
             m_top, m_bottom = divmod(device.manufacturer, self.cells)
             state.registers["Y"] = m_top
             state.registers["X"] = m_bottom
+
+    @special_opcode
+    def hwi(self, state, a_value):
+        a = a_value.get()
+        if a < len(self.devices):
+            state.interrupts.append(a)
