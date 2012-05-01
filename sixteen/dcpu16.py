@@ -23,10 +23,10 @@ def signed(fn):
     """
     @set_value
     @wraps(fn)
-    def signed_wrapper(self, b_unsigned, a_unsigned):
+    def signed_wrapper(self, state, b_unsigned, a_unsigned):
         b = as_signed(b_unsigned)
         a = as_signed(a_unsigned)
-        value = from_signed(fn(self, b, a))
+        value = from_signed(fn(self, state, b, a))
         # handle overflow for signed values
         overflow, result = divmod(value, self.cells)
         # NOTE: this clears overflow for all signed operations.
@@ -44,7 +44,7 @@ def set_value(fn):
     @basic_opcode
     @wraps(fn)
     def set_wrapper(self, state, b, a):
-        t = fn(self, b.get(), a.get())
+        t = fn(self, state, b.get(), a.get())
         if len(t) == 2:
             state.registers["EX"] = t[1]
         b.set(t[0])
@@ -60,7 +60,7 @@ def conditional(fn):
         # initialize the values
         a_value = self.values[a](state, True)
         b_value = self.values[b](state, False)
-        if fn(self, b_value.get(), a_value.get()):
+        if fn(self, state, b_value.get(), a_value.get()):
             # if the predicate returns True, we continue as usuaul
             return
         else:
@@ -75,8 +75,8 @@ def conditional(fn):
 def signed_conditional(fn):
     @conditional
     @wraps(fn)
-    def signed_conditional_wrapper(self, b, a):
-        return fn(self, as_signed(b), as_signed(a))
+    def signed_conditional_wrapper(self, state, b, a):
+        return fn(self, state, as_signed(b), as_signed(a))
     return signed_conditional_wrapper
 
 
@@ -189,114 +189,114 @@ class DCPU16(object):
     }
 
     @set_value
-    def set(self, b, a):
+    def set(self, state, b, a):
         return a,
 
     @set_value
-    def add(self, b, a):
+    def add(self, state, b, a):
         overflow, result = divmod(b + a, self.cells)
         return result, int(overflow > 0)
 
     @set_value
-    def sub(self, b, a):
+    def sub(self, state, b, a):
         overflow, result = divmod(b - a, self.cells)
         return result, overflow < 0 and 0xffff
 
     @set_value
-    def mul(self, b, a):
+    def mul(self, state, b, a):
         overflow, result = divmod(b * a, self.cells)
         return result, overflow
 
     @signed
-    def mli(self, b, a):
+    def mli(self, state, b, a):
         return b * a
 
     @set_value
-    def div(self, b, a):
+    def div(self, state, b, a):
         if a == 0:
             return 0, 0
         else:
             return b // a, ((b << 16) // a) & 0xffff
 
     @signed
-    def dvi(self, b, a):
+    def dvi(self, state, b, a):
         return b // a
 
     @set_value
-    def mod(self, b, a):
+    def mod(self, state, b, a):
         return b % a,
 
     @signed
-    def mdi(self, b, a):
+    def mdi(self, state, b, a):
         # if notch changes it to true modulus, it'll be
         # > return b % a
         return b % a - a
 
     @set_value
-    def AND(self, b, a):
+    def AND(self, state, b, a):
         return b & a,
 
     @set_value
-    def bor(self, b, a):
+    def bor(self, state, b, a):
         return b | a,
     
     @set_value
-    def xor(self, b, a):
+    def xor(self, state, b, a):
         return b ^ a,
 
     @set_value
-    def shr(self, b, a):
+    def shr(self, state, b, a):
         return b >> a, ((b << 16) >> a) & 0xffff
 
     @signed
-    def asr(self, b, a):
+    def asr(self, state, b, a):
         return b >> a
 
     @set_value
-    def shl(self, b, a):
+    def shl(self, state, b, a):
         overflow, result = divmod(b << a, self.cells)
         return result, overflow
 
     @conditional
-    def ifb(self, b, a):
+    def ifb(self, state, b, a):
         return (b & a) != 0
 
     @conditional
-    def ifc(self, b, a):
+    def ifc(self, state, b, a):
         return (b & a) == 0
 
     @conditional
-    def ife(self, b, a):
+    def ife(self, state, b, a):
         return b == a
 
     @conditional
-    def ifn(self, b, a):
+    def ifn(self, state, b, a):
         return b != a
 
     @conditional
-    def ifg(self, b, a):
+    def ifg(self, state, b, a):
         return b > a
 
     @signed_conditional
-    def ifa(self, b, a):
+    def ifa(self, state, b, a):
         return b > a
 
     @conditional
-    def ifl(self, b, a):
+    def ifl(self, state, b, a):
         return b < a
 
     @signed_conditional
-    def ifu(self, b, a):
+    def ifu(self, state, b, a):
         return b < a
 
     @set_value
-    def adx(self, b, a):
-        overflow, result = divmod(b + a + self.registers["EX"], self.cells)
+    def adx(self, state, b, a):
+        overflow, result = divmod(b + a + state.registers["EX"], self.cells)
         return result, int(overflow > 0)
 
     @set_value
-    def sbx(self, b, a):
-        overflow, result = divmod(b - a + self.registers["EX"], self.cells)
+    def sbx(self, state, b, a):
+        overflow, result = divmod(b - a + state.registers["EX"], self.cells)
         return result, overflow and 0xffff
 
     @basic_opcode
@@ -330,7 +330,7 @@ class DCPU16(object):
 
     @special_opcode
     def iag(self, state, a):
-        a.set(self.registers["IA"])
+        a.set(state.registers["IA"])
 
     @special_opcode
     def ias(self, state, a):
