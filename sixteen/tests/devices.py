@@ -7,7 +7,8 @@ from sixteen.tests.dcpu16 import BaseDCPU16Test
 
 
 class TestDevice(Hardware):
-    pass
+    identifier = 0xdeaddead
+    manufacturer = 0xbeefbeef
 
 
 class DeviceTest(BaseDCPU16Test):
@@ -23,3 +24,14 @@ class TestDeviceOperations(DeviceTest, unittest.TestCase):
             0x0200
         ])
         self.assertRegister("A", 1)
+
+    def test_hwq(self):
+        self.run_instructions([
+            # hwq 1
+            0x7e20, 0
+        ])
+        identifier = self.cpu.registers["A"] + (self.cpu.registers["B"] << 16)
+        self.assertEqual(TestDevice.identifier, identifier)
+        manufacturer = self.cpu.registers["X"] + (self.cpu.registers["Y"]
+                << 16)
+        self.assertEqual(TestDevice.manufacturer, manufacturer)
