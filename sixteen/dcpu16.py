@@ -2,6 +2,7 @@
 
 from sixteen.values import NextWord, NextWordPointer, RegisterValue, \
     RegisterPointer, RegisterPlusNextWord, Literal, POPorPUSH
+from sixteen.utilities import OpcodeError
 from sixteen.states import State
 from sixteen.bits import as_instruction, as_signed, from_signed
 from functools import wraps
@@ -155,6 +156,8 @@ class DCPU16(object):
         op, b, a = as_instruction(next(state.ram_iter))
         # get the mnemonic and the method corresponding to it.
         mnemonic = self.operations.get(op)
+        if mnemonic is None:
+            raise OpcodeError(opcode, location)
         method = getattr(self, mnemonic)
         # run the method and decide what changes to do.
         method(state, b, a)
@@ -337,6 +340,8 @@ class DCPU16(object):
     def special(self, state, o, a):
         "Pass special opcodes to their methods."
         mnemonic = self.special_operations.get(o)
+        if mnemonic is None:
+            raise OpcodeError(o, state.registers["PC"])
         method = getattr(self, mnemonic)
         return method(state, a)
 
