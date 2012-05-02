@@ -386,5 +386,5 @@ class DCPU16(object):
     @special_opcode
     def hwi(self, state, a_value):
         a = a_value.get()
-        if a < len(self.devices):
+        if a < len(self.hardware):
             state.interrupts.append(a)
