@@ -33,6 +33,8 @@ class State(object):
         self.consumed = []
         self.cells = cpu.cells
         self.interrupts = []
+        self.queing = False
+        self.interrupt_queue = []
         self.registers = DeltaDict(cpu.registers)
         if location:
             self.registers["PC"] = location
@@ -71,7 +73,10 @@ class State(object):
         > the interrupt message.
         """
         if self.registers["IA"] != 0:
-            self.push(self.registers["PC"])
-            self.push(self.registers["A"])
-            self.registers["A"] = message
-            self.registers["PC"] = self.registers["IA"]
+            if self.queuing:
+                self.interrupt_queue.append(self.registers["A"])
+            else:
+                self.push(self.registers["PC"])
+                self.push(self.registers["A"])
+                self.registers["A"] = message
+                self.registers["PC"] = self.registers["IA"]

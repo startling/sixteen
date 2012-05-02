@@ -160,6 +160,7 @@ class DCPU16(object):
     def cycle(self):
         "Run for one instruction, returning the executed instruction."
         state = self.get_instruction()
+        # allow interrupts to go.
         # change all the registers
         for k, v in state.registers.iteritems():
             self.update_register(k, v)
@@ -167,6 +168,7 @@ class DCPU16(object):
         for k, v in state.ram.iteritems():
             self.update_ram(k, v)
         #TODO: hand interrupts to devices
+        #TODO: let devices go to IA somehow?
         #TODO: run each device's .cycle
         return state.consumed
 
@@ -343,6 +345,7 @@ class DCPU16(object):
 
     @special_opcode
     def rfi(self, state, a):
+        state.queuing = False
         state.registers["A"] = state.pop()
         state.registers["PC"] = state.pop()
 
@@ -359,7 +362,7 @@ class DCPU16(object):
         > manufacturer
         """
         a = a_value.get()
-        if a < len(self.devices):
+        if a < len(self.hardware):
             device = self.hardware[a]
             id_top, id_bottom = divmod(device.identifier, self.cells)
             state.registers["B"] = id_top
