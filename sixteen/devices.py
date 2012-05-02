@@ -25,14 +25,21 @@ class Hardware(object):
     # the name of the hardware.
     name = ""
 
-    def on_interrupt(self, registers):
-        """Configure this device as per the configuration in the registers; this
-        will probably be called when the program does a `HWI`.
+    def on_interrupt(self, registers, ram):
+        """This gets called when a program does HWI, usually. It gets
+        dictionaries of the current state's registers and RAM, which it can
+        modify as it pleases. Whatever gets returned gets ignored.
         """
         pass
 
-    def on_cycle(self, changed_ram):
-        "This gets called for each device for each cycle. If it returns a thing"
+    def on_cycle(self, changed_registers, changed_ram):
+        """This gets called for each device for each cycle. If it returns a
+        thing (an integer no greater than 0xffff, ideally), that thing gets
+        used as the message for an intterupt. That should be its only means of
+        communicating to the CPU; it shouldn't modify the changed_ram or
+        changed_registers.
+        """
+        pass
 
 
 class Keyboard(Hardware):
@@ -50,7 +57,7 @@ class Keyboard(Hardware):
         self.interrupt = False
         self.message = None
     
-    def on_interrupt(self, registers):
+    def on_interrupt(self, registers, ram):
         self.mode = registers["A"]
         if registers["A"] == 3:
             if registers["B"] == 0:
@@ -59,5 +66,5 @@ class Keyboard(Hardware):
                 self.interrupt = True
                 self.message = registers["B"]
 
-    def on_cycle(self, changed):
+    def on_cycle(self, changed_registers, changed_ram):
         pass

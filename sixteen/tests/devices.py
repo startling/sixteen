@@ -26,7 +26,7 @@ class TestDevice(Hardware):
         "A function to tell this device to interrupt on the next turn."
         self._next = True
 
-    def on_cycle(self):
+    def on_cycle(self, changed_registers, changed_ram):
         # if we've told it to raise an interrupt...
         if self._next:
             self._next = False

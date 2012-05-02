@@ -173,7 +173,7 @@ class DCPU16(object):
         # allow each of the devices to interrupt
         #TODO: run queued interrupts
         for device in self.hardware:
-            value = device.on_cycle()
+            value = device.on_cycle(state.registers.changes, state.ram.changes)
             if value is not None:
                 state.interrupt(value)
         # if there's anything in the queue...
