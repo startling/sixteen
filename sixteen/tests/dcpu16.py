@@ -655,3 +655,15 @@ class TestJsr(BaseDCPU16Test, unittest.TestCase):
             0x6381
         ])
         self.assertRegister("A", 50)
+
+    def test_jsr_reynir(self):
+        """From #0x10c-dev:
+        < reynir> I wonder if JSR PEEK is buggy in some implementations :)
+        < startling> reynir: gimme an example + expected output and I'll tell you. :)
+        < reynir> startling: um.. SET PUSH, 5 / SET PUSH, 10 / SET 0, POP / JSR PEEK ; should jumpt to 5
+        < reynir> ^ perhaps add 42 to the pushed values
+        """
+        self.run_instructions([
+            0x9b01, 0xaf01, 0x63e1, 0x0000, 0x6420    
+        ])
+        self.assertRegister("PC", 5)
