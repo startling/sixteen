@@ -377,6 +377,8 @@ class DCPU16(object):
             id_top, id_bottom = divmod(device.identifier, self.cells)
             state.registers["B"] = id_top
             state.registers["A"] = id_bottom
+            # set C to version
+            state.registers["C"] = device.version % self.cells
             m_top, m_bottom = divmod(device.manufacturer, self.cells)
             state.registers["Y"] = m_top
             state.registers["X"] = m_bottom
