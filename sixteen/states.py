@@ -33,8 +33,8 @@ class State(object):
         self.consumed = []
         self.cells = cpu.cells
         self.interrupts = []
-        self.queing = False
-        self.interrupt_queue = []
+        self.queuing = cpu.queuing
+        self.interrupt_queue = cpu.interrupt_queue
         self.registers = DeltaDict(cpu.registers)
         if location:
             self.registers["PC"] = location

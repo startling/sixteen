@@ -108,6 +108,9 @@ class DCPU16(object):
         self.hardware = hardware or []
         # initialize the RAM
         self.ram_init()
+        # initialize the queue and queuing
+        self.queuing = False
+        self.interrupt_queue = []
         
     def __getattr__(self, name):
         "If an attribute doesn't exist, try the registers."
@@ -162,6 +165,9 @@ class DCPU16(object):
         state = self.get_instruction()
         # allow interrupts to go.
         # change all the registers
+        # update queuing and the queue:
+        self.interrupt_queue.extend(state.interrupt_queue)
+        self.queuing = state.queuing
         for k, v in state.registers.iteritems():
             self.update_register(k, v)
         # change all the RAM
