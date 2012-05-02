@@ -11,17 +11,18 @@ class TestDevice(Hardware):
     identifier = 0xdeaddead
     manufacturer = 0xbeefbeef
 
+    def on_interrupt(self, registers, ram):
+        # square a and store it in b; overflow goes in EX
+        overflow, result = divmod(registers["A"] ** 2, 0x10000)
+        registers["B"] = result
+        registers["EX"] = overflow
+
 
 class DeviceTest(BaseDCPU16Test):
     def setUp(self):
         self.device = TestDevice()
         self.cpu = DCPU16([self.device])
 
-    def on_interrupt(self, registers, ram):
-        # square a and store it in b; overflow goes in EX
-        overflow, result = divmod(registers["A"] ** 2, 0x10000)
-        registers["B"] = result
-        registers["EX"] = overflow
 
 
 class TestDeviceOperations(DeviceTest, unittest.TestCase):
