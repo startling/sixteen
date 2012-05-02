@@ -76,8 +76,13 @@ class State(object):
             if self.queuing:
                 self.interrupt_queue.append(self.registers["A"])
             else:
-                self.queuing = True
-                self.push(self.registers["PC"])
-                self.push(self.registers["A"])
-                self.registers["A"] = message
-                self.registers["PC"] = self.registers["IA"]
+                self.do_interrupt(message)
+
+
+    def do_interrupt(self, message):
+        "Execute this interrupt right now dammit (don't queue it)."
+        self.queuing = True
+        self.push(self.registers["PC"])
+        self.push(self.registers["A"])
+        self.registers["A"] = message
+        self.registers["PC"] = self.registers["IA"]
