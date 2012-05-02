@@ -11,6 +11,9 @@ class TestDevice(Hardware):
     identifier = 0xdeaddead
     manufacturer = 0xbeefbeef
 
+    def __init__(self):
+        self._next = False
+
     def on_interrupt(self, registers, ram):
         # square a and store it in b; overflow goes in EX
         overflow, result = divmod(registers["A"] ** 2, 0x10000)
