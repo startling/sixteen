@@ -147,7 +147,7 @@ class DCPU16(object):
         values[n + 0x10] = RegisterPlusNextWord.named(name)
     # set all of the short literals
     values[0x20] = Literal(0xffff)
-    for n in xrange(1, 31):
+    for n in xrange(0, 31):
         values[0x21 + n] = Literal(n)
 
     def get_instruction(self, location=None):
