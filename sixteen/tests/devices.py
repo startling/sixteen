@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+from math import sqrt
 from sixteen.dcpu16 import DCPU16
 from sixteen.devices import Hardware
 from sixteen.tests.dcpu16 import BaseDCPU16Test
@@ -16,6 +17,11 @@ class DeviceTest(BaseDCPU16Test):
         self.device = TestDevice()
         self.cpu = DCPU16([self.device])
 
+    def on_interrupt(self, registers, ram):
+        # square a and store it in b; overflow goes in EX
+        overflow, result = divmod(registers["A"] ** 2, 0x10000)
+        registers["B"] = result
+        registers["EX"] = overflow
 
 
 class TestDeviceOperations(DeviceTest, unittest.TestCase):
@@ -36,3 +42,13 @@ class TestDeviceOperations(DeviceTest, unittest.TestCase):
         manufacturer = self.cpu.registers["X"] + (self.cpu.registers["Y"]
                 << 16)
         self.assertEqual(self.device.manufacturer, manufacturer)
+
+    def test_hwi(self):
+        self.run_instructions([
+            # set a, 2
+            0x7c01, 2,
+            # hwi 0
+            0x7e40, 0
+        ])
+        self.assertRegister("B", 4)
+        self.assertRegister("EX", 0)
