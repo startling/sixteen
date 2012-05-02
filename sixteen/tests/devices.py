@@ -10,6 +10,8 @@ from sixteen.tests.dcpu16 import BaseDCPU16Test
 class TestDevice(Hardware):
     identifier = 0xdeaddead
     manufacturer = 0xbeefbeef
+    version = 1
+    name = "Testing device."
 
     def __init__(self):
         self._next = False
