@@ -25,13 +25,14 @@ class Hardware(object):
     # the name of the hardware.
     name = ""
 
-    def configure(self, registers):
+    def on_interrupt(self, registers):
         """Configure this device as per the configuration in the registers; this
         will probably be called when the program does a `HWI`.
         """
         pass
 
-    #TODO: actually handle events?
+    def on_cycle(self, changed_ram):
+        "This gets called for each device for each cycle. If it returns a thing"
 
 
 class Keyboard(Hardware):
@@ -49,7 +50,7 @@ class Keyboard(Hardware):
         self.interrupt = False
         self.message = None
     
-    def configure(self, registers):
+    def on_interrupt(self, registers):
         self.mode = registers["A"]
         if registers["A"] == 3:
             if registers["B"] == 0:
@@ -57,3 +58,6 @@ class Keyboard(Hardware):
             else:
                 self.interrupt = True
                 self.message = registers["B"]
+
+    def on_cycle(self, changed):
+        pass

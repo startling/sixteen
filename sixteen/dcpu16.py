@@ -356,6 +356,10 @@ class DCPU16(object):
         state.registers["PC"] = state.pop()
 
     @special_opcode
+    def iaq(self, state, a):
+        state.queuing = bool(a)
+
+    @special_opcode
     def hwn(self, state, a):
         a.set(len(self.hardware) % self.cells)
 
