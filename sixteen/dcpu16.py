@@ -178,7 +178,7 @@ class DCPU16(object):
                 state.interrupt(value)
         # if there's anything in the queue...
         if state.interrupt_queue:
-            pass
+            state.do_interrupt(state.interrupt_queue.pop())
         # update queuing and the queue:
         self.interrupt_queue.extend(state.interrupt_queue)
         self.queuing = state.queuing
