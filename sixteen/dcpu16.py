@@ -333,8 +333,8 @@ class DCPU16(object):
 
     # a dict of nonbasic opcode numbers to mnemonics
     special_operations = {
-        0x01: "jsr", 0x08: "int", 0x09: "iag", 0x0a: "ias", 0x10: "hwn",
-        0x11: "hwq", 0x12: "hwi",
+        0x01: "jsr", 0x08: "int", 0x09: "iag", 0x0a: "ias", 0x0b: "rfi",
+        0x0c: "iaq", 0x10: "hwn", 0x11: "hwq", 0x12: "hwi",
     }
 
     def special(self, state, o, a):
