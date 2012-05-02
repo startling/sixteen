@@ -168,12 +168,16 @@ class DCPU16(object):
         # update queuing and the queue:
         self.interrupt_queue.extend(state.interrupt_queue)
         self.queuing = state.queuing
+        # hand hardware interrupts to devices
+        for index in state.interrupts:
+            device = self.hardware[index]
+            device.on_interrupt(state.registers, state.ram)
+        # change all the registers
         for k, v in state.registers.iteritems():
             self.update_register(k, v)
         # change all the RAM
         for k, v in state.ram.iteritems():
             self.update_ram(k, v)
-        #TODO: hand interrupts to devices
         #TODO: let devices go to IA somehow?
         #TODO: run each device's .cycle
         return state.consumed
