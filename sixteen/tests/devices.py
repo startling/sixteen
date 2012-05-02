@@ -49,7 +49,10 @@ class TestDeviceOperations(DeviceTest, unittest.TestCase):
             # set a, 2
             0x7c01, 2,
             # hwi 0
-            0x7e40, 0
+            0x7e40, 0,
+            # set a, 0xf0f0 to make sure we can continue after a hwi
+            0x7c01, 0xf0f0,
         ])
         self.assertRegister("B", 4)
         self.assertRegister("EX", 0)
+        self.assertRegister("A", 0xf0f0)
