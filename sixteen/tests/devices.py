@@ -13,7 +13,8 @@ class TestDevice(Hardware):
 
 class DeviceTest(BaseDCPU16Test):
     def setUp(self):
-        self.cpu = DCPU16([TestDevice()])
+        self.device = TestDevice()
+        self.cpu = DCPU16([self.device])
 
 
 
@@ -31,7 +32,7 @@ class TestDeviceOperations(DeviceTest, unittest.TestCase):
             0x7e20, 0
         ])
         identifier = self.cpu.registers["A"] + (self.cpu.registers["B"] << 16)
-        self.assertEqual(TestDevice.identifier, identifier)
+        self.assertEqual(self.device.identifier, identifier)
         manufacturer = self.cpu.registers["X"] + (self.cpu.registers["Y"]
                 << 16)
-        self.assertEqual(TestDevice.manufacturer, manufacturer)
+        self.assertEqual(self.device.manufacturer, manufacturer)
