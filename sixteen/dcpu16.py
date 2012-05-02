@@ -173,6 +173,9 @@ class DCPU16(object):
             value = device.on_cycle()
             if value is not None:
                 state.interrupt(value)
+        # if there's anything in the queue...
+        if state.interrupt_queue:
+            pass
         # update queuing and the queue:
         self.interrupt_queue.extend(state.interrupt_queue)
         self.queuing = state.queuing
