@@ -116,3 +116,30 @@ class TestDeviceOperations(DeviceTest, unittest.TestCase):
         self.cpu.cycle()
         self.cpu.cycle()
         self.assertRegister("B", 160)
+
+    def test_interrupt_queueing(self):
+        self.cpu.ram[:5] = [
+            # ias, :handler
+            0x7d40, 0x0003,
+            # sub pc, 1
+            0x8b83,
+            # handler: add b, 80 / rfi 0
+            0x7c22, 0x0050, 0x8560
+        ]
+        # cycle 3 times
+        self.cpu.cycle()
+        self.cpu.cycle()
+        self.cpu.cycle()
+        # make the device interrupt
+        self.device.interrupt_next()
+        self.cpu.cycle()
+        # interrupt again, while we're in the first one
+        self.device.interrupt_next()
+        self.cpu.cycle()
+        # make sure we got a message.
+        self.assertRegister("A", 0xdead)
+        # make sure 80 was added
+        self.assertRegister("B", 80)
+        # make sure the second interrupt got done.
+        self.cpu.cycle()
+        self.assertRegister("B", 160)
