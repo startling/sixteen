@@ -76,6 +76,7 @@ class State(object):
             if self.queuing:
                 self.interrupt_queue.append(self.registers["A"])
             else:
+                self.queuing = True
                 self.push(self.registers["PC"])
                 self.push(self.registers["A"])
                 self.registers["A"] = message
