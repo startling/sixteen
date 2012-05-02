@@ -163,23 +163,25 @@ class DCPU16(object):
     def cycle(self):
         "Run for one instruction, returning the executed instruction."
         state = self.get_instruction()
-        # allow interrupts to go.
-        # change all the registers
-        # update queuing and the queue:
-        self.interrupt_queue.extend(state.interrupt_queue)
-        self.queuing = state.queuing
         # hand hardware interrupts to devices
         for index in state.interrupts:
             device = self.hardware[index]
             device.on_interrupt(state.registers, state.ram)
+        # allow each of the devices to interrupt
+        #TODO: run queued interrupts
+        for device in self.hardware:
+            value = device.on_cycle()
+            if value is not None:
+                state.interrupt(value)
+        # update queuing and the queue:
+        self.interrupt_queue.extend(state.interrupt_queue)
+        self.queuing = state.queuing
         # change all the registers
         for k, v in state.registers.iteritems():
             self.update_register(k, v)
         # change all the RAM
         for k, v in state.ram.iteritems():
             self.update_ram(k, v)
-        #TODO: let devices go to IA somehow?
-        #TODO: run each device's .cycle
         return state.consumed
 
     def update_register(self, name, value):
