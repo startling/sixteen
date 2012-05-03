@@ -2,6 +2,7 @@ import json
 from twisted.internet import protocol, reactor
 from txws import WebSocketFactory
 from sixteen.dcpu16 import DCPU16
+from sixteen.bits import char_to_bitmap
 from sixteen.devices import Keyboard
 from sixteen.screen import LEM1802
 
@@ -10,14 +11,17 @@ class DCPU16Protocol(protocol.Protocol):
     cycle_counter = 0
 
     def __init__(self, code):
-        # and the letters_changed list
-        self.letters_changed = {}
-        self.chars_changed = {}
-        self.border_color = None
-        self.errors = []
         self.keyboard = Keyboard()
         self.display = LEM1802(self.change_font, self.change_letter,
                 self.change_palette)
+        # things that have changed since we last talked to the client.
+        self.letters_changed = {}
+        # start out by passing all of the font
+        self.chars_changed = dict(enumerate(char_to_bitmap(*t) for t in
+            # group them into twos and call char_to_bitmap on each pair
+            zip(*[iter(self.display.font)]*2)))
+        self.border_color = None
+        self.errors = []
         # intialize the cpu
         self.cpu = DCPU16([self.keyboard, self.display])
         # read the code from the factory to the RAM
@@ -41,8 +45,8 @@ class DCPU16Protocol(protocol.Protocol):
         self.letters_changed[(x, y)] = {
             "x": x, "y": y, "char": char, "blink": blink,
             # format the background and foreground tuples as html/css colors.
-            "foreground": "#%x%x%x" % foreground,
-            "background": "#%x%x%x" % background,
+            "foreground": "#%03x" % foreground,
+            "background": "#%03x" % background,
         }
 
     def dataReceived(self, data):
@@ -58,6 +62,7 @@ class DCPU16Protocol(protocol.Protocol):
         # if we get any errors, let the frontend know.
         except Exception as e:
             self.errors.append(str(e))
+            raise
         # and then pass everything to the frontend.
         self.write_changes()
 
