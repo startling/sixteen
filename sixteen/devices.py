@@ -107,7 +107,9 @@ class Keyboard(Hardware):
         > 0x91: Control
         """
         self.queue.append(keypress)
+        self.changed = True
         
     def on_cycle(self, changed_registers, changed_ram):
-        if self.interrupt_mode and len(self.queue):
+        if self.interrupt_mode and len(self.queue) and self.changed:
+            self.changed = False
             return self.message
