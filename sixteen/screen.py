@@ -49,3 +49,18 @@ class LEM1802(Hardware):
             start = registers["B"]
             end = start + len(self.palette)
             ram[start:end] = self.palette
+
+    def on_cycle(self, changed_registers, changed_ram):
+        for addr, value in changed_ram.iteritems():
+            # if font memory-mapping is on and the address is in that region
+            if self.mem_map_font is not None and (
+                    0 <= addr - self.mem_map_font < len(self.font)):
+                pass
+            # if screen memory-mapping is on and the address is in that region
+            if self.mem_map_screen is not None and (
+                    0 <= addr - self.mem_map_screen < 0x182 ):
+                pass
+            # if palette memory-mapping is on and the address is in that region
+            if self.mem_map_palette is not None and (
+                    0 <= addr - self.mem_map_palette < len(self.palette)):
+                pass
