@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sixteen.characters import characters
+from sixteen.display_constants import characters, palette
 from sixteen.devices import Hardware
 
 
@@ -14,14 +14,17 @@ class LEM1802(Hardware):
     identifier = 0x7349f615
     version = 0x1802
     manufacturer = 0x1c6c8b36
-    font = characters
 
     def __init__(self):
         # initialize all the memory-mapping as nowhere
         self.mem_map_screen = None
         self.mem_map_font = None
         self.mem_map_palette = None
-    
+        # make a copy of the font
+        self.font = characters[:]
+        # and of the palette
+        self.palette = palette[:]
+
     def on_interrupt(self, registers, ram):
         "See docs/lem1802 for more details regarding these."
         if registers["A"] == 0:
