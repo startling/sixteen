@@ -45,5 +45,7 @@ class LEM1802(Hardware):
             end = start + len(self.font)
             ram[start:end] = self.font
         elif registers["A"] == 5:
-            #TODO: dump palette data
-            pass
+            # dump palette data
+            start = registers["B"]
+            end = start + len(self.palette)
+            ram[start:end] = self.palette
