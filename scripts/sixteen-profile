@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+import argparse
+import cProfile
+from sixteen.dcpu16 import DCPU16
+
+
+parser = argparse.ArgumentParser(
+	description='Run a dcpu16 emulator under cProfile.'
+)
+
+
+parser.add_argument('cycles', nargs="?", default=50, type=int,
+    help="The number of cycles to run for (default: 50).",
+)
+
+
+args = parser.parse_args()
+
+
+d = DCPU16()
+# sub pc, 1
+d.ram[0] = 0x8b83
+
+
+def cycle_many():
+    for _ in xrange(args.cycles):
+        d.cycle()
+
+
+print "Spinning for %d cycles..." % args.cycles
+cProfile.run('cycle_many()')
