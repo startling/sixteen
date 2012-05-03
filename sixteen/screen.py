@@ -74,7 +74,7 @@ class LEM1802(Hardware):
                 foreground = (0b1111000000000000 & value) >> 12
                 background = (0b0000111100000000 & value) >> 8
                 blink = (0b0000000010000000 & value) >> 7
-                char = 0b1111111110000000 & value
+                char = 0b00000000011111111 & value
                 index = addr - self.mem_map_screen
                 self.change_screen(index, foreground, background, blink, char)
             # if palette memory-mapping is on and the address is in that region
