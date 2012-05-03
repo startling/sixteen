@@ -63,7 +63,7 @@ socket = new WebSocket("ws://localhost:4314");
 socket.onopen = function(msg) {
     // when the socket opens, let us debuggers know
     console.log("[Socket opened]");
-    socket.send(JSON.stringify([[], 200]));
+    socket.send(JSON.stringify([[], 2]));
 
 }
 
@@ -101,7 +101,7 @@ socket.onmessage = function(msg) {
 function cycle () {
     // register a callback to send a reply in.
     setTimeout(function () {
-        socket.send(JSON.stringify([keypresses, 400]));
+        socket.send(JSON.stringify([keypresses, 4]));
         keypresses = [];
     }, 70);
 }
