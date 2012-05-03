@@ -371,7 +371,7 @@ class DCPU16(object):
 
     @special_opcode
     def iaq(self, state, a):
-        state.queuing = bool(a)
+        state.queuing = bool(a.get())
 
     @special_opcode
     def hwn(self, state, a):
