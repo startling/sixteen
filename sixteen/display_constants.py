@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Data for the default character set.
-
-Shamelessly stolen from Rick of #0x10cdev's dox:
-* http://pastie.org/pastes/3773114/text?key=ctkymbahpc1q3js3k0bueq
-* http://pastie.org/pastes/3772655/text?key=xw0dmiwx5khzoagoemyww
-"""
 
 
+# Data for the default character set.
+# 
+# Shamelessly stolen from Rick of #0x10cdev's dox:
+# * http://pastie.org/pastes/3773114/text?key=ctkymbahpc1q3js3k0bueq
+# * http://pastie.org/pastes/3772655/text?key=xw0dmiwx5khzoagoemyww
 characters = [
     # +----+
     # | #  |
