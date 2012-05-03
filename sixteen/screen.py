@@ -26,7 +26,7 @@ class LEM1802(Hardware):
         self.palette = palette[:]
         # save the callbacks
         self.change_font = change_font
-        self.change_screen = change_font
+        self.change_screen = change_screen
         self.change_palette = change_palette
 
     def on_interrupt(self, registers, ram):
