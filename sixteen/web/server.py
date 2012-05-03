@@ -41,8 +41,8 @@ class DCPU16Protocol(protocol.Protocol):
         self.letters_changed[(x, y)] = {
             "x": x, "y": y, "char": char, "blink": blink,
             # format the background and foreground tuples as html/css colors.
-            "foreground": "#%02x%02x%02x" % foreground,
-            "background": "#%02x%02x%02x" % background,
+            "foreground": "#%x%x%x" % foreground,
+            "background": "#%x%x%x" % background,
         }
 
     def dataReceived(self, data):
