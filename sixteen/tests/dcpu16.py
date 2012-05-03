@@ -558,6 +558,18 @@ class TestConditionals(BaseDCPU16Test, unittest.TestCase):
         self.assertRegister("A", 0xbeef)
         self.assertRegister("B", 0x0)
 
+    def test_chained_conditional(self):
+        self.run_instructions([
+            # ife a, 1
+            0x8812,
+            # ife, a, 0
+            0x8412,
+            # set a, 0x1234 (should only happen if both conditionals pass)
+            0x7c01, 0x1234    
+        ])
+        # make sure a didn't get set to 0x1234
+        self.assertRegister("A", 0)
+
 
 class TestAdx(BaseDCPU16Test, unittest.TestCase):
     def test_adx(self):
