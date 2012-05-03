@@ -1,6 +1,44 @@
 # -*- coding: utf-8 -*-
 
 
+# cga colors
+# see: http://en.wikipedia.org/wiki/Color_Graphics_Adapter#Color_palette
+palette = [
+    # black, #000000
+    0x0000,
+    # blue, #0000AA
+    0x000a,
+    # green, #00AA00
+    0x00a0,
+    # cyan, #00AAAA
+    0x00aa,
+    # red, #AA0000
+    0x0a00,
+    # magenta, #AA00AA
+    0x0a0a,
+    # brown, #AA5500
+    0x0a50,
+    # light gray, #AAAAAA
+    0x0aaa,
+    # gray, #555555
+    0x0555,
+    # light blue, #5555FF
+    0x055f,
+    # light green, #55FF55
+    0x05f5,
+    # light cyan, #55ffff
+    0x05ff,
+    # light red, #ff5555,
+    0x0f55,
+    # light magenta, #ff55ff
+    0x0f5f,
+    # yellow, #ffff55
+    0x0ff5,
+    # white, #ffffff
+    0x0fff
+]
+
+
 # Data for the default character set.
 # 
 # Shamelessly stolen from Rick of #0x10cdev's dox:
