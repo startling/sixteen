@@ -2,9 +2,9 @@
 
 
 class DeltaDict(object):
-    """A dictionary-like object that's initialized with another dictionary.
-    Setting to it, though, doesn't mutate the original; instead, those changes
-    get put into a new dictionary.
+    """A dictionary-like object that's initialized with either a dictionary or
+    a list. Setting to it, though, doesn't mutate the original; instead, those
+    changes get put into a new dictionary.
     """
     def __init__(self, original):
         self._original = original
@@ -39,7 +39,7 @@ class State(object):
         if location:
             self.registers["PC"] = location
         self.ram_iter = self.ram_iterator()
-        self.ram = DeltaDict(dict(enumerate(cpu.ram)))
+        self.ram = DeltaDict(cpu.ram)
 
     def pop(self):
         "Pop from the cpu's stack."
