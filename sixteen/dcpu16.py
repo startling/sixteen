@@ -65,11 +65,16 @@ def conditional(fn):
             # if the predicate returns True, we continue as usuaul
             return
         else:
-            #TODO: chained conditionals
-            # run the next instruction so we can see how much it consumes
-            skip_state = self.get_instruction(state.registers["PC"])
+            pc = state.registers["PC"]
+            while True:
+                # run the next instruction so we can see how much it consumes
+                skip_state = self.get_instruction(pc)
+                pc = skip_state.registers["PC"]
+                # if it's a conditional, continue
+                if not self.is_conditional(skip_state.consumed[0]):
+                    break
             # skip ahead to where that instruction stopped
-            state.registers["PC"] = skip_state.registers["PC"]
+            state.registers["PC"] = pc
     return conditional_wrapper
 
 
@@ -311,6 +316,11 @@ class DCPU16(object):
     @signed_conditional
     def ifu(self, state, b, a):
         return b < a
+
+    def is_conditional(self, instruction):
+        o, b, a = as_instruction(instruction)
+        name = self.operations.get(o)
+        return name is not None and name.startswith("if")
 
     @set_value
     def adx(self, state, b, a):
