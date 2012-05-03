@@ -42,11 +42,11 @@ class DCPU16Protocol(protocol.Protocol):
     def change_letter(self, index, foreground, background, blink, char):
         "This is called whenever a cell of vram is changed."
         x, y = divmod(index, 32)
-        self.letters_changed[(x, y)] = {
+        self.letters_changed[x, y] = {
             "x": x, "y": y, "char": char, "blink": blink,
             # format the background and foreground tuples as html/css colors.
-            "foreground": "#%03x" % foreground,
-            "background": "#%03x" % background,
+            "foreground": "#%03x" % self.display.palette[foreground],
+            "background": "#%03x" % self.display.palette[background],
         }
 
     def dataReceived(self, data):
