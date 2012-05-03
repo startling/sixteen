@@ -70,3 +70,16 @@ def as_signed(i):
 def from_signed(i):
     "Turn this signed integer into a two's complement (unsigned) integer."
     return i if i >= 0 else invert(abs(i), 16) + 1
+
+
+def char_to_bitmap(top, bottom):
+    "Turn two sixteen-bit words into a list representing a bitmap."
+    # organize the bits into columns
+    columns = [
+        [x for x in bit_iter(top >> 8, 8)][::-1],
+        [x for x in bit_iter(top & 0xff, 8)][::-1],
+        [x for x in bit_iter(bottom >> 8, 8)][::-1],
+        [x for x in bit_iter(bottom & 0xff, 8)][::-1],
+    ]
+    # zip them, to rearrange them into rows.
+    return zip(*columns)
