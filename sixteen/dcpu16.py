@@ -244,7 +244,10 @@ class DCPU16(object):
 
     @set_value
     def mod(self, state, b, a):
-        return b % a,
+        if a == 0:
+            return 0,
+        else:
+            return b % a,
 
     @signed
     def mdi(self, state, b, a):
