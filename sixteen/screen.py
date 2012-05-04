@@ -15,7 +15,8 @@ class LEM1802(Hardware):
     version = 0x1802
     manufacturer = 0x1c6c8b36
 
-    def __init__(self, change_font, change_screen, change_palette):
+    def __init__(self, change_font=None, change_screen=None,
+            change_palette=None):
         # initialize all the memory-mapping as nowhere
         self.mem_map_screen = None
         self.mem_map_font = None
@@ -60,7 +61,8 @@ class LEM1802(Hardware):
             if self.mem_map_font is not None and (
                     0 <= addr - self.mem_map_font < len(self.font)):
                 self.font[addr - self.mem_map_font] = value
-                self.change_font(addr, value)
+                if self.change_font:
+                    self.change_font(addr, value)
             # if screen memory-mapping is on and the address is in that region
             if self.mem_map_screen is not None and (
                     0 <= addr - self.mem_map_screen < 0x182 ):
@@ -76,9 +78,11 @@ class LEM1802(Hardware):
                 blink = (0b0000000010000000 & value) >> 7
                 char = 0b00000000011111111 & value
                 index = addr - self.mem_map_screen
-                self.change_screen(index, foreground, background, blink, char)
+                if self.change_screen:
+                    self.change_screen(index, foreground, background, blink, char)
             # if palette memory-mapping is on and the address is in that region
             if self.mem_map_palette is not None and (
                     0 <= addr - self.mem_map_palette < len(self.palette)):
                 self.palette[addr - self.mem_map_palette] = value
-                self.change_palette(addr, value)
+                if self.change_palette:
+                    self.change_palette(addr, value)
