@@ -146,6 +146,7 @@ class DCPU16(object):
                 raise OpcodeError(b, location)
             a_value = self.values[a](state, True)
             arguments = (a_value,)
+            state.dis = "{0} {1}".format(mnemonic, a_value.dis)
         else:
             mnemonic = self.operations.get(op)
             if mnemonic is None:
@@ -153,6 +154,8 @@ class DCPU16(object):
             a_value = self.values[a](state, True)
             b_value = self.values[b](state, False)
             arguments = (b_value, a_value)
+            state.dis = "{0} {1}, {2}".format(mnemonic, a_value.dis,
+                    b_value.dis)
         method = getattr(self, mnemonic)
         # run the method and decide what changes to do.
         return method, arguments, state
