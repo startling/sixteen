@@ -40,7 +40,7 @@ def file_to_ram(f, cpu, bigendian=True, offset=0):
     """Given a file-like object if 16-bit words and a cpu object with a RAM
     attribute, read words from the file and store them in the RAM.
     """
-    for n, _ in enumerate(cpu.RAM[offset:]):
+    for n, _ in enumerate(cpu.ram[offset:]):
         # read two bytes as ints
         word = [ord(c) for c in f.read(2)]
         # if there are exactly two bytes, go on
@@ -53,7 +53,7 @@ def file_to_ram(f, cpu, bigendian=True, offset=0):
             # bitshift the top up and then add to the bottom
             word_int = (top << 8) + bottom
             # set this n in the ram to that number
-            cpu.RAM[n] = word_int
+            cpu.ram[n] = word_int
         # if there aren't two bytes, stop
         else:
             break
