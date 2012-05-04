@@ -36,7 +36,7 @@ class State(object):
         self.queuing = cpu.queuing
         self.interrupt_queue = []
         self.registers = DeltaDict(cpu.registers)
-        if location:
+        if location is not None:
             self.registers["PC"] = location
         self.ram_iter = self.ram_iterator()
         self.ram = DeltaDict(cpu.ram)
