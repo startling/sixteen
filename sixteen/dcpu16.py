@@ -220,7 +220,6 @@ class DCPU16(object):
 
     @set_value
     def set(self, state, b, a):
-        print b, a
         return a,
 
     @set_value
