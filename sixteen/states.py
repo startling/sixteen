@@ -18,7 +18,8 @@ class DeltaDict(object):
         """Try getting from the new dict; if that fails, try to get it from the
         original.
         """
-        return self.changes.get(key) or self._original[key]
+        changed = self.changes.get(key)
+        return changed if changed is not None else self._original[key]
 
     def __iter__(self):
         return iter(self.changes)
