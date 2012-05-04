@@ -3,7 +3,7 @@
 
 import readline
 from functools import wraps
-from sixteen.words import as_opcode
+from sixteen.bits import as_instruction
 from sixteen.utilities import OpcodeError
 
 
@@ -52,31 +52,26 @@ class Debugger(object):
 
 	def step(self):
 		try:
-			op, args = self.cpu.cycle()
-			if len(args) == 1:
-				(a,) = args
-				return "%s %s" % (op, a.dis)
-			elif len(args) == 2:
-				a, b = args
-				return "%s %s, %s" % (op, a.dis, b.dis)
-			#TODO: make this show hex values, too.
+			state = self.cpu.cycle()
+			return state.dis + " [{0}]".format(", ".join(hex(x) for x in
+				state.consumed))
 		except OpcodeError as o:
 			return self.error + str(o)
 
 	@format_output
 	def dump(self, address):
-		return self.cpu.RAM[self.parse_number(address)]
+		return self.cpu.ram[self.parse_number(address)]
 
 	@format_output
 	def dump_range(self, first, second):
-		return self.cpu.RAM[self.parse_number(first):self.parse_number(second)+ 1]
+		return self.cpu.ram[self.parse_number(first):self.parse_number(second)+ 1]
 
 	@format_output
 	def registers(self, r=None):
 		if r == None:
 			return self.cpu.registers
 		else:
-			return self.cpu.registers[r]
+			return self.cpu.registers[r.upper()]
 
 	def continue_until(self, pc):
 		"Continue until PC is at the greater than the given address."
@@ -97,19 +92,19 @@ class Debugger(object):
 	def parse_number(self, n):
 		i = int(n, base=16)
 		# % it, so that we don't under/overflow.
-		return i % len(self.cpu.RAM)
+		return i % self.cpu.cells
 
 	def dis(self, addr):
 		"Given an address, disassemble the word there."
-		word = self.cpu.RAM[self.parse_number(addr)]
+		addr = self.parse_number(addr)
 		try:
 			# parse the opcodes and values out of the word
-			opcode, values = self.cpu.parse_instruction(word)
+			_, _, state = self.cpu.get_instruction(addr)
 			# print each opcode and its arguments
-			assembly = "%s %s" % (opcode, ", ".join([v.dis for v in values]))
-		# if there's an OpcodeError, it's a DAT instruction.
+			assembly = state.dis
+		# if there's an OpcodeError, pretend it's a DAT instruction.
 		except OpcodeError:
-			assembly = "DAT 0x%04x" % word
+			assembly = "DAT 0x%04x" % cpu.ram[addr]
 		return assembly
 
 	def jump(self, pc):
