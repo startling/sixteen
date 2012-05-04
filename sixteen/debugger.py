@@ -53,8 +53,8 @@ class Debugger(object):
 	def step(self):
 		try:
 			state = self.cpu.cycle()
-			return state.dis + " [{0}]".format(", ".join(hex(x) for x in
-				state.consumed))
+			return state.dis + " [{0}]".format(", ".join("{0:04x}".format(x)
+				for x in state.consumed))
 		except OpcodeError as o:
 			return self.error + str(o)
 
