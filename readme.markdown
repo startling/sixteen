@@ -58,6 +58,8 @@ A: 0010 C: 0000 B: 0000 I: 0000 J: 0000 O: 0000 PC: 0009 SP: ffff Y: 0000 X: 000
 
 ## sixteen-web
 
+> This is one of the things that's broken for the new spec so far.
+
 sixteen-web is a web frontend for the virtual machine. Run it like this:
 
 ````sh
@@ -99,6 +101,8 @@ optional arguments:
 
 ## an assembler!
 
+> This is broken right now, too.
+
 run it like this:
 
 ````sh
@@ -123,6 +127,8 @@ Like sixteen-debug, you can run it with `--little` or `--hex`.
 
 
 ## dcpubot
+
+> dcpubot hasn't been updated yet.
 
 This is an irc bot that assembles and runs (a subset of) dcpu-16 assembly. Run it like this:
 
@@ -157,7 +163,10 @@ pip install git+git://github.com/startling/sixteen.git
 
 ## up next:
 
-* fix the quirky parts of the parser
-* optimize sixteen-web, frontend and backend.
-* rewrite the debugger and make a more useful disassembler.
+* get the screen and sixteen-web working
+* rewrite the assembler + parser
+* rewrite the debugger; the code sucks.
+* let the disassembler guess for chars and strings (both c- and pascal-style)
 * write nice editor commands for sixteen-asm, sixteen-dis, and sixteen-web
+
+Feel free to do any of these. :)
