@@ -6,6 +6,8 @@
 import sys
 import argparse
 from sixteen.dcpu16 import DCPU16
+from sixteen.devices import Keyboard
+from sixteen.screen import LEM1802
 from sixteen.debugger import Debugger, ColoredDebugger
 from sixteen.utilities import HexRead, file_to_ram
 
@@ -41,7 +43,9 @@ else:
 	f = HexRead(args.file)
 
 # initialize a new CPU
-d = DCPU16()
+display = LEM1802()
+keyboard = Keyboard()
+d = DCPU16([display, keyboard])
 
 
 # read from the file to the CPU's RAM
