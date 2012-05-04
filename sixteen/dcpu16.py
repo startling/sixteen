@@ -13,6 +13,8 @@ def basic_opcode(fn):
     def opcode_wrapper(self, state, b, a):
         a_value = self.values[a](state, True)
         b_value = self.values[b](state, False)
+        state.dis = "{0} {1}, {2}".format(fn.__name__, a_value.dis,
+                b_value.dis)
         return fn(self, state, b_value, a_value)
     return opcode_wrapper
 
@@ -61,6 +63,8 @@ def conditional(fn):
         # initialize the values
         a_value = self.values[a](state, True)
         b_value = self.values[b](state, False)
+        state.dis = "{0} {1}, {2}".format(fn.__name__, a_value.dis,
+                b_value.dis)
         if fn(self, state, b_value.get(), a_value.get()):
             # if the predicate returns True, we continue as usuaul
             return
@@ -89,6 +93,7 @@ def signed_conditional(fn):
 def special_opcode(fn):
     @wraps(fn)
     def opcode_wrapper(self, state, a):
+        state.dis = "{0} {2}".format(fn.__name__, a_value.dis)
         a_value = self.values[a](state, True)
         return fn(self, state, a_value)
     return opcode_wrapper
@@ -215,6 +220,7 @@ class DCPU16(object):
 
     @set_value
     def set(self, state, b, a):
+        print b, a
         return a,
 
     @set_value

@@ -40,6 +40,7 @@ class State(object):
             self.registers["PC"] = location
         self.ram_iter = self.ram_iterator()
         self.ram = DeltaDict(cpu.ram)
+        self.dis = None
 
     def pop(self):
         "Pop from the cpu's stack."
