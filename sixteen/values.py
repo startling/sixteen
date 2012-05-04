@@ -116,6 +116,8 @@ def POPorPUSH(state, is_a):
 
 
 class POP(Register):
+    dis = "POP"
+
     def __init__(self, *args):
         Register.__init__(self, *args)
         self.value = self.state.pop()
@@ -125,6 +127,8 @@ class POP(Register):
 
 
 class PUSH(Register):
+    dis = "PUSH"
+
     def __init__(self, *args):
         Register.__init__(self, *args)
         self.state.registers["SP"] -= 1
