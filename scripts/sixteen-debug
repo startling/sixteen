@@ -58,4 +58,9 @@ if args.color:
 else:
 	debugger = Debugger(d)
 
-debugger()
+try:
+	debugger()
+except KeyboardInterrupt:
+	print
+except EOFError:
+	print
