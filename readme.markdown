@@ -1,5 +1,7 @@
 # sixteen
 
+    Oh hi. Stuff is broken right now, as I try to bring everything up to date to the 1.7 spec. The emulator is up to spec, I think, and now I have to re-engineer the tools to work with the new device specification. Most of the stuff below is outdated or broken, but things are changing pretty quickly; sorry for the instability. - startling
+
 This is a DCPU-16 emulator written in python. Exciting stuff.
 
 Here's what we've got so far:
