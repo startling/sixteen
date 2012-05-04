@@ -93,8 +93,8 @@ def signed_conditional(fn):
 def special_opcode(fn):
     @wraps(fn)
     def opcode_wrapper(self, state, a):
-        state.dis = "{0} {2}".format(fn.__name__, a_value.dis)
         a_value = self.values[a](state, True)
+        state.dis = "{0} {1}".format(fn.__name__, a_value.dis)
         return fn(self, state, a_value)
     return opcode_wrapper
 
