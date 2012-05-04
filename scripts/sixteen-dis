@@ -5,8 +5,8 @@
 import sys
 import argparse
 import re
-from sixteen.dis import Disassembler
-from sixteen.debugger import Debugger, ColoredDebugger
+from sixteen.dis import disassembler
+from sixteen.dcpu16 import DCPU16
 from sixteen.utilities import HexRead, file_to_ram, OpcodeError
 
 
@@ -46,18 +46,18 @@ elif args.bin and not args.file:
 elif not args.bin and not args.file:
     f = HexRead.from_file(sys.stdin)
 
-# initialize a new (disassembling) CPU
-d = Disassembler()
 
+# initialize a new (disassembling) CPU
+d = DCPU16()
 
 # read the file to the CPU's RAM
 file_to_ram(f, d, args.big_endian)
 
 # close the file
-f.close
+f.close()
 
 
-for assembly, address in d.dis():
+for assembly, address in disassembler(d):
     if args.addresses:
         print "%-20s ; 0x%04x" % (assembly, address)
     else:
