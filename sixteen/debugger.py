@@ -14,9 +14,10 @@ class Debugger(object):
 	format = "%04x"
 	quit = ("q", "quit")
 
-	def __init__(self, cpu):
+	def __init__(self, cpu, keyboard):
 		"Given a cpu, initialize a Debugger."
 		self.cpu = cpu
+		self.keyboard = keyboard
 		self.commands = {
 			"r": self.registers,
 			"registers": self.registers,
@@ -26,6 +27,8 @@ class Debugger(object):
 			"dumprange": self.dump_range,
 			"c": self.continue_until,
 			"continue": self.continue_until,
+			"k": self.keypress,
+			"key": self.keypress,
 			"until": self.until,
 			"u": self.until,
 			"jump": self.jump,
@@ -116,13 +119,18 @@ class Debugger(object):
 		after = self.format % self.cpu.registers["PC"] + 1
 		return "[%s] -> [%s]" % (before, after)
 
+	def keypress(self, key):
+		self.keyboard.register_keypress(ord(key))
+
 	def run(self, i):
 		"Given an input, parse it and run it, if applicable."
 		inputs = i.split()
 		command = self.commands.get(inputs[0])
 		if command != None:
 			try:
-				print command(*inputs[1:])
+				returned = command(*inputs[1:])
+				if returned is not None:
+					print returned
 			# ignore argument errors for now.
 			except TypeError:
 				pass

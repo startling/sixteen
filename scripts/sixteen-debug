@@ -58,9 +58,9 @@ f.close()
 
 # run the debugger on the cpu
 if args.color:
-	debugger = ColoredDebugger(d)
+	debugger = ColoredDebugger(d, keyboard)
 else:
-	debugger = Debugger(d)
+	debugger = Debugger(d, keyboard)
 
 try:
 	debugger()
