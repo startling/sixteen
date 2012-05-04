@@ -198,7 +198,7 @@ class DCPU16(object):
         # change all the RAM
         for k, v in state.ram.iteritems():
             self.update_ram(k, v)
-        return state.consumed
+        return state
 
     def update_register(self, name, value):
         # use modulus to take overflow and underflow into account
