@@ -97,7 +97,7 @@ class DCPU16(object):
         # initialize the queue and queuing
         self.queuing = False
         self.interrupt_queue = []
-        
+
     def __getattr__(self, name):
         "If an attribute doesn't exist, try the registers."
         r = self.registers.get(name.upper())
@@ -111,7 +111,7 @@ class DCPU16(object):
         self.ram = [0x0000] * self.cells
 
     values = {
-        # POP/PUSH 
+        # POP/PUSH
         0x18: POPorPUSH,
         # PEEK is just [SP]
         0x19: RegisterPointer.named("SP"),
@@ -150,7 +150,7 @@ class DCPU16(object):
         else:
             mnemonic = self.operations.get(op)
             if mnemonic is None:
-                raise OpcodeError(opcode, location)
+                raise OpcodeError(op, location)
             a_value = self.values[a](state, True)
             b_value = self.values[b](state, False)
             arguments = (b_value, a_value)
@@ -260,7 +260,7 @@ class DCPU16(object):
     @set_value
     def bor(self, state, b, a):
         return b | a,
-    
+
     @set_value
     def xor(self, state, b, a):
         return b ^ a,
