@@ -55,6 +55,7 @@ def conditional(fn):
         else:
             pc = state.registers["PC"]
             while True:
+                state.cycles += 1
                 # run the next instruction so we can see how much it consumes
                 _, _, skip_state = self.get_instruction(pc)
                 pc = skip_state.registers["PC"]
@@ -97,6 +98,8 @@ class DCPU16(object):
         # initialize the queue and queuing
         self.queuing = False
         self.interrupt_queue = []
+        # initialize cycle counting
+        self.cycles = 0
 
     def __getattr__(self, name):
         "If an attribute doesn't exist, try the registers."
@@ -186,6 +189,8 @@ class DCPU16(object):
         # change all the RAM
         for k, v in state.ram.iteritems():
             self.update_ram(k, v)
+        # change the cycle counter
+        self.cycles = state.cycles
         return state
 
     def update_register(self, name, value):
@@ -208,29 +213,35 @@ class DCPU16(object):
 
     @set_value
     def set(self, state, b, a):
+        state.cycles += 1
         return a,
 
     @set_value
     def add(self, state, b, a):
+        state.cycles += 2
         overflow, result = divmod(b + a, self.cells)
         return result, int(overflow > 0)
 
     @set_value
     def sub(self, state, b, a):
+        state.cycles += 2
         overflow, result = divmod(b - a, self.cells)
         return result, overflow < 0 and 0xffff
 
     @set_value
     def mul(self, state, b, a):
+        state.cycles += 2
         overflow, result = divmod(b * a, self.cells)
         return result, overflow
 
     @signed
     def mli(self, state, b, a):
+        state.cycles += 2
         return b * a
 
     @set_value
     def div(self, state, b, a):
+        state.cycles += 3
         if a == 0:
             return 0, 0
         else:
@@ -238,10 +249,12 @@ class DCPU16(object):
 
     @signed
     def dvi(self, state, b, a):
+        state.cycles += 3
         return b // a
 
     @set_value
     def mod(self, state, b, a):
+        state.cycles += 3
         if a == 0:
             return 0,
         else:
@@ -249,65 +262,80 @@ class DCPU16(object):
 
     @signed
     def mdi(self, state, b, a):
+        state.cycles += 3
         # if notch changes it to true modulus, it'll be
         # > return b % a
         return b % a - a
 
     @set_value
     def AND(self, state, b, a):
+        state.cycles += 1
         return b & a,
 
     @set_value
     def bor(self, state, b, a):
+        state.cycles += 1
         return b | a,
 
     @set_value
     def xor(self, state, b, a):
+        state.cycles += 1
         return b ^ a,
 
     @set_value
     def shr(self, state, b, a):
+        state.cycles += 1
         return b >> a, ((b << 16) >> a) & 0xffff
 
     @signed
     def asr(self, state, b, a):
+        state.cycles += 1
         return b >> a
 
     @set_value
     def shl(self, state, b, a):
+        state.cycles += 1
         overflow, result = divmod(b << a, self.cells)
         return result, overflow
 
     @conditional
     def ifb(self, state, b, a):
+        state.cycles += 2
         return (b & a) != 0
 
     @conditional
     def ifc(self, state, b, a):
+        state.cycles += 2
         return (b & a) == 0
 
     @conditional
     def ife(self, state, b, a):
+        state.cycles += 2
         return b == a
 
     @conditional
     def ifn(self, state, b, a):
+        state.cycles += 2
         return b != a
 
     @conditional
     def ifg(self, state, b, a):
+        state.cycles += 2
         return b > a
 
     @signed_conditional
     def ifa(self, state, b, a):
+        state.cycles += 2
         return b > a
 
     @conditional
     def ifl(self, state, b, a):
+        state.cycles += 2
         return b < a
 
     @signed_conditional
     def ifu(self, state, b, a):
+        state.cycles += 2
         return b < a
 
     def is_conditional(self, instruction):
@@ -317,20 +345,24 @@ class DCPU16(object):
 
     @set_value
     def adx(self, state, b, a):
+        state.cycles += 3
         overflow, result = divmod(b + a + state.registers["EX"], self.cells)
         return result, int(overflow > 0)
 
     @set_value
     def sbx(self, state, b, a):
+        state.cycles += 3
         overflow, result = divmod(b - a + state.registers["EX"], self.cells)
         return result, overflow and 0xffff
 
     def sti(self, state, b, a):
+        state.cycles += 2
         b.set(a.get())
         state.registers["I"] += 1
         state.registers["J"] += 1
 
     def std(self, state, b, a):
+        state.cycles += 2
         b.set(a.get())
         state.registers["I"] -= 1
         state.registers["J"] -= 1
@@ -350,28 +382,35 @@ class DCPU16(object):
         return method(state, a)
 
     def jsr(self, state, a):
+        state.cycles += 3
         state.push(state.registers["PC"])
         state.registers["PC"] = a.get()
 
     def iag(self, state, a):
+        state.cycles += 1
         a.set(state.registers["IA"])
 
     def ias(self, state, a):
+        state.cycles += 1
         state.registers["IA"] = a.get()
 
     def int(self, state, a):
+        state.cycles += 4
         "Triggers software interrupt with message A."
         state.interrupt(a.get())
 
     def rfi(self, state, a):
+        state.cycles += 3
         state.queuing = False
         state.registers["A"] = state.pop()
         state.registers["PC"] = state.pop()
 
     def iaq(self, state, a):
+        state.cycles += 2
         state.queuing = bool(a.get())
 
     def hwn(self, state, a):
+        state.cycles += 2
         a.set(len(self.hardware) % self.cells)
 
     def hwq(self, state, a_value):
@@ -381,6 +420,7 @@ class DCPU16(object):
         > hardware version X+(Y<<16) is a 32 bit word identifying the
         > manufacturer
         """
+        state.cycles += 4
         a = a_value.get()
         if a < len(self.hardware):
             device = self.hardware[a]
@@ -394,6 +434,7 @@ class DCPU16(object):
             state.registers["X"] = m_bottom
 
     def hwi(self, state, a_value):
+        state.cycles += 4
         a = a_value.get()
         if a < len(self.hardware):
             state.interrupts.append(a)
