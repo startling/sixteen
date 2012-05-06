@@ -31,17 +31,23 @@ class DeltaDict(object):
 class State(object):
     "Create a mutable state of a given cpu without mutating the CPU itself."
     def __init__(self, cpu, location=None):
+        self.cpu = cpu
         self.consumed = []
         self.cells = cpu.cells
         self.interrupts = []
         self.queuing = cpu.queuing
         self.interrupt_queue = []
+        self.cycles = cpu.cycles
         self.registers = DeltaDict(cpu.registers)
         if location is not None:
             self.registers["PC"] = location
         self.ram_iter = self.ram_iterator()
         self.ram = DeltaDict(cpu.ram)
         self.dis = None
+
+    @property
+    def last_cycles(self):
+        return self.cycles - self.cpu.cycles
 
     def pop(self):
         "Pop from the cpu's stack."

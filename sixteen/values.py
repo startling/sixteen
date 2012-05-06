@@ -28,12 +28,13 @@ class Consumes(Value):
     def __init__(self, state, is_a):
         Value.__init__(self, state, is_a)
         self.value = next(state.ram_iter)
+        state.cycles += 1
 
 
 class NextWord(Consumes):
     def get(self):
         return self.value
-    
+
     # setting to next word literals is silently ignored.
 
     @property
