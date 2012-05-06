@@ -14,5 +14,5 @@ def disassembler(cpu=None):
             yield state.dis, n
             n = state.registers["PC"]
         except OpcodeError:
-            yield "dat %04x" % cpu.ram[n]
+            yield "dat 0x%04x" % cpu.ram[n]
             n += 1
