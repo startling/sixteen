@@ -197,7 +197,7 @@ def nonbasic_instructions(self, op, a):
 
 # ordinary instructions
 @AssemblyParser.pattern("^(\S+) ([^,]+)(?:,|\s)\s?(.+)$")
-def instruction(self, op, a, b):
+def instruction(self, op, b, a):
     # parse the opcode first, so it Defers right of the bat if this is an
     # illegal opcode
     o = self.opcode(op)
@@ -206,7 +206,7 @@ def instruction(self, op, a, b):
     b, second_word = self.values.parse(b)
     # filter out Nones
     not_nones = list(n for n in (first_word, second_word) if n != None)
-    return [from_instruction(o, a, b)] + not_nones
+    return [from_instruction(o, b, a)] + not_nones
 
 
 def string_literal(literal):
