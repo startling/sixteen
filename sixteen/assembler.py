@@ -128,8 +128,9 @@ def label(self, l):
 
 class AssemblyParser(Parser):
     cpu = DCPU16
-    opcodes = dict((v, k) for k, v in cpu.opcodes.iteritems())
-    special_opcodes = dict((v, k) for k, v in cpu.special_opcodes.iteritems())
+    opcodes = dict((v, k) for k, v in cpu.operations.iteritems())
+    special_opcodes = dict((v, k)
+            for k, v in cpu.special_operations.iteritems())
 
     def __init__(self):
         self.values = ValueParser()
@@ -137,7 +138,7 @@ class AssemblyParser(Parser):
 
     def opcode(self, op):
         "Look up an opcode."
-        gotten = self.opcodes.get(op.upper())
+        gotten = self.opcodes.get(op.upper()) or self.opcodes.get(op.lower())
         if gotten == None:
             raise Defer()
         else:
@@ -145,7 +146,8 @@ class AssemblyParser(Parser):
 
     def special_opcode(self, op):
         "Look up a special opcode."
-        gotten = self.special_opcodes.get(op.upper())
+        gotten = (self.special_opcodes.get(op.upper()) or
+                self.special_opcodes.get(op.lower()))
         if gotten == None:
             raise Defer()
         else:
