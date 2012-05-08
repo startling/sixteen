@@ -101,7 +101,7 @@ optional arguments:
 
 ## an assembler!
 
-> This is broken right now, too.
+> This seems to work right now, but not tested thoroughly.
 
 run it like this:
 
