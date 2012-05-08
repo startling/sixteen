@@ -3,7 +3,7 @@
 import re
 from ast import literal_eval
 from itertools import chain
-from sixteen.words import from_opcode
+from sixteen.bits import from_instruction
 from sixteen.parser import Parser, Defer
 from sixteen.dcpu16 import DCPU16
 
@@ -188,9 +188,9 @@ def nonbasic_instructions(self, op, a):
     o = self.special_opcode(op)
     a, first_word = self.values.parse(a)
     if first_word == None:
-        return [from_opcode(0x0, o, a,)]
+        return [from_instruction(0x0, o, a,)]
     else:
-        return [from_opcode(0x0, o, a,), first_word]
+        return [from_instruction(0x0, o, a,), first_word]
 
 
 # ordinary instructions
@@ -204,7 +204,7 @@ def instruction(self, op, a, b):
     b, second_word = self.values.parse(b)
     # filter out Nones
     not_nones = list(n for n in (first_word, second_word) if n != None)
-    return [from_opcode(o, a, b)] + not_nones
+    return [from_instruction(o, a, b)] + not_nones
 
 
 def string_literal(literal):
