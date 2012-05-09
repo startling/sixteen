@@ -73,8 +73,8 @@ def PC(self):
     return 0x1c, None
 
 
-@ValueParser.pattern("^O|o$")
-def O(self):
+@ValueParser.pattern("^EX|ex$")
+def EX(self):
     return 0x1d, None
 
 
