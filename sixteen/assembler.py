@@ -3,7 +3,7 @@
 import re
 from ast import literal_eval
 from itertools import chain
-from sixteen.words import from_opcode
+from sixteen.bits import from_instruction
 from sixteen.parser import Parser, Defer
 from sixteen.dcpu16 import DCPU16
 
@@ -60,7 +60,11 @@ def PEEK(self):
 
 @ValueParser.pattern(r"^\[--SP\]|PUSH|\[--sp\]|push$")
 def PUSH(self):
-    return 0x1a, None
+    return 0x18, None
+
+@ValueParser.pattern(r"^\[SP\s?\+\s?([^+ ])\]|PICK\s+(\S+)|pick\s+(\S+)$")
+def PICK(self, num):
+    return 0x1a, num
 
 
 @ValueParser.pattern("^SP|sp$")
@@ -73,8 +77,8 @@ def PC(self):
     return 0x1c, None
 
 
-@ValueParser.pattern("^O|o$")
-def O(self):
+@ValueParser.pattern("^EX|ex$")
+def EX(self):
     return 0x1d, None
 
 
@@ -92,7 +96,9 @@ def literal(self, sign, n, both=True):
         raise Defer()
     if both:
         if num <= 0x1f:
-            return 0x20 + num, None
+            return 0x21 + num, None
+        elif num == 0xffff:
+            return 0x20, None
         else:
             return 0x1f, num
     else:
@@ -128,8 +134,9 @@ def label(self, l):
 
 class AssemblyParser(Parser):
     cpu = DCPU16
-    opcodes = dict((v, k) for k, v in cpu.opcodes.iteritems())
-    special_opcodes = dict((v, k) for k, v in cpu.special_opcodes.iteritems())
+    opcodes = dict((v, k) for k, v in cpu.operations.iteritems())
+    special_opcodes = dict((v, k)
+            for k, v in cpu.special_operations.iteritems())
 
     def __init__(self):
         self.values = ValueParser()
@@ -137,7 +144,7 @@ class AssemblyParser(Parser):
 
     def opcode(self, op):
         "Look up an opcode."
-        gotten = self.opcodes.get(op.upper())
+        gotten = self.opcodes.get(op.upper()) or self.opcodes.get(op.lower())
         if gotten == None:
             raise Defer()
         else:
@@ -145,7 +152,8 @@ class AssemblyParser(Parser):
 
     def special_opcode(self, op):
         "Look up a special opcode."
-        gotten = self.special_opcodes.get(op.upper())
+        gotten = (self.special_opcodes.get(op.upper()) or
+                self.special_opcodes.get(op.lower()))
         if gotten == None:
             raise Defer()
         else:
@@ -188,14 +196,14 @@ def nonbasic_instructions(self, op, a):
     o = self.special_opcode(op)
     a, first_word = self.values.parse(a)
     if first_word == None:
-        return [from_opcode(0x0, o, a,)]
+        return [from_instruction(0x0, o, a,)]
     else:
-        return [from_opcode(0x0, o, a,), first_word]
+        return [from_instruction(0x0, o, a,), first_word]
 
 
 # ordinary instructions
 @AssemblyParser.pattern("^(\S+) ([^,]+)(?:,|\s)\s?(.+)$")
-def instruction(self, op, a, b):
+def instruction(self, op, b, a):
     # parse the opcode first, so it Defers right of the bat if this is an
     # illegal opcode
     o = self.opcode(op)
@@ -204,7 +212,7 @@ def instruction(self, op, a, b):
     b, second_word = self.values.parse(b)
     # filter out Nones
     not_nones = list(n for n in (first_word, second_word) if n != None)
-    return [from_opcode(o, a, b)] + not_nones
+    return [from_instruction(o, b, a)] + not_nones
 
 
 def string_literal(literal):

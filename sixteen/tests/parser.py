@@ -105,13 +105,14 @@ class TestValues(unittest.TestCase):
         self.assertParses("317", (0x1f, 317))
 
     def test_negative_literals(self):
-        self.assertParses("-0x01", (0x1f, 0xffff))
+        self.assertParses("-0x02", (0x1f, 0xfffe))
         self.assertParses("-16", (0x1f, 0xfff0))
 
     def test_short_literals(self):
-        self.assertParses("0", (0x20, None))
-        self.assertParses("0x1f", (0x3f, None))
-        self.assertParses("0b11", (0x23, None))
+        self.assertParses("-0x01", (0x20, None))
+        self.assertParses("0", (0x21, None))
+        self.assertParses("0x1e", (0x3f, None))
+        self.assertParses("0b11", (0x24, None))
 
 
 class TestParseInstructions(unittest.TestCase):
