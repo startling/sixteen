@@ -92,7 +92,9 @@ def literal(self, sign, n, both=True):
         raise Defer()
     if both:
         if num <= 0x1f:
-            return 0x20 + num, None
+            return 0x21 + num, None
+        elif num == 0xffff:
+            return 0x20, None
         else:
             return 0x1f, num
     else:
