@@ -60,7 +60,11 @@ def PEEK(self):
 
 @ValueParser.pattern(r"^\[--SP\]|PUSH|\[--sp\]|push$")
 def PUSH(self):
-    return 0x1a, None
+    return 0x18, None
+
+@ValueParser.pattern(r"^\[SP\s?\+\s?([^+ ])\]|PICK\s+(\S+)|pick\s+(\S+)$")
+def PICK(self, num):
+    return 0x1a, num
 
 
 @ValueParser.pattern("^SP|sp$")
