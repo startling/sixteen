@@ -14,7 +14,7 @@ from twisted.application import internet, service
 from sixteen.assembler import AssemblyParser, LabelError
 from sixteen.parser import ParserError
 from sixteen.dcpu16 import DCPU16
-from sixteen.dis import Disassembler
+from sixteen.dis import disassembler
 from sixteen.utilities import OpcodeError
 
 
@@ -57,14 +57,14 @@ class DCPUBot(irc.IRCClient):
                 code = asm.parse_tree(lines)
                 # read the code to a vm's cpu
                 cpu = DCPU16()
-                cpu.RAM[:len(code)] = code
+                cpu.ram[:len(code)] = code
                 cycle_count = 0
                 # run for a maximum of self.cycle_limit times
                 for _ in xrange(self.cycle_limit):
                     try:
-                        op, args = cpu.cycle()
+                        state = cpu.cycle()
                         # and then add to the cycle_count
-                        cycle_count += 1 + sum(x.consumes for x in args)
+                        cycle_count = state.last_cycles
                     # if there's an illegal opcode (probably 0x0000), stop.
                     except OpcodeError as k:
                         break
@@ -90,9 +90,10 @@ class DCPUBot(irc.IRCClient):
                         code.append(literal_eval(c))
                     else:
                         code.append(literal_eval("0x" + c))
-                d = Disassembler()
-                d.RAM[:len(code)] = code
-                message = " / ".join(list(a for a, addr in d.dis()))
+                d = disassembler()
+                cpu = DCPU16()
+                cpu.ram[:len(code)] = code
+                message = " / ".join(list(a for a, addr in disassembler(cpu)))
                 self.msg(channel, "%s: %s" % (user, message))
             except ValueError:
                 self.msg(channel, "%s: malformed string." % user)
