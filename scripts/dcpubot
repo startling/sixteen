@@ -47,7 +47,7 @@ class DCPUBot(irc.IRCClient):
         user = user.split("!", 1)[0]
         # if we get a message that starts with "dcpubot:"...
         if msg.startswith(self.nickname + ":") or (msg.startswith(">") and not
-                msg.startswith(">>")):
+                msg.startswith(">>")) or msg.startswith(self.nickname + ","):
             stripped = msg.replace(self.nickname + ":", "").replace(">", "")
             # split the given code at "/"
             lines = stripped.split("/")
