@@ -65,7 +65,7 @@ class DCPUBot(irc.IRCClient):
                     try:
                         state = cpu.cycle()
                         # and then add to the cycle_count
-                        cycle_count = state.last_cycles
+                        cycle_count = cpu.cycles
                     # if there's an illegal opcode (probably 0x0000), stop.
                     except OpcodeError as k:
                         break
